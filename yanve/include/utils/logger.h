@@ -7,29 +7,27 @@
 #include "misc.h"
 
 #define LogInstance yanve::Logger::instance()
-#define LogInfo(tag, str, ...) LogInstance->LogI(tag, yanve::utils::stringFormat(str, __VA_ARGS__))
-#define LogError(tag, str, ...) LogInstance->LogE(tag, yanve::utils::stringFormat(str, __VA_ARGS__))
-#define LogWarning(tag, str, ...) LogInstance->LogW(tag, yanve::utils::stringFormat(str, __VA_ARGS__))
+#define LogInfo(tag, str, ...) LogInstance.LogI(tag, yanve::utils::stringFormat(str, __VA_ARGS__))
+#define LogError(tag, str, ...) LogInstance.LogE(tag, yanve::utils::stringFormat(str, __VA_ARGS__))
+#define LogWarning(tag, str, ...) LogInstance.LogW(tag, yanve::utils::stringFormat(str, __VA_ARGS__))
 
 namespace yanve
 {
 class Logger
 {
 public:
-	static Logger* instance() {
-		if (_instance == nullptr) {
-			_instance = new Logger("log.txt", true);
-		}
-		return _instance;
+	static YANVE_API Logger& instance() {
+    static Logger logger{"log.txt", true};
+		return logger;
 	}
 
 	//void SetGuiConsole(GuiConsole* guiConsolePtr);
 
-	void LogI(const std::string& tag, const std::string& message);
-	void LogW(const std::string& tag, const std::string& message);
-	void LogE(const std::string& tag, const std::string& message);
+	void YANVE_API LogI(const std::string& tag, const std::string& message);
+	void YANVE_API LogW(const std::string& tag, const std::string& message);
+	void YANVE_API LogE(const std::string& tag, const std::string& message);
 
-	static void openglCallbackFunction(
+	static void YANVE_API openglCallbackFunction(
 		GLenum source,
 		GLenum type,
 		GLuint id,

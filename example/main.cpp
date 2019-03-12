@@ -2,6 +2,6 @@
 
 int main(int argc, char** argv)
 {
-  yanve::print();
+  yanve::Window window{ "hello", 1024, 800 };
   return 0;
 }

@@ -6,10 +6,7 @@
 namespace yanve
 {
 
-class InputManager;
-using InputManagerPtr = std::unique_ptr<InputManager>;
-
-class InputManager
+class YANVE_API InputManager
 {
 public:
   enum Key
@@ -177,6 +174,6 @@ private:
   InputManager(InputManager&&) = delete;
   InputManager& operator= (const InputManager&) = delete;
 
-  static InputManagerPtr ptr;
+  //static InputManagerPtr ptr;
 };
 }

@@ -6,7 +6,7 @@
 namespace yanve
 {
 
-class Window
+class YANVE_API Window
 {
 public:
   Window(std::string title, int width, int height);

@@ -1,18 +1,14 @@
-#pragma once
-
 #include <core/inputmanager.h>
 #include <SDL2/SDL.h>
 
 namespace yanve
 {
-InputManagerPtr InputManager::ptr = nullptr;
+//InputManagerPtr InputManager::ptr = nullptr;
 
 InputManager& InputManager::instance()
 {
-  if (ptr == nullptr) {
-    ptr = std::unique_ptr<InputManager>{ new InputManager() };
-  }
-  return *ptr;
+  static InputManager manager;
+  return manager;
 }
 
 InputManager::InputManager()

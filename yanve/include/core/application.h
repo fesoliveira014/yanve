@@ -4,7 +4,7 @@
 
 namespace yanve
 {
-class Application
+class YANVE_API Application
 {
 public:
   Application() {};
@@ -14,5 +14,6 @@ public:
   virtual void update() = 0;
   virtual void render() = 0;
   virtual void shutdown() = 0;
+private:
 };
 }
