@@ -1,15 +1,23 @@
 #pragma once
 
 #include <common.h>
+
+#define SDL_MAIN_HANDLED
 #include <SDL2/SDL.h>
 
 namespace yanve
 {
 
-class YANVE_API InputManager
+class InputManager
 {
 public:
-  enum Key
+  enum YANVE_API Action {
+    Pressed = 0,
+    Released,
+    NumActions
+  };
+
+  enum YANVE_API Key
   {
     keyUnknown = SDL_SCANCODE_UNKNOWN,
     keyA = SDL_SCANCODE_A,
@@ -95,7 +103,7 @@ public:
     numKeys
   };
 
-  enum Mouse
+  enum YANVE_API Mouse
   {
     buttonLeft = SDL_BUTTON_LEFT,
     buttonMiddle = SDL_BUTTON_MIDDLE,
@@ -103,6 +111,7 @@ public:
     numButtons
   };
 
+private:
   void keyPressedEvent(int key, int action);
   void mousePressedEvent(int button, int action);
   void mouseMovedEvent(int x, int y);
@@ -111,17 +120,21 @@ public:
   void focusEvent(bool focus);
   void minimizedEvent(bool minimized);
 
-  void update();
+  friend class Window;
 
-  bool windowResized() { return _windowState.resized; }
-  bool windowMinimized() { return _windowState.minimized; }
-  bool windowFocus() { return _windowState.focus; }
-  glm::vec2 windowSize() const { return glm::vec2{ _windowState.width, _windowState.height }; }
-  bool pressed(const Key& keyboardKey) { return _keyboardState[keyboardKey].pressed; }
-  bool pressed(const Mouse& button) { return _mouseButtonState[button].pressed; }
-  glm::vec2 mousePosition() const { return glm::vec2{ _mouseCursorState.x, _mouseCursorState.y }; }
-  glm::vec2 mouseDisplacement(const Mouse& button) const { return glm::vec2{ _mouseButtonState[button].x1 - _mouseButtonState[button].x0, _mouseButtonState[button].y1 - _mouseButtonState[button].y0 }; }
-  glm::vec2 scroll() const { return _mouseCursorState.scroll; }
+public:
+  void YANVE_API update();
+
+  bool YANVE_API windowResized() { return _windowState.resized; }
+  bool YANVE_API windowMinimized() { return _windowState.minimized; }
+  bool YANVE_API windowFocus() { return _windowState.focus; }
+  glm::vec2 YANVE_API windowSize() const { return glm::vec2{ _windowState.width, _windowState.height }; }
+  bool YANVE_API pressed(const Key& keyboardKey) { return _keyboardState[keyboardKey].pressed; }
+  bool YANVE_API pressed(const Mouse& button) { return _mouseButtonState[button].pressed; }
+  glm::vec2 YANVE_API mousePosition() const { return glm::vec2{ _mouseCursorState.x, _mouseCursorState.y }; }
+  glm::vec2 YANVE_API mouseDisplacement(const Mouse& button) const { return glm::vec2{ _mouseButtonState[button].x1 - _mouseButtonState[button].x0, _mouseButtonState[button].y1 - _mouseButtonState[button].y0 }; }
+  glm::vec2 YANVE_API scroll() const { return _mouseCursorState.scroll; }
+  bool YANVE_API quit() { return _quit; }
 
 private:
   struct KeyState
@@ -162,10 +175,10 @@ private:
   MouseButtonState _mouseButtonState[Mouse::numButtons];
   MouseCursorState _mouseCursorState;
   WindowState _windowState;
-  bool quit;
+  bool _quit;
 
 public:
-  static InputManager& instance();
+  static YANVE_API InputManager& instance();
 
 private:
   InputManager();

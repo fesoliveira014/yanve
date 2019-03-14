@@ -16,4 +16,10 @@
 #include <algorithm>
 #include <memory>
 
+#ifndef GLEW_STATIC
+#define GLEW_STATIC
+#endif
+
+#include <gl/glew.h>
+
 #include <glm/glm.hpp>
