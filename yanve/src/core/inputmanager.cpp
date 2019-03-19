@@ -1,9 +1,14 @@
 #include <core/inputmanager.h>
+#include <utils/logger.h>
+
+#include <external/imgui/imgui.h>
+#include <external/imgui/imgui_impl_sdl_gl3.h>
 #include <SDL2/SDL.h>
 
 namespace yanve
 {
 //InputManagerPtr InputManager::ptr = nullptr;
+  static const std::string LOG_TAG = "InputManager::";
 
 InputManager& InputManager::instance()
 {
@@ -13,6 +18,32 @@ InputManager& InputManager::instance()
 
 InputManager::InputManager()
 {
+  for (auto& key : _keyboardState) {
+    key.first = false;
+    key.last = false;
+    key.pressed = false;
+  }
+
+  for (auto& button : _mouseButtonState) {
+    button.first = false;
+    button.last = false;
+    button.pressed = false;
+    button.x0 = 0;
+    button.y0 = 0;
+    button.x1 = 0;
+    button.y1 = 0;
+  }
+
+  _mouseCursorState.x = 0;
+  _mouseCursorState.y = 0;
+  _mouseCursorState.scroll = glm::vec2(0.0);
+
+  _windowState.width = 0;
+  _windowState.height = 0;
+  _windowState.resized = false;
+  _windowState.minimized = false;
+  _windowState.focus= true;
+
   _quit = false;
 }
 
@@ -33,50 +64,69 @@ void InputManager::update()
 
   SDL_Event e;
   while (SDL_PollEvent(&e)) {
+    ImGui_ImplSdlGL3_ProcessEvent(&e);
     switch (e.type) {
     case SDL_QUIT:
       _quit = true;
+      LogVerbose(LOG_TAG + __func__, "Quit event");
       break;
     case SDL_WINDOWEVENT:
       if (e.window.event == SDL_WINDOWEVENT_RESIZED) {
         resizeEvent(e.window.data1, e.window.data2);
+        LogVerbose(LOG_TAG + __func__, "Resize event: (%d, %d)", e.window.data1, e.window.data2);
       }
       else if (e.window.event == SDL_WINDOWEVENT_FOCUS_GAINED) {
         focusEvent(true);
+        LogVerbose(LOG_TAG + __func__, "Gained focus event");
       }
       else if (e.window.event == SDL_WINDOWEVENT_FOCUS_LOST) {
         focusEvent(false);
+        LogVerbose(LOG_TAG + __func__, "Lost focus event");
       }
       else if (e.window.event == SDL_WINDOWEVENT_MINIMIZED) {
         minimizedEvent(true);
+        LogVerbose(LOG_TAG + __func__, "Minimized event");
       }
       else if (e.window.event == SDL_WINDOWEVENT_MAXIMIZED) {
         minimizedEvent(false);
+        LogVerbose(LOG_TAG + __func__, "Maximized event");
       }
       break;
     case SDL_KEYDOWN:
-      if (!_windowState.minimized && _windowState.focus)
+      if (!_windowState.minimized && _windowState.focus) {
         keyPressedEvent(e.key.keysym.scancode, Action::Pressed);
+        LogVerbose(LOG_TAG + __func__, "Key down event: {scancode: %d}", e.key.keysym.scancode);
+      }
       break;
     case SDL_KEYUP:
-      if (!_windowState.minimized && _windowState.focus)
+      if (!_windowState.minimized && _windowState.focus) {
         keyPressedEvent(e.key.keysym.scancode, Action::Released);
+        LogVerbose(LOG_TAG + __func__, "Key up event: {scancode: %d}", e.key.keysym.scancode);
+      }
       break;
     case SDL_MOUSEBUTTONDOWN:
-      if (!_windowState.minimized && _windowState.focus)
+      if (!_windowState.minimized && _windowState.focus) {
         mousePressedEvent(e.button.button, Action::Pressed);
+        LogVerbose(LOG_TAG + __func__, "Button down event: {botton: %d}", e.button.button);
+      }
       break;
     case SDL_MOUSEBUTTONUP:
-      if (!_windowState.minimized && _windowState.focus)
+      if (!_windowState.minimized && _windowState.focus) {
         mousePressedEvent(e.button.button, Action::Released);
+        LogVerbose(LOG_TAG + __func__, "Button up event: {botton: %d}", e.button.button);
+      }
       break;
     case SDL_MOUSEMOTION:
-      if (!_windowState.minimized && _windowState.focus)
+      if (!_windowState.minimized && _windowState.focus) {
         mouseMovedEvent(e.motion.x, e.motion.y);
+        LogVerbose(LOG_TAG + __func__, "Mouse motion event: (%d,%d)", e.motion.x, e.motion.y);
+      }
       break;
     case SDL_MOUSEWHEEL:
-      if (!_windowState.minimized && _windowState.focus)
+      if (!_windowState.minimized && _windowState.focus) {
         mouseScrolledEvent(e.wheel.x, e.wheel.y);
+        LogVerbose(LOG_TAG + __func__, "Mouse scroll event: (%d,%d)", e.wheel.x, e.wheel.y);
+      }
       break;
     default:
       break;

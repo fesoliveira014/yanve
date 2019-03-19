@@ -11,6 +11,12 @@
 #define LogError(tag, str, ...) LogInstance.LogE(tag, yanve::utils::stringFormat(str, __VA_ARGS__))
 #define LogWarning(tag, str, ...) LogInstance.LogW(tag, yanve::utils::stringFormat(str, __VA_ARGS__))
 
+#ifdef YANVE_DEBUG
+#define LogVerbose(tag, str, ...) LogInfo(tag, str, __VA_ARGS__)
+#else
+#define LogVerbose(tag, str, ...)
+#endif
+
 namespace yanve
 {
 class Logger
@@ -63,7 +69,7 @@ protected:
 
 	void logMessage(const std::string& formated_message);
 
-	static Logger* _instance;
+	//static Logger* _instance;
 	//GuiConsole* _guiConsolePtr;
 
 	unsigned int _numErrors;

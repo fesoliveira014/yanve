@@ -1,7 +1,8 @@
 #include <core/window.h>
 
+#include <core/gui.h>
 #include <core/inputmanager.h>
-//#include <utils/logger.h>
+#include <utils/logger.h>
 
 namespace yanve
 {
@@ -10,7 +11,7 @@ static const std::string LOG_TAG = "Window";
 Window::Window(std::string title, int width, int height)
 {
   if (SDL_Init(SDL_INIT_EVERYTHING) < 0) {
-    //LogError(LOG_TAG + "::Window", "Could not initialize SDL2.");
+    LogError(LOG_TAG + __func__, "Could not initialize SDL2.");
     throw std::exception("SDL can't be initialized.");
   }
 
@@ -18,7 +19,7 @@ Window::Window(std::string title, int width, int height)
                              width, height, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
 
   if (_window == nullptr) {
-    //LogError(LOG_TAG + "::Window", "Could not initialize SDL window.");
+    LogError(LOG_TAG + __func__, "Could not initialize SDL window.");
     throw std::exception("Window can't be initialized.");
   }
 
@@ -37,15 +38,18 @@ Window::Window(std::string title, int width, int height)
   glewExperimental = GL_TRUE;
 
   if (glewInit() != GLEW_OK) {
-    //LogError(LOG_TAG + "::Window", "Could not initialize GLEW.");
+    LogError(LOG_TAG + __func__, "Could not initialize GLEW.");
     throw std::exception("GLEW can't be initalized.");
   }
 
-  // first time input manager is initialized (dunno if this is good or not, need to think harder about dependencies
   glViewport(0, 0, GLsizei(width), GLsizei(height));
-  InputManager::instance().resizeEvent(width, height); 
+  glClearColor(0.0, 0.0, 0.0, 1.0);
+
+  // first time input manager is initialized (dunno if this is good or not, need to think harder about dependencies
+  InputManager::instance().resizeEvent(width, height);
+  GuiManager::setup(_window);
+
   _title = title;
-  _open = true;
 }
 
 Window::~Window()
@@ -54,10 +58,16 @@ Window::~Window()
   SDL_DestroyWindow(_window);
 }
 
-void Window::clear(const glm::vec4& color)
+void Window::clearColor(const glm::vec4& color)
 {
   glClearColor(color.r, color.g, color.b, color.a);
 }
+
+void Window::clear()
+{
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
 
 void Window::update()
 {
@@ -67,10 +77,6 @@ void Window::update()
     auto size = input.windowSize();
     glViewport(0, 0, GLsizei(size.x), GLsizei(size.y));
   }
-
-  /*if (input.windowMinimized) {
-
-  }*/
 }
 
 void Window::display()

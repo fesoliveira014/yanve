@@ -15,4 +15,4 @@
 #include <core/inputmanager.h>
 #include <core/window.h>
 #include <core/application.h>
-
+#include <core/gui.h>

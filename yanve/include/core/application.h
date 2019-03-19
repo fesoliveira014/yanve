@@ -13,8 +13,11 @@ public:
 
   virtual void initialize() = 0;
   virtual void update() = 0;
+  virtual void updateGui() = 0;
   virtual void render() = 0;
+  virtual int run() = 0;
   virtual void shutdown() = 0;
+
 private:
 };
 }

@@ -2,7 +2,7 @@
 
 namespace yanve
 {
-Logger* Logger::_instance = NULL;
+//Logger* Logger::_instance = NULL;
 
 Logger::Logger(const std::string & fileName, bool console) : _numErrors(0U), _numWarning(0U), _console(console)
 {
