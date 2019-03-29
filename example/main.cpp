@@ -3,11 +3,16 @@
 
 class TestApp : public yanve::Application
 {
+  typedef typename yanve::gl::Attribute<0, glm::vec3> Position;
+
 public:
   TestApp(std::string name) : window{name, 1024, 800}, running { true } {}
   ~TestApp() {}
 
-  void initialize() override {}
+  void initialize() override 
+  {
+    
+  }
 
   void update() override
   {
@@ -23,10 +28,16 @@ public:
   
   void updateGui() override
   {
+    static Position p;
     yanve::GuiManager::beginFrame();
     {
       ImGui::Begin("hello");
       ImGui::Text("Hello, world!");
+      ImGui::Text("Attribute location: %d", Position::Location);
+      ImGui::Text("Attribute size: %u", p.size());
+      ImGui::Text("Attribute components: %d", p.components());
+      ImGui::Text("Attribute data type: %d", p.dataType());
+      ImGui::Text("Attribute data option: %d", p.dataOption());
       ImGui::End();
     }
     yanve::GuiManager::endFrame();

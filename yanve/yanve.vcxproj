@@ -248,6 +248,9 @@
     <ClInclude Include="include\common.h" />
     <ClInclude Include="include\core\gui.h" />
     <ClInclude Include="include\core\window.h" />
+    <ClInclude Include="include\graphics\geometry.h" />
+    <ClInclude Include="include\graphics\gl\buffer.h" />
+    <ClInclude Include="include\graphics\gl\mesh.h" />
     <ClInclude Include="include\utils\misc.h" />
     <ClInclude Include="include\yanve.h" />
     <ClInclude Include="include\platform\targetver.h" />
@@ -258,10 +261,13 @@
     <ClCompile Include="include\external\imgui\imgui_draw.cpp" />
     <ClCompile Include="include\external\imgui\imgui_impl_sdl_gl3.cpp" />
     <ClCompile Include="include\core\inputmanager.h" />
+    <ClCompile Include="include\graphics\gl\attribute.h" />
     <ClCompile Include="include\utils\logger.h" />
     <ClCompile Include="src\core\gui.cpp" />
     <ClCompile Include="src\core\inputmanager.cpp" />
     <ClCompile Include="src\core\window.cpp" />
+    <ClCompile Include="src\graphics\gl\buffer.cpp" />
+    <ClCompile Include="src\graphics\gl\attribute.cpp" />
     <ClCompile Include="src\platform\dllmain.cpp" />
     <ClCompile Include="src\utils\logger.cpp" />
     <ClCompile Include="src\yanve.cpp" />

@@ -16,3 +16,6 @@
 #include <core/window.h>
 #include <core/application.h>
 #include <core/gui.h>
+
+#include <graphics/gl/attribute.h>
+#include <graphics/gl/buffer.h>
