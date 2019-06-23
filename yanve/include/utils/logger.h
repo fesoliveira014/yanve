@@ -1,7 +1,6 @@
 #pragma once
 
 #include <common.h>
-#include <gl/glew.h>
 #include <ctime>
 
 #include "misc.h"

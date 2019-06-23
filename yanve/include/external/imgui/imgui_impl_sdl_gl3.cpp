@@ -45,9 +45,9 @@
 // SDL,GL3W
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_syswm.h>
-#ifndef GLEW_STATIC
-#define GLEW_STATIC
-#endif
+//#ifndef GLEW_STATIC
+//#define GLEW_STATIC
+//#endif
 #include <GL/glew.h>    // This example is using gl3w to access OpenGL functions (because it is small). You may use glew/glad/glLoadGen/etc. whatever already works for you.
 
 // SDL data

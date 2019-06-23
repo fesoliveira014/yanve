@@ -38,8 +38,8 @@ Window::Window(std::string title, int width, int height)
   glewExperimental = GL_TRUE;
 
   if (glewInit() != GLEW_OK) {
-    LogError(LOG_TAG + __func__, "Could not initialize GLEW.");
-    throw std::exception("GLEW can't be initalized.");
+    LogError(LOG_TAG + __func__, "Could not initialize GLAD.");
+    throw std::exception("GLAD can't be initalized.");
   }
 
   glViewport(0, 0, GLsizei(width), GLsizei(height));
@@ -56,6 +56,7 @@ Window::~Window()
 {
   SDL_GL_DeleteContext(_context);
   SDL_DestroyWindow(_window);
+  SDL_Quit();
 }
 
 void Window::clearColor(const glm::vec4& color)
@@ -65,7 +66,7 @@ void Window::clearColor(const glm::vec4& color)
 
 void Window::clear()
 {
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glClear(GL_COLOR_BUFFER_BIT);
 }
 
 

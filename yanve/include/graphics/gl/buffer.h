@@ -49,7 +49,14 @@ public:
   inline YANVE_API Buffer(Buffer&& other);
   YANVE_API ~Buffer();
 
-  inline Buffer& operator=(Buffer&& other);
+  inline Buffer& operator=(Buffer&& other)
+  {
+    _handle = std::move(other._handle);
+    _size = std::move(other._size);
+    _target = std::move(other._target);
+    other._handle = 0;
+    return *this;
+  }
 
   void YANVE_API setData(void* data, size_t size, BufferUsage usage);
   void YANVE_API setSubData(void* data, size_t size, size_t offset);
