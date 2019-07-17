@@ -88,4 +88,28 @@ void Logger::logMessage(const std::string& formated_message)
 	if (_console) std::cout << formated_message << std::endl;
 	//if (_guiConsolePtr) _guiConsolePtr->AddLog(formated_message.c_str());
 }
+
+void Logger::openglCallbackFunction(
+	GLenum source,
+	GLenum type,
+	GLuint id,
+	GLenum severity,
+	GLsizei length,
+	const GLchar* message,
+	const void* userParam) 
+{
+	static bool nomore = false;
+	(void)source; (void)type; (void)id;
+	(void)severity; (void)length; (void)userParam;
+	if (!nomore) {
+		if (severity == GL_DEBUG_SEVERITY_HIGH) LogError("OpenGL", "%s", message);
+		else LogInfo("OpenGL", "%s", message);
+
+		if (severity == GL_DEBUG_SEVERITY_HIGH) {
+			LogError("OpenGL", "This probably is breaking something.");
+			//nomore = true;
+		}
+	}
+}
+
 }

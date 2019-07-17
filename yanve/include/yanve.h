@@ -19,3 +19,6 @@
 
 #include <graphics/gl/attribute.h>
 #include <graphics/gl/buffer.h>
+
+#include <utils/logger.h>
+#include <utils/clock.h>

@@ -49,7 +49,7 @@ public:
   inline YANVE_API Buffer(Buffer&& other);
   YANVE_API ~Buffer();
 
-  inline Buffer& operator=(Buffer&& other)
+  inline Buffer& operator=(Buffer&& other) noexcept
   {
     _handle = std::move(other._handle);
     _size = std::move(other._size);

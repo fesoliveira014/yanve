@@ -40,20 +40,7 @@ public:
 		GLsizei length,
 		const GLchar* message,
 		const void* userParam
-	) {
-		static bool nomore = false;
-		(void)source; (void)type; (void)id;
-		(void)severity; (void)length; (void)userParam;
-		if (!nomore) {
-			if (severity == GL_DEBUG_SEVERITY_HIGH) LogError("OpenGL", "%s", message);
-			else LogInfo("OpenGL", "%s", message);
-
-			if (severity == GL_DEBUG_SEVERITY_HIGH) {
-				LogError("OpenGL", "This probably is breaking something.");
-				//nomore = true;
-			}
-		}
-	}
+	);
 	
 protected:
 	Logger(const std::string & fileName, bool console = false);

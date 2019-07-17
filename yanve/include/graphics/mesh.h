@@ -34,6 +34,9 @@ public:
 
   template <class ... T>
   Mesh& addBuffer(const Buffer& buffer, GLintptr offset, const T&... attributes); // some overloads to this
+
+  template <class ... T>
+  Mesh& addBuffer(Buffer&& buffer, GLintptr offset, const T& ... attributes); // some overloads to this
   
 };
 

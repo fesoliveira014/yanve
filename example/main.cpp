@@ -1,41 +1,20 @@
 #include <yanve.h>
 #include <iostream>
 
-static void openglCallbackFunction(
-  GLenum source,
-  GLenum type,
-  GLuint id,
-  GLenum severity,
-  GLsizei length,
-  const GLchar* message,
-  const void* userParam
-) {
-  static bool nomore = false;
-  (void)source; (void)type; (void)id;
-  (void)severity; (void)length; (void)userParam;
-  if (!nomore) {
-    if (severity == GL_DEBUG_SEVERITY_HIGH) std::cerr << "OpenGL High: " <<  message << std::endl;
-    else std::cerr << "OpenGL Low: " << message << std::endl;
-
-    //if (severity == GL_DEBUG_SEVERITY_HIGH) {
-    //  LogError("OpenGL", "This probably is breaking something.");
-    //  //nomore = true;
-    //}
-  }
-}
-
 class TestApp : public yanve::Application
 {
   typedef typename yanve::gl::Attribute<0, glm::vec3> Position;
 
 public:
-  TestApp(std::string name) : running{ true }, window{ name, 1024, 768 }
+  TestApp(std::string name) : 
+    running{ true }, 
+    window{ name, 1024, 768 },
+    deltaTimer{},
+    clock{},
+    framesPerSec{0},
+    frames{0}
   { 
-    /*glewExperimental = GL_TRUE;
-
-    if (glewInit() != GLEW_OK) {
-      throw std::exception("GLAD can't be initalized.");
-    }*/
+    
   }
 
   ~TestApp() {}
@@ -128,9 +107,10 @@ public:
 
     const char* vertexShaderSource = "#version 330 core\n"
     "layout (location = 0) in vec3 aPos;\n"
+    "uniform mat4 model;"
     "void main()\n"
     "{\n"
-    "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
+    "   gl_Position = model * vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
       "}\0";
 
     const char* fragmentShaderSource = 
@@ -189,11 +169,17 @@ public:
 
   void update() override
   {
+    if (clock.elapsed() >= 1.0) {
+      clock.reset();
+      framesPerSec = frames;
+      frames = 0;
+    }
+
     auto& input = yanve::InputManager::instance();
     input.update();
     window.clear();
     window.update();
-    //yanve::GuiManager::beginFrame();
+    yanve::GuiManager::beginFrame();
 
     glm::mat4 transform = glm::rotate(modelMatrix, angle, glm::vec3(1.0, 1.0, 0.0));
     glUniformMatrix4fv(modelUniformPos, 1, GL_FALSE, glm::value_ptr(transform));
@@ -203,21 +189,18 @@ public:
       angle = 0.0f;
 
     running = !input.quit();
+    frames++;
   }
   
   void updateGui() override
   {
-    //{
-    //  ImGui::Begin("Triangle");
+    {
+      ImGui::Begin("Test Box");
 
-    //  ImGui::Text("vertexBuffer: %d", vertexBuffer);
-    //  ImGui::Text("colorBuffer: %d", colorBuffer);
-    //  ImGui::Text("indexBuffer: %d", indexBuffer);
-    //  ImGui::Text("vertexArrayObject: %d", vertexArrayObject);
-    //  ImGui::Text("shaderProgram: %d", shaderProgram);
-    //  
-    //  ImGui::End();
-    //}
+      ImGui::Text("FPS: %d", framesPerSec);
+      
+      ImGui::End();
+    }
   }
 
   void render() override
@@ -227,8 +210,8 @@ public:
     //glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
     glDrawArrays(GL_TRIANGLES, 0, vertices.size());
     
-    //updateGui();
-    //yanve::GuiManager::endFrame();
+    updateGui();
+    yanve::GuiManager::endFrame();
 
     window.display();
   }
@@ -250,6 +233,12 @@ public:
 protected:
   yanve::Window window;
   bool running;
+
+  yanve::utils::Clock deltaTimer;
+  yanve::utils::Clock clock;
+
+  long framesPerSec;
+  long frames;
 
   std::vector<glm::vec3> vertices;
   std::vector<glm::vec4> colors;
