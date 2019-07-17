@@ -1,3 +1,3 @@
-# Yet Another Voxel Engine
+# Yet Another (visual? voxel?) Engine
 
 Yep, another one :)
