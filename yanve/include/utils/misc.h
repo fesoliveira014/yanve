@@ -98,7 +98,7 @@ namespace yanve
     std::string stringFormat(const std::string &format, Args const &... args)
     {
       const auto fmt = format.c_str();
-      const size_t size = std::snprintf(nullptr, 0, fmt, process_arg(args)...) + 1;
+      const size_t size = static_cast<std::size_t>(std::snprintf(nullptr, 0, fmt, process_arg(args)...)) + 1;
       auto buf = std::make_unique<char[]>(size);
       std::snprintf(buf.get(), size, fmt, process_arg(args)...);
       auto res = std::string(buf.get(), buf.get() + size - 1);

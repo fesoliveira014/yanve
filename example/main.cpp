@@ -1,6 +1,36 @@
 #include <yanve.h>
 #include <iostream>
 
+class TestShader : public yanve::gl::ShaderProgram
+{
+  typedef yanve::gl::Attribute<0, glm::vec3> Position;
+
+public:
+  TestShader() : ShaderProgram()
+  {
+    yanve::gl::Shader vertex(yanve::gl::Shader::Type::Vertex);
+    yanve::gl::Shader fragment(yanve::gl::Shader::Type::Fragment);
+
+    vertex.addFile("res/shaders/simplevertex.glsl");
+    fragment.addFile("res/shaders/simplefrag.glsl");
+
+    vertex.compile();
+    fragment.compile();
+
+    attachShaders({ vertex, fragment });
+
+    link();
+
+    _uniforms["model"] = getUniformLocation("model");
+  }
+
+  TestShader& setModelMatrix(const glm::mat4& model)
+  {
+    setUniform("model", model);
+    return *this;
+  }
+};
+
 class TestApp : public yanve::Application
 {
   typedef typename yanve::gl::Attribute<0, glm::vec3> Position;
@@ -11,6 +41,7 @@ public:
     window{ name, 1024, 768 },
     deltaTimer{},
     clock{},
+    shaderProgram{},
     framesPerSec{0},
     frames{0}
   { 
@@ -69,11 +100,6 @@ public:
     vertices.push_back(glm::vec3( 0.5,  0.5, -0.5));
     vertices.push_back(glm::vec3( 0.5,  0.5,  0.5));
 
-    //vertices.push_back(glm::vec3(-0.5f, -0.5f, 0.0f));  // bottom left
-    //vertices.push_back(glm::vec3( 0.5f, -0.5f, 0.0f));  // bottom right
-    //vertices.push_back(glm::vec3( 0.5f,  0.5f, 0.0f));  // top right
-    //vertices.push_back(glm::vec3(-0.5f,  0.5f, 0.0f));   // top left 
-
     for (int i = 0; i < vertices.size(); ++i) {
       colors.push_back(glm::vec4(vertices[i] + glm::vec3(0.5), 1.0));
     }
@@ -81,11 +107,6 @@ public:
     for (int i = 0; i < vertices.size(); ++i) {
       indices.push_back(i);
     }
-
-    //indices.push_back(0); indices.push_back(1); indices.push_back(2);
-    //indices.push_back(0); indices.push_back(2); indices.push_back(3);
-
-    //glFrontFace(GL_CCW);
 
     glGenVertexArrays(1, &vertexArrayObject);
     glBindVertexArray(vertexArrayObject);
@@ -105,66 +126,10 @@ public:
     vertexBuffer = std::move(vBuf);
     indexBuffer = std::move(iBuf);
 
-    const char* vertexShaderSource = "#version 330 core\n"
-    "layout (location = 0) in vec3 aPos;\n"
-    "uniform mat4 model;"
-    "void main()\n"
-    "{\n"
-    "   gl_Position = model * vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-      "}\0";
-
-    const char* fragmentShaderSource = 
-      "#version 330 core\n"
-      "out vec4 FragColor;\n"
-      "void main()\n"
-      "{\n"
-      "   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
-      "}\n\0";
-
-    GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShader, 1, &vertexShaderSource, nullptr);
-    glCompileShader(vertexShader);
-
-    int success;
-    char infoLog[512];
-    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-    if (!success)
-    {
-      glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-      std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
-    }
-    
-    GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, &fragmentShaderSource, nullptr);
-    glCompileShader(fragmentShader);
-
-    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
-    if (!success)
-    {
-      glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
-      std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
-    }
-
-    shaderProgram = glCreateProgram();
-    glAttachShader(shaderProgram, vertexShader);
-    glAttachShader(shaderProgram, fragmentShader);
-    glLinkProgram(shaderProgram);
-
-    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
-    if (!success) {
-      glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
-      std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
-    }
-
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
-
     modelMatrix = glm::mat4(1.0f);
     angle = 0.0f;
 
-    glUseProgram(shaderProgram);
-    modelUniformPos = glGetUniformLocation(shaderProgram, "model");
-    glUniformMatrix4fv(modelUniformPos, 1, GL_FALSE, glm::value_ptr(modelMatrix));
+    shaderProgram.setModelMatrix(modelMatrix);
   }
 
   void update() override
@@ -182,7 +147,7 @@ public:
     yanve::GuiManager::beginFrame();
 
     glm::mat4 transform = glm::rotate(modelMatrix, angle, glm::vec3(1.0, 1.0, 0.0));
-    glUniformMatrix4fv(modelUniformPos, 1, GL_FALSE, glm::value_ptr(transform));
+    shaderProgram.setModelMatrix(transform);
     angle += 0.0001f;
 
     if (angle > 2.0f * glm::pi<float>())
@@ -205,7 +170,7 @@ public:
 
   void render() override
   {
-    glUseProgram(shaderProgram);
+    shaderProgram.use();
     glBindVertexArray(vertexArrayObject); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
     //glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
     glDrawArrays(GL_TRIANGLES, 0, vertices.size());
@@ -249,8 +214,8 @@ protected:
   yanve::gl::Buffer indexBuffer;
   GLuint vertexArrayObject;
 
-  GLuint shaderProgram;
-  GLuint modelUniformPos;
+  //GLuint shaderProgram;
+  TestShader shaderProgram;
 
   glm::mat4 modelMatrix;
   float angle = 0.0f;

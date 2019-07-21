@@ -251,6 +251,9 @@
     <ClInclude Include="include\core\window.h" />
     <ClInclude Include="include\graphics\geometry.h" />
     <ClInclude Include="include\graphics\gl\buffer.h" />
+    <ClInclude Include="include\graphics\gl\globject.h" />
+    <ClInclude Include="include\graphics\gl\shader.h" />
+    <ClInclude Include="include\graphics\gl\shaderprogram.h" />
     <ClInclude Include="include\graphics\mesh.h" />
     <ClInclude Include="include\utils\clock.h" />
     <ClInclude Include="include\utils\misc.h" />
@@ -270,6 +273,8 @@
     <ClCompile Include="src\core\window.cpp" />
     <ClCompile Include="src\graphics\gl\buffer.cpp" />
     <ClCompile Include="src\graphics\gl\attribute.cpp" />
+    <ClCompile Include="src\graphics\gl\shader.cpp" />
+    <ClCompile Include="src\graphics\gl\shaderprogram.cpp" />
     <ClCompile Include="src\graphics\mesh.cpp" />
     <ClCompile Include="src\platform\dllmain.cpp" />
     <ClCompile Include="src\utils\clock.cpp" />

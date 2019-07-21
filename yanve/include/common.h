@@ -15,6 +15,7 @@
 #include <sstream>
 #include <algorithm>
 #include <memory>
+#include <unordered_map>
 
 #include <GL/glew.h>
 

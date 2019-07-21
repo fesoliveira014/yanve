@@ -19,6 +19,8 @@
 
 #include <graphics/gl/attribute.h>
 #include <graphics/gl/buffer.h>
+#include <graphics/gl/shader.h>
+#include <graphics/gl/shaderprogram.h>
 
 #include <utils/logger.h>
 #include <utils/clock.h>
