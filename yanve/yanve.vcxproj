@@ -254,9 +254,11 @@
     <ClInclude Include="include\graphics\gl\globject.h" />
     <ClInclude Include="include\graphics\gl\shader.h" />
     <ClInclude Include="include\graphics\gl\shaderprogram.h" />
-    <ClInclude Include="include\graphics\mesh.h" />
+    <ClInclude Include="include\graphics\gl\mesh.h" />
     <ClInclude Include="include\utils\clock.h" />
+    <ClInclude Include="include\utils\mesh\interleave.h" />
     <ClInclude Include="include\utils\misc.h" />
+    <ClInclude Include="include\utils\nocreate.h" />
     <ClInclude Include="include\yanve.h" />
     <ClInclude Include="include\platform\targetver.h" />
   </ItemGroup>
@@ -275,7 +277,7 @@
     <ClCompile Include="src\graphics\gl\attribute.cpp" />
     <ClCompile Include="src\graphics\gl\shader.cpp" />
     <ClCompile Include="src\graphics\gl\shaderprogram.cpp" />
-    <ClCompile Include="src\graphics\mesh.cpp" />
+    <ClCompile Include="src\graphics\gl\mesh.cpp" />
     <ClCompile Include="src\platform\dllmain.cpp" />
     <ClCompile Include="src\utils\clock.cpp" />
     <ClCompile Include="src\utils\logger.cpp" />

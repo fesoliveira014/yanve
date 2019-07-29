@@ -3,7 +3,7 @@
 namespace yanve::gl
 {
 
-size_t implementation::FloatAttribute::size(GLuint components, DataType dataType)
+GLsizei implementation::FloatAttribute::size(GLuint components, DataType dataType)
 {
   switch (dataType) {
   case DataType::UnsignedByte:
@@ -12,17 +12,17 @@ size_t implementation::FloatAttribute::size(GLuint components, DataType dataType
   case DataType::UnsignedShort:
   case DataType::Short:
   case DataType::HalfFloat:
-    return 2 * components;
+    return 2U * components;
   case DataType::UnsignedInt:
   case DataType::Int:
   case DataType::Float:
-    return 4 * components;
+    return 4U * components;
   case DataType::Double:
-    return 8 * components;
+    return 8U * components;
   }
 }
 
-size_t implementation::IntAttribute::size(GLuint components, DataType dataType)
+GLsizei implementation::IntAttribute::size(GLuint components, DataType dataType)
 {
   switch (dataType) {
   case DataType::UnsignedByte:
@@ -30,18 +30,18 @@ size_t implementation::IntAttribute::size(GLuint components, DataType dataType)
     return components;
   case DataType::UnsignedShort:
   case DataType::Short:
-    return 2 * components;
+    return 2U * components;
   case DataType::UnsignedInt:
   case DataType::Int:
-    return 4 * components;
+    return 4U * components;
   }
 }
 
-size_t implementation::DoubleAttribute::size(GLuint components, DataType dataType)
+GLsizei implementation::DoubleAttribute::size(GLuint components, DataType dataType)
 {
   switch (dataType) {
   case DataType::Double:
-    return 8 * components;
+    return 8U * components;
   }
 }
 

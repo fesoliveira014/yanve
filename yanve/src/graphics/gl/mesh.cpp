@@ -34,6 +34,14 @@ Mesh::Mesh(Mesh&& other) noexcept :
   other._vao = 0;
 }
 
+Mesh::~Mesh()
+{
+  bool destroy = _vao && (_flags & Flags::DestroyOnDestruction);
+
+  if (destroy)
+    glDeleteVertexArrays(1, &_vao);
+}
+
 Mesh& Mesh::operator=(Mesh&& other) noexcept
 {
   std::swap(_vao, other._vao);
@@ -51,12 +59,18 @@ Mesh& Mesh::operator=(Mesh&& other) noexcept
   return *this;
 }
 
-Mesh::~Mesh()
+Mesh& Mesh::setIndexBuffer(Buffer&& buffer, GLintptr offset, MeshIndexType type, GLuint start, GLuint end)
 {
-  bool destroy = _vao && (_flags & Flags::DestroyOnDestruction);
+  bindVAO();
+  buffer.bind();
 
-  if (destroy)
-    glDeleteVertexArrays(1, &_vao);
+  _indexBuffer = std::move(buffer);
+  _indexOffset = offset;
+  _indexType = type;
+  _indexStart = start;
+  _indexEnd = end;
+
+  return *this;
 }
 
 Mesh& Mesh::draw(ShaderProgram& shader)
@@ -96,29 +110,18 @@ GLsizei Mesh::meshIndexTypeSize(MeshIndexType type) const
   }
 }
 
-Mesh& Mesh::setIndexBuffer(Buffer&& buffer, GLintptr offset, MeshIndexType type, GLuint start, GLuint end)
-{
-  _indexBuffer = std::move(buffer);
-  _indexOffset = offset;
-  _indexType = type;
-  _indexStart = start;
-  _indexEnd = end;
-
-  return *this;
-}
-
-Mesh& Mesh::setIndexBuffer(Buffer& buffer, GLintptr offset, MeshIndexType type, GLuint start, GLuint end) {
-  setIndexBuffer(Buffer::wrap(buffer.id(), buffer.target()), offset, type, start, end);
-}
-
-Mesh& Mesh::setIndexBuffer(Buffer& buffer, GLintptr offset, MeshIndexType type) {
-  setIndexBuffer(buffer, offset, type, 0, 0);
-}
-
 void Mesh::bindVAO()
 {
   _flags |= Flags::Created;
+  glBindVertexArray(_vao);
 }
+
+void Mesh::bindIndexBuffer(Buffer& buffer)
+{
+  bindVAO();
+  buffer.bind();
+}
+
 
 void Mesh::attributePointer(Buffer& buffer, const GLuint location, const GLint size, const GLenum type, GLint normalized, const GLintptr offset, const GLsizei stride/*, GLint divisor*/)
 {
@@ -140,8 +143,11 @@ void Mesh::vertexAttribPointer(AttributeLayout&& attribute)
                         attribute.normalized, attribute.stride, reinterpret_cast<void*>(attribute.offset));
 
   if (attribute.divisor) {
+    bindVAO();
     glVertexAttribDivisor(attribute.location, attribute.divisor);
   }
+
+  _attributes.push_back(std::move(attribute));
 }
 
 }

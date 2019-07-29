@@ -44,7 +44,7 @@ void ShaderProgram::attachShaders(std::initializer_list<std::reference_wrapper<S
 
 bool ShaderProgram::link()
 {
-  GLint success, logLength;
+  GLint success;
 
   glLinkProgram(_id);
   glGetProgramiv(_id, GL_LINK_STATUS, &success);

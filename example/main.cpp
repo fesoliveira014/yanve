@@ -3,9 +3,11 @@
 
 class TestShader : public yanve::gl::ShaderProgram
 {
-  typedef yanve::gl::Attribute<0, glm::vec3> Position;
 
 public:
+  typedef yanve::gl::Attribute<0, glm::vec3> Position;
+  typedef yanve::gl::Attribute<1, glm::vec4> Color;
+
   TestShader() : ShaderProgram()
   {
     yanve::gl::Shader vertex(yanve::gl::Shader::Type::Vertex);
@@ -42,6 +44,7 @@ public:
     deltaTimer{},
     clock{},
     shaderProgram{},
+    mesh{yanve::gl::MeshPrimitive::Triangles},
     framesPerSec{0},
     frames{0}
   { 
@@ -108,23 +111,23 @@ public:
       indices.push_back(i);
     }
 
-    glGenVertexArrays(1, &vertexArrayObject);
-    glBindVertexArray(vertexArrayObject);
-
     yanve::gl::Buffer vBuf{};
     vBuf.setData(vertices.data(), vertices.size() * sizeof(glm::vec3), yanve::gl::BufferUsage::StaticDraw);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
 
-    yanve::gl::Buffer iBuf{};
+    yanve::gl::Buffer cBuf{};
+    cBuf.setData(colors.data(), colors.size() * sizeof(glm::vec4), yanve::gl::BufferUsage::StaticDraw);
+
+    yanve::gl::Buffer iBuf{yanve::gl::Buffer::Target::ElementArray};
     iBuf.setData(indices.data(), indices.size() * sizeof(size_t), yanve::gl::BufferUsage::StaticDraw);
 
-    glEnableVertexAttribArray(0);
-    //glEnableVertexAttribArray(1);
-
-    glBindVertexArray(0);
-
     vertexBuffer = std::move(vBuf);
+    colorBuffer = std::move(cBuf);
     indexBuffer = std::move(iBuf);
+    
+    mesh.addBuffer(vertexBuffer, 0, TestShader::Position{})
+      .addBuffer(colorBuffer, 0, TestShader::Color{})
+      .setCount(vertices.size())
+      .setIndexBuffer(indexBuffer, 0, yanve::gl::Mesh::MeshIndexType::UnsignedInt);
 
     modelMatrix = glm::mat4(1.0f);
     angle = 0.0f;
@@ -170,11 +173,8 @@ public:
 
   void render() override
   {
-    shaderProgram.use();
-    glBindVertexArray(vertexArrayObject); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
-    //glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
-    glDrawArrays(GL_TRIANGLES, 0, vertices.size());
-    
+    mesh.draw(shaderProgram);
+
     updateGui();
     yanve::GuiManager::endFrame();
 
@@ -207,12 +207,13 @@ protected:
 
   std::vector<glm::vec3> vertices;
   std::vector<glm::vec4> colors;
-  std::vector<size_t> indices;
+  std::vector<GLuint> indices;
 
   yanve::gl::Buffer vertexBuffer;
   yanve::gl::Buffer colorBuffer;
   yanve::gl::Buffer indexBuffer;
-  GLuint vertexArrayObject;
+
+  yanve::gl::Mesh mesh;
 
   //GLuint shaderProgram;
   TestShader shaderProgram;

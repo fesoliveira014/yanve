@@ -21,6 +21,7 @@
 #include <graphics/gl/buffer.h>
 #include <graphics/gl/shader.h>
 #include <graphics/gl/shaderprogram.h>
+#include <graphics/gl/mesh.h>
 
 #include <utils/logger.h>
 #include <utils/clock.h>

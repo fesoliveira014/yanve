@@ -4,13 +4,13 @@
 
 namespace yanve::gl
 {
-class GLObject
+class YANVE_API GLObject
 {
 protected:
-  enum GLFlags : uint32_t
+  enum Flags : uint32_t
   {
     Created = 1 << 0,
-    DestroyOnDescrution = 1 << 1
+    DestroyOnDestruction = 1 << 1
   };
 
   uint32_t _flags;

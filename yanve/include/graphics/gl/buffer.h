@@ -1,6 +1,8 @@
 #pragma once
 
 #include <common.h>
+#include <graphics/gl/globject.h>
+#include <utils/nocreate.h>
 
 namespace yanve::gl
 {
@@ -20,7 +22,7 @@ enum class BufferUsage : GLenum
   DynamicCopy = GL_DYNAMIC_COPY
 };
 
-class Buffer
+class Buffer : public GLObject
 {
 public:
   enum class Target : GLenum
@@ -44,17 +46,28 @@ public:
     // GL > 4.4
     Query = GL_QUERY_BUFFER
   };
-
+  
   explicit YANVE_API Buffer(Target target = Target::Array);
-  inline YANVE_API Buffer(Buffer&& other);
+  explicit YANVE_API Buffer(NoCreateT);
+  inline YANVE_API Buffer(Buffer&& other) noexcept;
   YANVE_API ~Buffer();
+
+  static Buffer YANVE_API wrap(GLuint id, Target target = Target::Array, Flags flags = {})
+  {
+    return Buffer{id, target, flags};
+  }
+
+  static Buffer YANVE_API wrap(GLuint id, Flags flags)
+  {
+    return Buffer{ id, Target::Array, flags };
+  }
 
   inline Buffer& operator=(Buffer&& other) noexcept
   {
-    _handle = std::move(other._handle);
+    _id = std::move(other._id);
     _size = std::move(other._size);
     _target = std::move(other._target);
-    other._handle = 0;
+    other._id = 0;
     return *this;
   }
 
@@ -67,14 +80,19 @@ public:
   void YANVE_API bind();
   void YANVE_API unbind();
 
-  GLuint YANVE_API handle() const { return _handle; }
+  GLuint YANVE_API id() const { return _id; }
+  Target YANVE_API target() const { return _target; }
   
 private:
+  explicit Buffer(GLuint id, Target target, Flags flags = {});
   explicit Buffer(const Buffer&) = delete;
+
   Buffer& operator=(const Buffer&) = delete;
-  GLuint _handle;
+  GLuint _id;
   Target _target;
   size_t _size;
 };
+
+inline Buffer::Buffer(NoCreateT) : _id{ 0 }, _target{} { _flags = Flags{}; }
 
 }

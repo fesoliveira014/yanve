@@ -30,11 +30,11 @@ public:
   constexpr Attribute(Components components, DataType dataType = implementation::Attribute<T>::DefaultDataType, DataOption dataOption = implementation::Attribute<T>::DefaultDataOption) : _components{components}, _dataType{dataType}, _dataOption{dataOption} {}
   constexpr Attribute(DataType dataType = implementation::Attribute<T>::DefaultDataType, DataOption dataOption = implementation::Attribute<T>::DefaultDataOption) : _components{ implementation::Attribute<T>::DefaultComponents }, _dataType{ dataType }, _dataOption{ dataOption } {}
 
-  constexpr Components components() { return _components; }
-  constexpr DataType dataType() { return _dataType; }
-  constexpr DataOption dataOption() { return _dataOption; }
+  constexpr Components components() const { return _components; }
+  constexpr DataType dataType() const { return _dataType; }
+  constexpr DataOption dataOption() const { return _dataOption; }
 
-  size_t size() const
+  GLsizei size() const
   {
     return implementation::Attribute<T>::size(GLuint(_components), _dataType);
   }
@@ -57,19 +57,19 @@ template <> struct SizedAttribute<1,1> : SizedVectorAttribute<1>
   constexpr static Components DefaultComponents = Components::One;
 };
 
-template <> struct SizedAttribute<1, 2> : SizedVectorAttribute<2>
+template <> struct SizedAttribute<1, 2> : SizedVectorAttribute<1>
 {
   enum class Components : GLint { One = 1, Two = 2 };
   constexpr static Components DefaultComponents = Components::Two;
 };
 
-template <> struct SizedAttribute<1, 3> : SizedVectorAttribute<3>
+template <> struct SizedAttribute<1, 3> : SizedVectorAttribute<1>
 {
   enum class Components : GLint { One = 1 , Two = 2, Three = 3 };
   constexpr static Components DefaultComponents = Components::Three;
 };
 
-template <> struct SizedAttribute<1, 4> : SizedVectorAttribute<4>
+template <> struct SizedAttribute<1, 4> : SizedVectorAttribute<1>
 {
   enum class Components : GLint { One = 1, Two = 2, Three = 3, Four = 4 };
   constexpr static Components DefaultComponents = Components::Four;
@@ -131,7 +131,7 @@ struct FloatAttribute
   };
 
   constexpr static DataOption DefaultDataOption = DataOption::Default;
-  static size_t YANVE_API size(GLuint components, DataType dataType);  
+  static GLsizei YANVE_API size(GLuint components, DataType dataType);  
 };
 
 struct IntAttribute
@@ -155,7 +155,7 @@ struct IntAttribute
 
   constexpr static DataOption DefaultDataOption = DataOption::Default;
 
-  static size_t YANVE_API size(GLuint components, DataType dataType);
+  static GLsizei YANVE_API size(GLuint components, DataType dataType);
 };
 
 struct UnsignedIntAttribute
@@ -168,7 +168,7 @@ struct UnsignedIntAttribute
   typedef IntAttribute::DataOption DataOption;
   constexpr static DataOption DefaultDataOption = DataOption::Default;
 
-  static size_t YANVE_API size(GLuint components, DataType dataType)
+  static GLsizei YANVE_API size(GLuint components, DataType dataType)
   {
     return IntAttribute::size(components, dataType);
   }
@@ -187,7 +187,7 @@ struct DoubleAttribute
   typedef IntAttribute::DataOption DataOption;
   constexpr static DataOption DefaultDataOption = DataOption::Default;
 
-  static size_t YANVE_API size(GLuint components, DataType dataType);
+  static GLsizei YANVE_API size(GLuint components, DataType dataType);
 };
 
 template <> struct Attribute<int> : IntAttribute {};

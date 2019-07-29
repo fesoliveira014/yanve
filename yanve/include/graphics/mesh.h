@@ -3,6 +3,7 @@
 #include <common.h>
 #include <graphics/gl/buffer.h>
 #include <graphics/gl/attribute.h>
+#include <graphics/gl/globject.h>
 
 namespace yanve::gl
 {
@@ -25,19 +26,137 @@ enum class MeshPrimitive
   TriangleStripAdjacency = GL_TRIANGLE_STRIP_ADJACENCY
 };
 
-class Mesh
+class ShaderProgram;
+
+class YANVE_API Mesh : public GLObject
 {
 public:
+  enum class MeshIndexType : GLenum
+  {
+    UnsignedByte = GL_UNSIGNED_BYTE,
+    UnsignedShort = GL_UNSIGNED_SHORT,
+    UnsignedInt = GL_UNSIGNED_INT
+  };
+
+protected:
+  struct AttributeLayout
+  {
+    Buffer buffer;
+    GLuint location;
+    GLint size;
+    GLint normalized;
+    GLenum type;
+    GLintptr offset;
+    GLsizei stride;
+    GLuint divisor;
+
+    AttributeLayout(const Buffer& buffer, GLuint location, GLint size, GLenum type, GLint normalized, GLintptr offset, GLsizei stride, GLuint divisor = 0) :
+      buffer{Buffer::wrap(buffer.id())},
+      location{location},
+      size{size},
+      type{type},
+      normalized{normalized},
+      offset{offset},
+      stride{stride},
+      divisor{divisor}
+    {
+    }
+
+    AttributeLayout(AttributeLayout&&) noexcept = default;
+    AttributeLayout(const AttributeLayout&) noexcept = delete;
+    AttributeLayout& operator=(AttributeLayout&&) noexcept = default;
+    AttributeLayout& operator=(const AttributeLayout&) noexcept = delete;
+  };
+
+  GLuint _vao;
+  MeshPrimitive _primitive;
+
+  std::vector<AttributeLayout> _attributes;
+  
+  Buffer _indexBuffer;
+  GLintptr _indexOffset;
+  MeshIndexType _indexType;
+  GLuint _indexStart;
+  GLuint _indexEnd;
+  
+  GLuint _baseVertex;
+  GLsizei _count;
+
+public:
   explicit Mesh(MeshPrimitive primitive = MeshPrimitive::Triangles);
+  explicit Mesh(const Mesh&) = delete;
+  explicit Mesh(Mesh&& mesh) noexcept;
+
+  ~Mesh();
+
+  Mesh& operator=(const Mesh&) = delete;
+  Mesh& operator=(Mesh&& other) noexcept;
+
+  Mesh& setPrimitive(MeshPrimitive primitive) { _primitive = primitive; return *this; }
+  Mesh& setCount(GLsizei count) { _count = count; return *this; }
+  Mesh& setBaseVertex(GLuint baseVertex) { _baseVertex = baseVertex; return *this; }
   
-  Mesh& draw();
+  Mesh& setIndexBuffer(Buffer&& buffer, GLintptr offset, MeshIndexType type, GLuint start, GLuint end);
+  Mesh& setIndexBuffer(Buffer& buffer, GLintptr offset, MeshIndexType type, GLuint start, GLuint end);
+  Mesh& setIndexBuffer(Buffer& buffer, GLintptr offset, MeshIndexType type);
+
+  MeshPrimitive primitive() const { return _primitive; }
+  GLsizei count() const { return _count; }
+  GLuint baseVertex() const { return _baseVertex; }
+  bool isIndexed() const { return _indexBuffer.id() != 0; }
+  MeshIndexType indexType() const { return _indexType; }
+  GLsizei indexTypeSize() const { return meshIndexTypeSize(_indexType); }
+
+  Mesh& draw(ShaderProgram& shader);
+  Mesh& draw(ShaderProgram&& shader) { return draw(shader); }
 
   template <class ... T>
-  Mesh& addBuffer(const Buffer& buffer, GLintptr offset, const T&... attributes); // some overloads to this
+  inline Mesh& addBuffer(const Buffer& buffer, GLintptr offset, const T& ... attributes) {
+    addVertexBufferInternal(buffer, offset, strideOfInterleaved(attributes...), 0, attributes...);
+  }
 
-  template <class ... T>
-  Mesh& addBuffer(Buffer&& buffer, GLintptr offset, const T& ... attributes); // some overloads to this
+protected:
+  explicit Mesh(GLuint vao, MeshPrimitive primitive, Flags flags);
+
+  void bindVAO();
+
+  /* Computing stride of interleaved vertex attributes */
+  template<GLuint location, class T, class ...U> 
+  static GLsizei strideOfInterleaved(const Attribute<location, T>& attribute, const U& ... attributes) {
+    return attribute.size() * Attribute<location, T>::VectorCount + strideOfInterleaved(attributes...);
+  }
+
+  static GLsizei strideOfInterleaved() { return 0; }
+
+  template <GLuint location, class T, class ...U>
+  void addVertexBufferInternal(const Buffer& buffer, GLuint offset, GLsizei stride, GLuint divisor, const Attribute<location, T>& attribute, const U& ... attributes) {
+    addVertexAttribute(buffer, attribute, offset, stride);
+    addVertexBufferInternal(buffer, offset + attribute.size() * Attribute<location, T>::VectorCount, stride, divisor, attributes...);
+  }
+
+  void addVertexBufferInternal(Buffer&, GLintptr, GLsizei, GLuint) {}
+
+  template <GLuint location, class T>
+  void addVertexAttribute(typename std::enable_if<std::is_same<typename implementation::Attribute<T>::ScalarType, float>::value, Buffer&> buffer, const Attribute<location, T>& attribute, GLintptr offset, GLsizei stride/*, GLint divisor*/)
+  {
+    attributePointer(
+      buffer,
+      location,
+      GLint(attribute.components()),
+      GLenum(attribute.dataType()),
+      GLint(attribute.dataOption()),
+      offset,
+      stride/*,
+      divisor*/
+    );
+  }
+
+  void attributePointer(const Buffer& buffer, const GLuint location, const GLint size, const GLenum type, GLint normalized, const GLintptr offset, const GLsizei stride/*, GLint divisor*/);
+  void attributePointerInternal(AttributeLayout&& attribute);
+
+  void vertexAttribPointer(AttributeLayout&& attribute);
   
+  GLsizei meshIndexTypeSize(MeshIndexType type) const;
 };
 
 }

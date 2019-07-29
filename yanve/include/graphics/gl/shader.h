@@ -33,7 +33,7 @@ namespace yanve::gl
     ~Shader();
 
     Shader& operator=(const Shader&) = delete;
-    Shader& operator=(Shader&& other) noexcept;
+    inline Shader& operator=(Shader&& other) noexcept;
 
     bool compile();
 
