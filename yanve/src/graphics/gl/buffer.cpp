@@ -9,10 +9,10 @@ Buffer::Buffer(Target target) :
   _size{0}
 {
   glGenBuffers(1, &_id);
-  _flags |= GLObject::Flags::Created | GLObject::Flags::DestroyOnDestruction;
+  _flags |= ObjectFlags::Created | ObjectFlags::DestroyOnDestruction;
 }
 
-Buffer::Buffer(GLuint id, Target target, Flags flags):
+Buffer::Buffer(GLuint id, Target target, ObjectFlags flags):
   _id{ id },
   _target{ target },
   _size{0}
@@ -32,18 +32,10 @@ Buffer::Buffer(Buffer&& other) noexcept
 
 Buffer::~Buffer()
 {
-  if (_id && (_flags & GLObject::Flags::DestroyOnDestruction))
-    glDeleteBuffers(1, &_id);
+  if (!_id || !(_flags & ObjectFlags::DestroyOnDestruction)) return;
+  
+  glDeleteBuffers(1, &_id);
 }
-
-//Buffer & Buffer::operator=(Buffer && other)
-//{
-//  _id = std::move(other._id);
-//  _size = std::move(other._size);
-//  _target = std::move(other._target);
-//  other._id = 0;
-//  return *this;
-//}
 
 void Buffer::setData(void* data, size_t size, BufferUsage usage)
 {
@@ -73,7 +65,7 @@ void Buffer::getSubData(size_t offset, size_t size, void* data)
 
 void Buffer::bind()
 {
-  if (_id) _flags |= GLObject::Flags::Created;
+  if (_id) _flags |= ObjectFlags::Created;
   glBindBuffer(static_cast<GLenum>(_target), _id);
 }
 

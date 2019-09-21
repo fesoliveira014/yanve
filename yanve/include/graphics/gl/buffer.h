@@ -52,12 +52,12 @@ public:
   inline YANVE_API Buffer(Buffer&& other) noexcept;
   YANVE_API ~Buffer();
 
-  static Buffer YANVE_API wrap(GLuint id, Target target = Target::Array, Flags flags = {})
+  static Buffer YANVE_API wrap(GLuint id, Target target = Target::Array, ObjectFlags flags = {})
   {
     return Buffer{id, target, flags};
   }
 
-  static Buffer YANVE_API wrap(GLuint id, Flags flags)
+  static Buffer YANVE_API wrap(GLuint id, ObjectFlags flags)
   {
     return Buffer{ id, Target::Array, flags };
   }
@@ -84,15 +84,17 @@ public:
   Target YANVE_API target() const { return _target; }
   
 private:
-  explicit Buffer(GLuint id, Target target, Flags flags = {});
+  explicit Buffer(GLuint id, Target target, ObjectFlags flags = {});
   explicit Buffer(const Buffer&) = delete;
 
   Buffer& operator=(const Buffer&) = delete;
+  
   GLuint _id;
   Target _target;
   size_t _size;
+  ObjectFlags _flags;
 };
 
-inline Buffer::Buffer(NoCreateT) : _id{ 0 }, _target{} { _flags = Flags{}; }
+inline Buffer::Buffer(NoCreateT) : _id{ 0 }, _target{}, _flags{} {}
 
 }

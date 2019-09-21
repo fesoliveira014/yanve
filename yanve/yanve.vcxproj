@@ -235,6 +235,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="include\core\types.h" />
     <ClInclude Include="include\external\imgui\imconfig.h" />
     <ClInclude Include="include\external\imgui\imgui.h" />
     <ClInclude Include="include\external\imgui\imgui_impl_sdl_gl3.h" />
@@ -252,15 +253,21 @@
     <ClInclude Include="include\graphics\geometry.h" />
     <ClInclude Include="include\graphics\gl\buffer.h" />
     <ClInclude Include="include\graphics\gl\globject.h" />
+    <ClInclude Include="include\graphics\gl\pixelformat.h" />
+    <ClInclude Include="include\graphics\gl\sampler.h" />
     <ClInclude Include="include\graphics\gl\shader.h" />
     <ClInclude Include="include\graphics\gl\shaderprogram.h" />
     <ClInclude Include="include\graphics\gl\mesh.h" />
+    <ClInclude Include="include\graphics\gl\abstracttexture.h" />
+    <ClInclude Include="include\graphics\gl\texture.h" />
+    <ClInclude Include="include\graphics\gl\textureformat.h" />
     <ClInclude Include="include\utils\clock.h" />
     <ClInclude Include="include\utils\mesh\interleave.h" />
     <ClInclude Include="include\utils\misc.h" />
     <ClInclude Include="include\utils\nocreate.h" />
     <ClInclude Include="include\yanve.h" />
     <ClInclude Include="include\platform\targetver.h" />
+    <ClInclude Include="include\utils\dimension.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="include\external\imgui\imgui.cpp" />
@@ -273,11 +280,13 @@
     <ClCompile Include="src\core\gui.cpp" />
     <ClCompile Include="src\core\inputmanager.cpp" />
     <ClCompile Include="src\core\window.cpp" />
+    <ClCompile Include="src\graphics\gl\abstracttexture.cpp" />
     <ClCompile Include="src\graphics\gl\buffer.cpp" />
     <ClCompile Include="src\graphics\gl\attribute.cpp" />
     <ClCompile Include="src\graphics\gl\shader.cpp" />
     <ClCompile Include="src\graphics\gl\shaderprogram.cpp" />
     <ClCompile Include="src\graphics\gl\mesh.cpp" />
+    <ClCompile Include="src\graphics\gl\texture.cpp" />
     <ClCompile Include="src\platform\dllmain.cpp" />
     <ClCompile Include="src\utils\clock.cpp" />
     <ClCompile Include="src\utils\logger.cpp" />

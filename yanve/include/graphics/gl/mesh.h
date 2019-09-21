@@ -87,6 +87,7 @@ protected:
   
   GLuint _baseVertex;
   GLsizei _count;
+  ObjectFlags _flags;
 
 public:
   explicit Mesh(MeshPrimitive primitive = MeshPrimitive::Triangles);
@@ -132,7 +133,7 @@ public:
   }
 
 protected:
-  explicit Mesh(GLuint vao, MeshPrimitive primitive, Flags flags);
+  explicit Mesh(GLuint vao, MeshPrimitive primitive, ObjectFlags flags);
 
   void bindVAO();
   void bindIndexBuffer(Buffer& buffer);
@@ -175,6 +176,6 @@ protected:
   GLsizei meshIndexTypeSize(MeshIndexType type) const;
 };
 
-inline Mesh::Mesh(NoCreateT) : _vao{ 0 } { _flags = 0; }
+inline Mesh::Mesh(NoCreateT) : _vao{ 0 }, _flags{ObjectFlags::DestroyOnDestruction} {}
 
 }

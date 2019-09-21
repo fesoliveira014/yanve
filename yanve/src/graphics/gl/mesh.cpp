@@ -8,10 +8,10 @@ Mesh::Mesh(MeshPrimitive primitive) :
   _primitive{ primitive }
 {
   glCreateVertexArrays(1, &_vao);
-  _flags |= Flags::DestroyOnDestruction;
+  _flags |= ObjectFlags::Created;
 }
 
-Mesh::Mesh(GLuint vao, MeshPrimitive primitive, Flags flags) :
+Mesh::Mesh(GLuint vao, MeshPrimitive primitive, ObjectFlags flags) :
   _vao{ vao },
   _primitive{ primitive }
 {
@@ -36,7 +36,7 @@ Mesh::Mesh(Mesh&& other) noexcept :
 
 Mesh::~Mesh()
 {
-  bool destroy = _vao && (_flags & Flags::DestroyOnDestruction);
+  bool destroy = _vao && (_flags & ObjectFlags::DestroyOnDestruction);
 
   if (destroy)
     glDeleteVertexArrays(1, &_vao);
@@ -112,7 +112,7 @@ GLsizei Mesh::meshIndexTypeSize(MeshIndexType type) const
 
 void Mesh::bindVAO()
 {
-  _flags |= Flags::Created;
+  _flags |= ObjectFlags::Created;
   glBindVertexArray(_vao);
 }
 

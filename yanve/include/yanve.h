@@ -22,6 +22,12 @@
 #include <graphics/gl/shader.h>
 #include <graphics/gl/shaderprogram.h>
 #include <graphics/gl/mesh.h>
+#include <graphics/gl/pixelformat.h>
+#include <graphics/gl/sampler.h>
+#include <graphics/gl/textureformat.h>
+#include <graphics/gl/abstracttexture.h>
+#include <graphics/gl/texture.h>
 
 #include <utils/logger.h>
 #include <utils/clock.h>
+

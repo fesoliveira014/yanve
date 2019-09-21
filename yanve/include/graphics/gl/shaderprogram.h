@@ -12,6 +12,7 @@ namespace yanve::gl
   protected:
     GLuint _id;
     std::unordered_map<std::string, GLuint> _uniforms;
+    ObjectFlags _flags;
 
   public:
     ShaderProgram();

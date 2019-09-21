@@ -1,15 +1,12 @@
-<13:06:57> - Session Initiated.
+<16:45:24> - Session Initiated.
 
-<13:06:57> [Error] compile: Error compiling shader of type 35633
-<13:06:57> [Error] compile: Error log: 0(1) : error C0205: invalid profile "code"
-
-<13:06:57> [Error] link: Error linking program: Vertex info
+<16:45:24> [Error] addFile: Could not load shader res/shaders/texturevertex.glsl
+<16:45:24> [Error] link: Error linking program: Vertex info
 -----------
-0(1) : error C0205: invalid profile "code"
-(0) : error C2003: incompatible options for link
+(0) : error C5145: must write to gl_Position
 
 
-<13:07:22> - There were 0 warnings and 0 errors.
+<16:45:49> - There were 0 warnings and 0 errors.
 
 ---------------------------------------
 

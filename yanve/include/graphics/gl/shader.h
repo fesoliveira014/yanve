@@ -22,6 +22,7 @@ namespace yanve::gl
   protected:
     GLuint _id;
     Type _type;
+    ObjectFlags _flags;
 
     std::vector<std::string> _sources;
 
