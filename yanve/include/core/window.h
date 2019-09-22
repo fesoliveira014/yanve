@@ -16,7 +16,7 @@ public:
 
   void YANVE_API update();
   void YANVE_API display();
-  void YANVE_API clear();
+  void YANVE_API clear(GLbitfield bitfield);
 
   void YANVE_API setTitle(std::string title) { _title = title; }
   std::string YANVE_API getTitle() { return _title; }

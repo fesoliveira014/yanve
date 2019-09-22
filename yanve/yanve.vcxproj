@@ -252,8 +252,10 @@
     <ClInclude Include="include\core\window.h" />
     <ClInclude Include="include\graphics\geometry.h" />
     <ClInclude Include="include\graphics\gl\buffer.h" />
+    <ClInclude Include="include\graphics\gl\context.h" />
     <ClInclude Include="include\graphics\gl\globject.h" />
     <ClInclude Include="include\graphics\gl\pixelformat.h" />
+    <ClInclude Include="include\graphics\gl\renderer.h" />
     <ClInclude Include="include\graphics\gl\sampler.h" />
     <ClInclude Include="include\graphics\gl\shader.h" />
     <ClInclude Include="include\graphics\gl\shaderprogram.h" />
@@ -283,6 +285,7 @@
     <ClCompile Include="src\graphics\gl\abstracttexture.cpp" />
     <ClCompile Include="src\graphics\gl\buffer.cpp" />
     <ClCompile Include="src\graphics\gl\attribute.cpp" />
+    <ClCompile Include="src\graphics\gl\renderer.cpp" />
     <ClCompile Include="src\graphics\gl\shader.cpp" />
     <ClCompile Include="src\graphics\gl\shaderprogram.cpp" />
     <ClCompile Include="src\graphics\gl\mesh.cpp" />

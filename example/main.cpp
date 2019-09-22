@@ -102,6 +102,13 @@ public:
 
   void initialize() override 
   {
+    yanve::gl::Renderer::setFrontFace(yanve::gl::Renderer::FrontFace::CounterClockWise);
+    yanve::gl::Renderer::setFaceCullingMode(yanve::gl::Renderer::PolygonFacing::Back);
+    yanve::gl::Renderer::enable(yanve::gl::Renderer::Feature::FaceCulling);
+
+    yanve::gl::Renderer::setDepthFunction(yanve::gl::Renderer::DepthFunction::Less);
+    yanve::gl::Renderer::enable(yanve::gl::Renderer::Feature::DepthTest);
+
     //front
     vertices.push_back(glm::vec3(-0.5, -0.5, -0.5)); uvs.push_back(glm::vec2(0.0f, 0.0f));
     vertices.push_back(glm::vec3( 0.5,  0.5, -0.5)); uvs.push_back(glm::vec2(1.0f, 1.0f));
@@ -214,9 +221,21 @@ public:
 
     auto& input = yanve::InputManager::instance();
     input.update();
-    window.clear();
+    window.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     window.update();
     yanve::GuiManager::beginFrame();
+
+    if (enableDepthTest != depthTestState) {
+      depthTestState = enableDepthTest;
+      yanve::gl::Renderer::setFeature(yanve::gl::Renderer::Feature::DepthTest, depthTestState);
+    }
+
+    if (enableFaceCulling != faceCullingState) {
+      faceCullingState = enableFaceCulling;
+      yanve::gl::Renderer::setFeature(yanve::gl::Renderer::Feature::FaceCulling, faceCullingState);
+    }
+
+    
 
     glm::mat4 transform = glm::rotate(modelMatrix, angle, glm::vec3(1.0, 1.0, 0.0));
     shaderProgram.setModelMatrix(transform);
@@ -238,6 +257,8 @@ public:
 
       ImGui::Text("FPS: %d", framesPerSec);
       ImGui::Checkbox("Use texture", &useTexture);
+      ImGui::Checkbox("Enable depth test", &enableDepthTest);
+      ImGui::Checkbox("Enable face culling", &enableFaceCulling);
       
       ImGui::End();
     }
@@ -304,6 +325,8 @@ protected:
   float angle = 0.0f;
 
   bool useTexture = false;
+  bool enableDepthTest = false, depthTestState = false;
+  bool enableFaceCulling = false, faceCullingState = false;
 };
 
 int main(int argc, char* argv[])

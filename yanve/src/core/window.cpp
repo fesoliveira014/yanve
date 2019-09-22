@@ -64,9 +64,11 @@ void Window::clearColor(const glm::vec4& color)
   glClearColor(color.r, color.g, color.b, color.a);
 }
 
-void Window::clear()
+// TODO: this should not be part of the window class, move it either to
+// the renderer or to a default framebuffer class
+void Window::clear(GLbitfield bitfield)
 {
-  glClear(GL_COLOR_BUFFER_BIT);
+  glClear(bitfield);
 }
 
 

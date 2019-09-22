@@ -27,6 +27,7 @@
 #include <graphics/gl/textureformat.h>
 #include <graphics/gl/abstracttexture.h>
 #include <graphics/gl/texture.h>
+#include <graphics/gl/renderer.h>
 
 #include <utils/logger.h>
 #include <utils/clock.h>
