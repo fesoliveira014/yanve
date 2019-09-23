@@ -7,7 +7,7 @@
    + Only deals with with window related operations:
       * create and manage rendering context
       * viewport resize
-      * clear screen
+      * ~clear screen~ (should be moved to framebuffer instead)
       * swap buffers
    + attributes:
       * SDL window
@@ -24,3 +24,18 @@
 
 - GUI Subsystem
    + Imgui based
+   
+- GL Wrapping and Rendering subsystem
+   + wraps OpengGL 4.5 objects
+     * buffers
+     * textures
+     * framebuffers
+     * mesh (VAO)
+     * shaders
+   + saves the state of the current rendering context
+     * bound buffers
+     * shader in use
+     * existing vao
+     * existing framebuffers
+     * bound textures
+     
