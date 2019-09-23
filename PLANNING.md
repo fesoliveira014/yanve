@@ -39,3 +39,22 @@
      * existing framebuffers
      * bound textures
      
+- Primitive meshes
+   + need to define a standard way of representing a mesh, as in a collection of buffers
+   + planned primitives:
+      * triangles
+      * cubes
+      * cones
+      * spheres
+      * euclidean polyhedra (8, 12, 20 faces)
+   + csg operations (?)
+   
+- Resources subsystem
+   + image object
+      * wrapper around stl_image lib
+   + model object
+      * either use assimp or look for a better obj and wavefront file parser
+   + shader file
+      * shader files are resources like any other, should be loaded and manager by resource subsys
+   + texture files
+      * are texture simple images or something on their own?
