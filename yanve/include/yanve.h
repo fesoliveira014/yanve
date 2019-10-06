@@ -28,6 +28,8 @@
 #include <graphics/gl/abstracttexture.h>
 #include <graphics/gl/texture.h>
 #include <graphics/gl/renderer.h>
+#include <graphics/gl/abstractframebuffer.h>
+#include <graphics/gl/defaultframebuffer.h>
 
 #include <utils/logger.h>
 #include <utils/clock.h>

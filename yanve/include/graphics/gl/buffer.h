@@ -24,6 +24,8 @@ enum class BufferUsage : GLenum
 
 class Buffer : public GLObject
 {
+  friend class AbstractFramebuffer;
+
 public:
   enum class Target : GLenum
   {
@@ -83,11 +85,16 @@ public:
   GLuint YANVE_API id() const { return _id; }
   Target YANVE_API target() const { return _target; }
   
-private:
+protected:
   explicit Buffer(GLuint id, Target target, ObjectFlags flags = {});
   explicit Buffer(const Buffer&) = delete;
 
   Buffer& operator=(const Buffer&) = delete;
+
+  static void bindInternal(Target target, Buffer *const buffer);
+  static void unbindInternal(Target target) { bindInternal(target, nullptr); };
+  void bindInternal(Target target) { bindInternal(target, this); }
+
   
   GLuint _id;
   Target _target;

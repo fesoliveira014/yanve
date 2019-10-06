@@ -8,24 +8,28 @@
 namespace yanve
 {
 
-class Window
+class YANVE_API Window
 {
+  friend class Application;
+
 public:
-  YANVE_API Window(std::string title, int width, int height);
-  YANVE_API ~Window();
+  Window(std::string title, int width, int height);
+  ~Window();
 
-  void YANVE_API update();
-  void YANVE_API display();
-  void YANVE_API clear(GLbitfield bitfield);
+  void swapBuffers();
 
-  void YANVE_API setTitle(std::string title) { _title = title; }
-  std::string YANVE_API getTitle() { return _title; }
+  glm::ivec2 size() const { return _size; }
+  void resize(const glm::ivec2& size);
+
+  void setTitle(std::string title) { _title = title; }
+  std::string getTitle() { return _title; }
   
-  void YANVE_API clearColor(const glm::vec4& color = glm::vec4(0.0, 0.0, 0.0, 1.0));
+protected:
+  SDL_Window* handle() { return _window; }
 
-private:
   SDL_Window* _window;
   SDL_GLContext _context;
+  glm::ivec2 _size;
 
   std::string _title;
 };

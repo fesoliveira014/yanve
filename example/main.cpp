@@ -221,7 +221,7 @@ public:
 
     auto& input = yanve::InputManager::instance();
     input.update();
-    window.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    yanve::gl::defaultFramebuffer.clear(yanve::gl::FramebufferClearMask::Color | yanve::gl::FramebufferClearMask::Depth);
     window.update();
     yanve::GuiManager::beginFrame();
 
@@ -234,8 +234,6 @@ public:
       faceCullingState = enableFaceCulling;
       yanve::gl::Renderer::setFeature(yanve::gl::Renderer::Feature::FaceCulling, faceCullingState);
     }
-
-    
 
     glm::mat4 transform = glm::rotate(modelMatrix, angle, glm::vec3(1.0, 1.0, 0.0));
     shaderProgram.setModelMatrix(transform);

@@ -13,6 +13,8 @@ namespace yanve::gl
 {
 class YANVE_API AbstractTexture : public GLObject
 {
+  friend class AbstractFramebuffer;
+
 public:
   AbstractTexture(const AbstractTexture&) = delete;
   AbstractTexture(AbstractTexture&& other) noexcept;

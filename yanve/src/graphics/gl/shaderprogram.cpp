@@ -55,6 +55,8 @@ bool ShaderProgram::link()
     LogError(__func__, "Error linking program: %s", errorLog);
     return false;
   }
+
+  return true;
 }
 
 bool ShaderProgram::hasUniform(std::string name)

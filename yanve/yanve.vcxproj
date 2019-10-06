@@ -250,9 +250,10 @@
     <ClInclude Include="include\common.h" />
     <ClInclude Include="include\core\gui.h" />
     <ClInclude Include="include\core\window.h" />
-    <ClInclude Include="include\graphics\geometry.h" />
+    <ClInclude Include="include\graphics\gl\abstractframebuffer.h" />
     <ClInclude Include="include\graphics\gl\buffer.h" />
     <ClInclude Include="include\graphics\gl\context.h" />
+    <ClInclude Include="include\graphics\gl\defaultframebuffer.h" />
     <ClInclude Include="include\graphics\gl\globject.h" />
     <ClInclude Include="include\graphics\gl\pixelformat.h" />
     <ClInclude Include="include\graphics\gl\renderer.h" />
@@ -264,6 +265,7 @@
     <ClInclude Include="include\graphics\gl\texture.h" />
     <ClInclude Include="include\graphics\gl\textureformat.h" />
     <ClInclude Include="include\utils\clock.h" />
+    <ClInclude Include="include\utils\enumoperators.h" />
     <ClInclude Include="include\utils\mesh\interleave.h" />
     <ClInclude Include="include\utils\misc.h" />
     <ClInclude Include="include\utils\nocreate.h" />
@@ -282,9 +284,11 @@
     <ClCompile Include="src\core\gui.cpp" />
     <ClCompile Include="src\core\inputmanager.cpp" />
     <ClCompile Include="src\core\window.cpp" />
+    <ClCompile Include="src\graphics\gl\abstractframebuffer.cpp" />
     <ClCompile Include="src\graphics\gl\abstracttexture.cpp" />
     <ClCompile Include="src\graphics\gl\buffer.cpp" />
     <ClCompile Include="src\graphics\gl\attribute.cpp" />
+    <ClCompile Include="src\graphics\gl\defaultframebuffer.cpp" />
     <ClCompile Include="src\graphics\gl\renderer.cpp" />
     <ClCompile Include="src\graphics\gl\shader.cpp" />
     <ClCompile Include="src\graphics\gl\shaderprogram.cpp" />

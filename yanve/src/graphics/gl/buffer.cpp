@@ -65,13 +65,24 @@ void Buffer::getSubData(size_t offset, size_t size, void* data)
 
 void Buffer::bind()
 {
-  if (_id) _flags |= ObjectFlags::Created;
-  glBindBuffer(static_cast<GLenum>(_target), _id);
+  bindInternal(_target);
 }
 
 void Buffer::unbind()
 {
-  glBindBuffer(static_cast<GLenum>(_target), 0);
+  unbindInternal(_target);
+}
+
+void Buffer::bindInternal(Target target, Buffer *const buffer)
+{
+  const GLuint id = buffer ? buffer->_id : 0;
+
+  // TODO: get context
+  // check if current is already bound to target
+  // return if true, update state if not
+
+  if (id) buffer->_flags |= ObjectFlags::Created;
+  glBindBuffer(GLenum(target), id);
 }
 
 }

@@ -42,10 +42,11 @@ Window::Window(std::string title, int width, int height)
     throw std::exception("GLAD can't be initalized.");
   }
 
+  // TODO: this has to be moved to context
   glViewport(0, 0, GLsizei(width), GLsizei(height));
   glClearColor(0.0, 0.0, 0.0, 1.0);
 
-  // first time input manager is initialized (dunno if this is good or not, need to think harder about dependencies
+  // move to abstract application contructor when possible
   InputManager::instance().resizeEvent(width, height);
   GuiManager::setup(_window);
 
@@ -59,30 +60,12 @@ Window::~Window()
   SDL_Quit();
 }
 
-void Window::clearColor(const glm::vec4& color)
+void Window::resize(const glm::ivec2& size)
 {
-  glClearColor(color.r, color.g, color.b, color.a);
+  _size = size;
 }
 
-// TODO: this should not be part of the window class, move it either to
-// the renderer or to a default framebuffer class
-void Window::clear(GLbitfield bitfield)
-{
-  glClear(bitfield);
-}
-
-
-void Window::update()
-{
-  auto& input = InputManager::instance();
-
-  if (input.windowResized()) {
-    auto size = input.windowSize();
-    glViewport(0, 0, GLsizei(size.x), GLsizei(size.y));
-  }
-}
-
-void Window::display()
+void Window::swapBuffers()
 {
   SDL_GL_SwapWindow(_window);
 }
