@@ -112,6 +112,4 @@ private:
   static void initializeContext(Context& context);
 };
 
-YANVE_API extern DefaultFramebuffer defaultFramebuffer;
-
 }

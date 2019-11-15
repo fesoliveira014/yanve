@@ -236,9 +236,6 @@
     <ClCompile Include="src\graphics\gl\state\meshstate.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\graphics\gl\state\framebuffer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\graphics\gl\state\texturestate.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -252,6 +249,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\core\application.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\graphics\gl\state\framebufferstate.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

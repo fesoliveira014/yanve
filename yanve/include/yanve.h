@@ -6,9 +6,11 @@
 
 #include <platform/targetver.h>
 
+#ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN             // Exclude rarely-used stuff from Windows headers
 // Windows Header Files
 #include <windows.h>
+#endif
 
 // reference additional headers your program requires here
 #include <common.h>
@@ -27,9 +29,9 @@
 #include <graphics/gl/textureformat.h>
 #include <graphics/gl/abstracttexture.h>
 #include <graphics/gl/texture.h>
-#include <graphics/gl/renderer.h>
 #include <graphics/gl/abstractframebuffer.h>
 #include <graphics/gl/defaultframebuffer.h>
+#include <graphics/gl/renderer.h>
 #include <graphics/gl/pixelformat.h>
 #include <graphics/gl/extensions.h>
 #include <graphics/gl/version.h>

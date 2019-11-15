@@ -78,14 +78,12 @@ void DefaultFramebuffer::invalidate(std::initializer_list<InvalidationAttachment
 
 void DefaultFramebuffer::initializeContext(Context& context)
 {
-  auto& state = *context.state().framebuffer;
+  //auto& state = *context.state().framebuffer;
 
-  GLint viewport[4];
-  glGetIntegerv(GL_VIEWPORT, viewport);
-  glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
-  defaultFramebuffer._viewport = state.viewport = Rectangle2Di{ {viewport[0], viewport[1]}, {viewport[2], viewport[3]} };
+  //GLint viewport[4];
+  //glGetIntegerv(GL_VIEWPORT, viewport);
+  //glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
+  //defaultFramebuffer._viewport = state.viewport = Rectangle2Di{ {viewport[0], viewport[1]}, {viewport[2], viewport[3]} };
 }
-
-DefaultFramebuffer defaultFramebuffer;
 
 }

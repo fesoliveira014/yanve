@@ -9,6 +9,8 @@
 namespace yanve::gl
 {
 
+class DefaultFramebuffer;
+
 namespace state 
 { 
   struct ContextState;
@@ -73,13 +75,13 @@ public:
     ArmMali = 1 << 7
   };
 
-  explicit Context();
+  explicit Context(DefaultFramebuffer& defaultFramebuffer);
   explicit Context(NoCreateT);
   //explicit Context(NoCreateT, int argc, char** argv);
   //explicit Context(NoCreateT, std::vector<std::string> args);
 
   Context(const Context&) = delete;
-  Context(Context&& other);
+  Context(Context&& other) noexcept;
 
   ~Context();
 
@@ -87,7 +89,7 @@ public:
   static Context& current();
   static void makeCurrent(Context* context);
 
-  bool create();
+  bool create(DefaultFramebuffer& defaultFramebuffer);
 
   Version version() const { return _version; }
   

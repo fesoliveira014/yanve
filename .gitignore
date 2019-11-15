@@ -16,6 +16,7 @@
 *.sln.docstates
 log.txt
 imgui.ini
+packages.config
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs

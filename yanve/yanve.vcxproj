@@ -308,7 +308,7 @@
     <ClCompile Include="src\graphics\gl\mesh.cpp" />
     <ClCompile Include="src\graphics\gl\state\bufferstate.cpp" />
     <ClCompile Include="src\graphics\gl\state\meshstate.cpp" />
-    <ClCompile Include="src\graphics\gl\state\framebuffer.cpp" />
+    <ClCompile Include="src\graphics\gl\state\framebufferstate.cpp" />
     <ClCompile Include="src\graphics\gl\state\shaderstate.cpp" />
     <ClCompile Include="src\graphics\gl\state\state.cpp" />
     <ClCompile Include="src\graphics\gl\state\texturestate.cpp" />

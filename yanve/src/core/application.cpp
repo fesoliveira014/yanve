@@ -8,7 +8,8 @@ namespace yanve
 
 Application::Application(std::string title, int width, int height) :
   window{title, width, height},
-  context{}
+  defaultFramebuffer{},
+  context{defaultFramebuffer}
 {
   gl::Context::makeCurrent(&context);
   InputManager::instance().resizeEvent(width, height);

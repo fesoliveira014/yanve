@@ -1,7 +1,10 @@
+#include <iostream>
+
+#define YANVE_NO_EXPORT
 #include <yanve.h>
+
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb/stb_image.h"
-#include <iostream>
 
 class TestShader : public yanve::gl::ShaderProgram
 {
@@ -223,10 +226,11 @@ public:
     input.update();
 
     if (input.windowResized()) {
+      defaultFramebuffer.setViewport({ {}, {input.windowSize().x, input.windowSize().y} });
       window.resize(input.windowSize());
     }
 
-    yanve::gl::defaultFramebuffer.clear(yanve::gl::FramebufferClearMask::Color | yanve::gl::FramebufferClearMask::Depth);
+    defaultFramebuffer.clear(yanve::gl::FramebufferClearMask::Color | yanve::gl::FramebufferClearMask::Depth);
     yanve::GuiManager::beginFrame();
 
     if (enableDepthTest != depthTestState) {
@@ -332,6 +336,6 @@ protected:
 
 int main(int argc, char* argv[])
 {
-  TestApp app{"test", 1024, 268};
+  TestApp app{"test", 1024, 768};
   return app.run();
 }

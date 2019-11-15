@@ -256,20 +256,20 @@ Context*& windowsCurrentContext()
 #define currentContext windowsCurrentContext();
 #endif
 
-Context::Context() : Context{NoCreate}
+Context::Context(DefaultFramebuffer& defaultFramebuffer) : Context{NoCreate}
 {
-  if (!create()) {
+  if (!create(defaultFramebuffer)) {
     LogError("Context", "Count not create GL Context!");
     throw std::runtime_error("Could not create GL context!");
   }
 }
 
-Context::Context(NoCreateT) : _version{gl::Version::None}
+Context::Context(NoCreateT) : _version{gl::Version::None}, _flags{}
 {
 
 }
 
-Context::Context(Context&& other) :
+Context::Context(Context&& other) noexcept:
   _version{other._version},
   _flags{other._flags},
   _extensionStatus{other._extensionStatus},
@@ -303,7 +303,7 @@ void Context::makeCurrent(Context* context)
   currentContext = context;
 }
 
-bool Context::create()
+bool Context::create(DefaultFramebuffer& defaultFramebuffer)
 {
   glewExperimental = GL_TRUE;
 
@@ -380,7 +380,13 @@ bool Context::create()
   
   _state = std::make_unique<state::State>(*this);
 
-  DefaultFramebuffer::initializeContext(*this);
+  auto& state = *_state->framebuffer;
+
+  GLint viewport[4];
+  glGetIntegerv(GL_VIEWPORT, viewport);
+  glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
+  defaultFramebuffer._viewport = state.viewport = Rectangle2Di{ {viewport[0], viewport[1]}, {viewport[2], viewport[3]} };
+
   Renderer::initializeContext();
 
   return true;

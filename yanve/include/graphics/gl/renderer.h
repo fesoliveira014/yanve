@@ -181,7 +181,7 @@ public:
     InvalidEnum = GL_INVALID_ENUM,
     InvalidValue = GL_INVALID_VALUE,
     InvalidOperation = GL_INVALID_OPERATION,
-    InvalidefaultFramebufferOperation = GL_INVALID_FRAMEBUFFER_OPERATION,
+    InvalidFramebufferOperation = GL_INVALID_FRAMEBUFFER_OPERATION,
     OutOfMemory = GL_OUT_OF_MEMORY,
     StackUnderflow = GL_STACK_UNDERFLOW,
     StackOverflow = GL_STACK_OVERFLOW

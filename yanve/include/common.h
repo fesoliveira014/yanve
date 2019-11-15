@@ -1,6 +1,8 @@
 #pragma once
 
-#ifdef _WIN32
+#ifdef YANVE_NO_EXPORT
+#define YANVE_API
+#elif defined(_WIN32)
 #define YANVE_API __declspec(dllexport)
 #define YANVE_IMPORT __declspec(dllimport)
 #define YANVE_LOCAL 
@@ -35,8 +37,3 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include <core/types.h>
-
-namespace yanve
-{
-
-}
