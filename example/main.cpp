@@ -83,9 +83,9 @@ class TestApp : public yanve::Application
   typedef typename yanve::gl::Attribute<0, glm::vec3> Position;
 
 public:
-  TestApp(std::string name) : 
+  TestApp(std::string name, int width, int height) : 
+    Application{name, width, height},
     running{ true }, 
-    window{ name, 1024, 768 },
     deltaTimer{},
     clock{},
     shaderProgram{},
@@ -221,8 +221,12 @@ public:
 
     auto& input = yanve::InputManager::instance();
     input.update();
+
+    if (input.windowResized()) {
+      window.resize(input.windowSize());
+    }
+
     yanve::gl::defaultFramebuffer.clear(yanve::gl::FramebufferClearMask::Color | yanve::gl::FramebufferClearMask::Depth);
-    window.update();
     yanve::GuiManager::beginFrame();
 
     if (enableDepthTest != depthTestState) {
@@ -275,7 +279,7 @@ public:
     updateGui();
     yanve::GuiManager::endFrame();
 
-    window.display();
+    window.swapBuffers();
   }
 
   int run() override
@@ -293,7 +297,6 @@ public:
   bool isRunning() { return running; }
 
 protected:
-  yanve::Window window;
   bool running;
 
   yanve::utils::Clock deltaTimer;
@@ -329,6 +332,6 @@ protected:
 
 int main(int argc, char* argv[])
 {
-  TestApp app{"test"};
+  TestApp app{"test", 1024, 268};
   return app.run();
 }

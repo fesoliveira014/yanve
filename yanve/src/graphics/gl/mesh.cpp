@@ -1,6 +1,11 @@
 #include <graphics/gl/mesh.h>
 #include <graphics/gl/shaderprogram.h>
 
+#include <graphics/gl/context.h>
+#include <graphics/gl/state/state.h>
+#include <graphics/gl/state/meshstate.h>
+#include <graphics/gl/state/bufferstate.h>
+
 namespace yanve::gl
 {
 
@@ -36,10 +41,15 @@ Mesh::Mesh(Mesh&& other) noexcept :
 
 Mesh::~Mesh()
 {
-  bool destroy = _vao && (_flags & ObjectFlags::DestroyOnDestruction);
+  if (!(_vao && (_flags & ObjectFlags::DestroyOnDestruction))) return;
 
-  if (destroy)
-    glDeleteVertexArrays(1, &_vao);
+  auto& state = *Context::current().state().mesh;
+
+  if (state.currentVAO == _vao) {
+    state.currentVAO = 0;
+  }
+
+  glDeleteVertexArrays(1, &_vao);
 }
 
 Mesh& Mesh::operator=(Mesh&& other) noexcept
@@ -112,8 +122,20 @@ GLsizei Mesh::meshIndexTypeSize(MeshIndexType type) const
 
 void Mesh::bindVAO()
 {
+  auto& current = Context::current().state().mesh->currentVAO;
+
+  if (current == _vao) return;
+
   _flags |= ObjectFlags::Created;
-  glBindVertexArray(_vao);
+  bindVAOInternal(_vao);
+
+  Context::current().state()
+    .buffer->bindings[state::BufferState::indexForTarget(Buffer::Target::ElementArray)] = _indexBuffer.id();
+}
+
+void Mesh::bindVAOInternal(GLint id)
+{
+  glBindVertexArray(Context::current().state().mesh->currentVAO = id);
 }
 
 void Mesh::bindIndexBuffer(Buffer& buffer)

@@ -149,4 +149,9 @@ void Renderer::setBlendColor(const glm::vec4& color)
   glBlendColor(color.x, color.y, color.z, color.w);
 }
 
+void Renderer::initializeContext()
+{
+  setClearColor({.945f, .945f, .945f, 1.0f});
+}
+
 }

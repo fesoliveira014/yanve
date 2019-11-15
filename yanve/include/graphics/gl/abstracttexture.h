@@ -100,7 +100,7 @@ protected:
 
 };
 
-template <> struct AbstractTexture::Helper<1>
+template <> struct YANVE_API AbstractTexture::Helper<1>
 {
   static size_t imageSize(AbstractTexture& texture, GLint level);
 
@@ -116,7 +116,7 @@ template <> struct AbstractTexture::Helper<1>
   // invalidateSubImage?
 };
 
-template <> struct AbstractTexture::Helper<2>
+template <> struct YANVE_API AbstractTexture::Helper<2>
 {
   static glm::uvec2 imageSize(AbstractTexture& texture, GLint level);
 
@@ -138,7 +138,7 @@ template <> struct AbstractTexture::Helper<2>
   // invalidateSubImage?
 };
 
-template <> struct AbstractTexture::Helper<3>
+template <> struct YANVE_API AbstractTexture::Helper<3>
 {
   static glm::uvec3 imageSize(AbstractTexture& texture, GLint level);
 

@@ -1,9 +1,10 @@
+#include <graphics/gl/context.h>
+#include <graphics/gl/state/state.h>
+#include <graphics/gl/state/framebufferstate.h>
 #include <graphics/gl/defaultframebuffer.h>
 
 namespace yanve::gl
 {
-
-DefaultFramebuffer defaultFramebuffer;
 
 DefaultFramebuffer::Status DefaultFramebuffer::checkStatus(FramebufferTarget target)
 {
@@ -75,12 +76,16 @@ void DefaultFramebuffer::invalidate(std::initializer_list<InvalidationAttachment
   AbstractFramebuffer::invalidate(_attachments.size(), _attachments.data(), rect);
 }
 
-void DefaultFramebuffer::initializeContext(/*Context& context*/)
+void DefaultFramebuffer::initializeContext(Context& context)
 {
+  auto& state = *context.state().framebuffer;
+
   GLint viewport[4];
   glGetIntegerv(GL_VIEWPORT, viewport);
-  defaultFramebuffer._viewport = Rectangle2Di{ {viewport[0], viewport[1]}, {viewport[2], viewport[3]} };
+  glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
+  defaultFramebuffer._viewport = state.viewport = Rectangle2Di{ {viewport[0], viewport[1]}, {viewport[2], viewport[3]} };
 }
 
+DefaultFramebuffer defaultFramebuffer;
 
 }

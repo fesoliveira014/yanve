@@ -2,11 +2,16 @@
 #include <graphics/gl/buffer.h>
 #include <utils/logger.h>
 
+#include <graphics/gl/context.h>
+#include <graphics/gl/state/state.h>
+#include <graphics/gl/state/framebufferstate.h>
+
 namespace yanve::gl
 {
 
 void AbstractFramebuffer::blit(AbstractFramebuffer& source, AbstractFramebuffer& destination, const Rectangle2Di& sourceRect, const Rectangle2Di& destRect, FramebufferBlitMask mask, FramebufferBlitFilter filter)
 {
+  
   glBlitNamedFramebuffer(source._id, destination._id, 
                          sourceRect.first.x, sourceRect.first.y, sourceRect.second.x, sourceRect.second.y, 
                          destRect.first.x, destRect.first.y, destRect.second.x, destRect.second.y, 
@@ -21,9 +26,16 @@ void AbstractFramebuffer::bind()
 
 void AbstractFramebuffer::bindInternal(FramebufferTarget target)
 {
-  // get context state
-  // check if framebuffer is bound to current target
-  // if not, then set current target to current framebuffer id
+  auto& state = *Context::current().state().framebuffer;
+
+  if (target == FramebufferTarget::Read) {
+    if (state.readBinding == _id) return;
+    state.readBinding = _id;
+  }
+  else if (target == FramebufferTarget::Draw) {
+    if (state.writeBinding == _id) return;
+    state.writeBinding = _id;
+  }
 
   _flags |= ObjectFlags::Created;
   glBindFramebuffer(GLenum(target), _id);
@@ -32,18 +44,21 @@ void AbstractFramebuffer::bindInternal(FramebufferTarget target)
 AbstractFramebuffer& AbstractFramebuffer::setViewport(const Rectangle2Di& viewport)
 {
   _viewport = viewport;
-  // check if framebuffer is bound to draw target and call setViewportInternal if it is
+
+  if (Context::current().state().framebuffer->writeBinding == _id)
+    setViewportInternal();
 
   return *this;
 }
 
 void AbstractFramebuffer::setViewportInternal()
 {
-  // get context framebuffer state
-  // check if framebuffer is bound to draw target
-  // check if state viewport is same as framebuffer viewport
-  // if not set it
+  auto& state = *Context::current().state().framebuffer;
 
+  if (state.viewport == _viewport)
+    return;
+
+  state.viewport = _viewport;
   glViewport(_viewport.first.x, _viewport.first.y, _viewport.second.x, _viewport.second.y);
 }
 

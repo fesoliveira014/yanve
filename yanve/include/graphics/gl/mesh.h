@@ -14,6 +14,11 @@
 namespace yanve::gl
 {
 
+namespace state
+{
+struct MeshState;
+}
+
 enum class MeshPrimitive
 {
   Points = GL_POINTS,
@@ -133,9 +138,11 @@ public:
   }
 
 protected:
+  friend struct state::MeshState;
   explicit Mesh(GLuint vao, MeshPrimitive primitive, ObjectFlags flags);
 
   void bindVAO();
+  static void bindVAOInternal(GLint id);
   void bindIndexBuffer(Buffer& buffer);
 
   template<GLuint location, class T, class ...U> 

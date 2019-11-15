@@ -2,6 +2,10 @@
 #include <graphics/gl/shader.h>
 #include <utils/logger.h>
 
+#include <graphics/gl/context.h>
+#include <graphics/gl/state/state.h>
+#include <graphics/gl/state/shaderstate.h>
+
 namespace yanve::gl
 {
 
@@ -24,12 +28,22 @@ ShaderProgram& ShaderProgram::operator=(ShaderProgram&& other) noexcept
 }
 
 ShaderProgram::~ShaderProgram() {
+  auto& state = *Context::current().state().shader;
+
+  if (state.current == _id)
+    glUseProgram(state.current = 0);
+
   if (_id) glDeleteProgram(_id);
+  _id = 0;
 }
 
 void ShaderProgram::use()
 {
-  glUseProgram(_id);
+  auto& state = *Context::current().state().shader;
+
+  if (state.current == _id) return;
+
+  glUseProgram(state.current = _id);
 }
 
 void ShaderProgram::attachShader(Shader& shader)

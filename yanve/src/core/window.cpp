@@ -42,13 +42,8 @@ Window::Window(std::string title, int width, int height)
     throw std::exception("GLAD can't be initalized.");
   }
 
-  // TODO: this has to be moved to context
-  glViewport(0, 0, GLsizei(width), GLsizei(height));
-  glClearColor(0.0, 0.0, 0.0, 1.0);
-
-  // move to abstract application contructor when possible
-  InputManager::instance().resizeEvent(width, height);
-  GuiManager::setup(_window);
+  //// TODO: this has to be moved to context
+  //glViewport(0, 0, GLsizei(width), GLsizei(height));
 
   _title = title;
 }

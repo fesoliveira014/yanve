@@ -1,12 +1,17 @@
 #pragma once
 
 #ifdef _WIN32
-#ifdef YANVE_EXPORTS
 #define YANVE_API __declspec(dllexport)
+#define YANVE_IMPORT __declspec(dllimport)
+#define YANVE_LOCAL 
+#define YANVE_THREAD_LOCAL __declspec(thread)
 #else
-#define YANVE_API __declspec(dllimport)
+#define YANVE_API __attribute__((visibility("default")))
+#define YANVE_IMPORT __attribute__((visibility("default")))
+#define YANVE_LOCAL __attribute__((visibility("hidden")))
+#define YANVE_THREAD_LOCAL _thread
 #endif
-#endif
+
 
 #include <iostream>
 #include <string>
@@ -30,3 +35,8 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include <core/types.h>
+
+namespace yanve
+{
+
+}

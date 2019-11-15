@@ -18,21 +18,21 @@
 
 namespace yanve
 {
-class Logger
+class YANVE_API Logger
 {
 public:
-	static YANVE_API Logger& instance() {
+	static  Logger& instance() {
     static Logger logger{"log.txt", true};
 		return logger;
 	}
 
 	//void SetGuiConsole(GuiConsole* guiConsolePtr);
 
-	void YANVE_API LogI(const std::string& tag, const std::string& message);
-	void YANVE_API LogW(const std::string& tag, const std::string& message);
-	void YANVE_API LogE(const std::string& tag, const std::string& message);
+	void  LogI(const std::string& tag, const std::string& message);
+	void  LogW(const std::string& tag, const std::string& message);
+	void  LogE(const std::string& tag, const std::string& message);
 
-	static void YANVE_API openglCallbackFunction(
+	static void  openglCallbackFunction(
 		GLenum source,
 		GLenum type,
 		GLuint id,

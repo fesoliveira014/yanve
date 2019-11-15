@@ -1,5 +1,9 @@
 #include <graphics/gl/buffer.h>
 
+#include <graphics/gl/context.h>
+#include <graphics/gl/state/state.h>
+#include <graphics/gl/state/bufferstate.h>
+
 namespace yanve::gl
 {
 Buffer::Buffer(Target target) :
@@ -33,6 +37,12 @@ Buffer::Buffer(Buffer&& other) noexcept
 Buffer::~Buffer()
 {
   if (!_id || !(_flags & ObjectFlags::DestroyOnDestruction)) return;
+
+  auto& state = *Context::current().state().buffer;
+
+  for (uint i = 0; i < state::BufferState::TargetCount; ++i) {
+    if (state.bindings[i] == _id) state.bindings[i] = 0;
+  }
   
   glDeleteBuffers(1, &_id);
 }
@@ -76,11 +86,11 @@ void Buffer::unbind()
 void Buffer::bindInternal(Target target, Buffer *const buffer)
 {
   const GLuint id = buffer ? buffer->_id : 0;
+  auto& bound = Context::current().state().buffer->bindings[state::BufferState::indexForTarget(target)];
 
-  // TODO: get context
-  // check if current is already bound to target
-  // return if true, update state if not
+  if (bound == id) return;
 
+  bound = id;
   if (id) buffer->_flags |= ObjectFlags::Created;
   glBindBuffer(GLenum(target), id);
 }

@@ -38,7 +38,7 @@ enum class FramebufferTarget : GLenum
 class YANVE_API AbstractFramebuffer
 {
 public:
-  using Rectangle2Di = std::pair<glm::ivec2, glm::ivec2>;
+  /*using Rectangle2Di = std::pair<glm::ivec2, glm::ivec2>;*/
 
   static void blit(AbstractFramebuffer& source, AbstractFramebuffer& destination, const Rectangle2Di& sourceRect, const Rectangle2Di& destRect, FramebufferBlitMask mask, FramebufferBlitFilter filter);
   static void blit(AbstractFramebuffer& source, AbstractFramebuffer& destination, const Rectangle2Di& rect, FramebufferBlitMask mask)

@@ -9,18 +9,18 @@ struct SDL_Window;
 
 namespace yanve
 {
-class GuiManager
+class YANVE_API GuiManager
 {
 public:
-  static YANVE_API GuiManager& instance()
+  static GuiManager& instance()
   {
     static GuiManager gui;
     return gui;
   }
 
-  static void YANVE_API setup(SDL_Window* windowPtr);
-  static void YANVE_API beginFrame();
-  static void YANVE_API endFrame();
+  static void setup(SDL_Window* windowPtr);
+  static void beginFrame();
+  static void endFrame();
 
 private:
   GuiManager();

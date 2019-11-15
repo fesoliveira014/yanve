@@ -30,6 +30,10 @@
 #include <graphics/gl/renderer.h>
 #include <graphics/gl/abstractframebuffer.h>
 #include <graphics/gl/defaultframebuffer.h>
+#include <graphics/gl/pixelformat.h>
+#include <graphics/gl/extensions.h>
+#include <graphics/gl/version.h>
+#include <graphics/gl/context.h>
 
 #include <utils/logger.h>
 #include <utils/clock.h>

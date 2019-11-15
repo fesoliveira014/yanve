@@ -120,7 +120,7 @@ private:
   void focusEvent(bool focus);
   void minimizedEvent(bool minimized);
 
-  friend class Window;
+  friend class Application;
 
 public:
   void YANVE_API update();

@@ -1,6 +1,10 @@
 #pragma once
 
 #include <graphics/gl/abstracttexture.h>
+#include <graphics/gl/context.h>
+#include <graphics/gl/state/state.h>
+#include <graphics/gl/state/texturestate.h>
+#include <utils\logger.h>
 
 namespace yanve::gl
 {
@@ -16,28 +20,50 @@ AbstractTexture::~AbstractTexture()
   if (!_id || !(_flags & ObjectFlags::DestroyOnDestruction)) return;
 
   // TODO: update global state to reflect deletion
+  auto& state = *Context::current().state().texture;
+
+  for (auto& binding : state.bindings) {
+    if (binding.second == _id) binding = {};
+  }
+
+  for (auto& binding : state.imageBindings) {
+    if (std::get<0>(binding) == _id) binding = {};
+  }
 
   glDeleteTextures(1, &_id);
 }
 
 void AbstractTexture::unbind(GLuint textureUnit)
 {
-  // TODO: first check if unbound and return if it is
+  auto& state = *Context::current().state().texture;
 
-  // TODO: this need to check if current unit is active and only
-  // glActiveTexture in case it is not the active one
-  glActiveTexture(GL_TEXTURE0 + textureUnit);
-  glBindTexture(_target, 0);
+  if (state.bindings[textureUnit].first == 0) return;
 
-  // TODO: update global texture state signaling this is unbound
+  if (state.currentTextureUnit != textureUnit)
+    glActiveTexture(GL_TEXTURE0 + (state.currentTextureUnit = textureUnit));
+
+  if (state.bindings[textureUnit].first == 0) { // sanity check
+    LogError("AbstractTexture::unbind", "Bad texture state");
+    throw std::runtime_error("AbstractTexture::unbind: Bad texture state");
+  }
+
+  glBindTexture(state.bindings[textureUnit].first, 0);
+
+  state.bindings[textureUnit] = {};
 }
 
 void AbstractTexture::bind(GLuint textureUnit)
 {
-  // create texture if not created yet
-  // check if texture is not yet bound in given unit
-  glActiveTexture(GL_TEXTURE0 + textureUnit);
-  _flags |= ObjectFlags::Created; // finishes texture creation
+  auto& state = *Context::current().state().texture;
+
+  if (state.bindings[textureUnit].second == _id) return;
+
+  state.bindings[textureUnit] = { _target, _id };
+
+  if (state.currentTextureUnit != textureUnit)
+    glActiveTexture(GL_TEXTURE0 + (state.currentTextureUnit = textureUnit));
+  
+  _flags |= ObjectFlags::Created;
   glBindTexture(_target, _id);
 }
 

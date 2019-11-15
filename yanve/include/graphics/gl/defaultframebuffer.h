@@ -4,8 +4,11 @@
 #include <graphics/gl/abstractframebuffer.h>
 #include <graphics/gl/globject.h>
 
+
 namespace yanve::gl
 {
+
+class Context;
 
 class YANVE_API DefaultFramebuffer : public AbstractFramebuffer
 {
@@ -104,9 +107,11 @@ public:
   }
 
 private:
-  static void initializeContext(/*Context& context*/);
+  friend class Context;
+
+  static void initializeContext(Context& context);
 };
 
-extern YANVE_API DefaultFramebuffer defaultFramebuffer;
+YANVE_API extern DefaultFramebuffer defaultFramebuffer;
 
 }

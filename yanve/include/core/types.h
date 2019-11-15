@@ -23,4 +23,8 @@ using uint = u32;
 using ulong = u64;
 using real = f32;
 
+using Rectangle2D = std::pair<glm::vec2, glm::vec2>;
+using Rectangle2Di = std::pair<glm::ivec2, glm::ivec2>;
+using Rectangle2Du = std::pair<glm::uvec2, glm::uvec2>;
+
 }

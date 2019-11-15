@@ -22,7 +22,7 @@ enum class BufferUsage : GLenum
   DynamicCopy = GL_DYNAMIC_COPY
 };
 
-class Buffer : public GLObject
+class YANVE_API Buffer : public GLObject
 {
   friend class AbstractFramebuffer;
 
@@ -49,17 +49,17 @@ public:
     Query = GL_QUERY_BUFFER
   };
   
-  explicit YANVE_API Buffer(Target target = Target::Array);
-  explicit YANVE_API Buffer(NoCreateT);
-  inline YANVE_API Buffer(Buffer&& other) noexcept;
-  YANVE_API ~Buffer();
+  explicit Buffer(Target target = Target::Array);
+  explicit Buffer(NoCreateT);
+  inline Buffer(Buffer&& other) noexcept;
+  ~Buffer();
 
-  static Buffer YANVE_API wrap(GLuint id, Target target = Target::Array, ObjectFlags flags = {})
+  static Buffer wrap(GLuint id, Target target = Target::Array, ObjectFlags flags = {})
   {
     return Buffer{id, target, flags};
   }
 
-  static Buffer YANVE_API wrap(GLuint id, ObjectFlags flags)
+  static Buffer wrap(GLuint id, ObjectFlags flags)
   {
     return Buffer{ id, Target::Array, flags };
   }
@@ -73,17 +73,17 @@ public:
     return *this;
   }
 
-  void YANVE_API setData(void* data, size_t size, BufferUsage usage);
-  void YANVE_API setSubData(void* data, size_t size, size_t offset);
+  void setData(void* data, size_t size, BufferUsage usage);
+  void setSubData(void* data, size_t size, size_t offset);
 
-  void YANVE_API getData(size_t size, void* data);
-  void YANVE_API getSubData(size_t offset, size_t size, void* data);
+  void getData(size_t size, void* data);
+  void getSubData(size_t offset, size_t size, void* data);
 
-  void YANVE_API bind();
-  void YANVE_API unbind();
+  void bind();
+  void unbind();
 
-  GLuint YANVE_API id() const { return _id; }
-  Target YANVE_API target() const { return _target; }
+  GLuint id() const { return _id; }
+  Target target() const { return _target; }
   
 protected:
   explicit Buffer(GLuint id, Target target, ObjectFlags flags = {});
