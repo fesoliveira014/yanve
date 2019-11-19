@@ -1,7 +1,7 @@
 #include <graphics/gl/state/texturestate.h>
 #include <graphics/gl/state/state.h>
 
-namespace yanve::gl::state
+namespace yanve::gl::detail
 {
   TextureState::TextureState() /*:
     maxSize{}, max3DSize{}, maxCubeMapSize{}, maxRectangleSize{},

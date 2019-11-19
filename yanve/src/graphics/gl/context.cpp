@@ -378,7 +378,7 @@ bool Context::create(DefaultFramebuffer& defaultFramebuffer)
 
   }*/
   
-  _state = std::make_unique<state::State>(*this);
+  _state = std::make_unique<detail::State>(*this);
 
   auto& state = *_state->framebuffer;
 

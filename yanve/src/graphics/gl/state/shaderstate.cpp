@@ -1,7 +1,7 @@
 #include <graphics/gl/state/shaderstate.h>
 #include <graphics/gl/state/state.h>
 
-namespace yanve::gl::state
+namespace yanve::gl::detail
 {
 
 ShaderState::ShaderState() : current{} {}

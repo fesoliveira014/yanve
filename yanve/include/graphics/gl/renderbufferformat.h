@@ -1,0 +1,65 @@
+#pragma once
+
+#include <common.h>
+
+namespace yanve::gl
+{
+
+enum class RenderbufferFormat: GLenum {
+    Red = GL_RED,
+    R8 = GL_R8,
+    RG = GL_RG,
+    RG8 = GL_RG8,
+    RGBA = GL_RGBA,
+    RGBA8 = GL_RGBA8,
+    R16 = GL_R16,
+    RG16 = GL_RG16,
+    RGB16 = GL_RGB16,
+    RGBA16 = GL_RGBA16,
+    R8UI = GL_R8UI,
+    RG8UI = GL_RG8UI,
+    RGBA8UI = GL_RGBA8UI,
+    R8I = GL_R8I,
+    RG8I = GL_RG8I,
+    RGBA8I = GL_RGBA8I,
+    R16UI = GL_R16UI,
+    RG16UI = GL_RG16UI,
+    RGBA16UI = GL_RGBA16UI,
+    R16I = GL_R16I,
+    RG16I = GL_RG16I,
+    RGBA16I = GL_RGBA16I,
+    R32UI = GL_R32UI,
+    RG32UI = GL_RG32UI,
+    RGBA32UI = GL_RGBA32UI,
+    R32I = GL_R32I,
+    RG32I = GL_RG32I,
+    RGBA32I = GL_RGBA32I,
+    R16F = GL_R16F,
+    RG16F = GL_RG16F,
+    RGBA16F = GL_RGBA16F,
+    R32F = GL_R32F,
+    RG32F = GL_RG32F,
+    RGBA32F = GL_RGBA32F,
+    RGB565 = GL_RGB565,
+    RGBA4 = GL_RGBA4,
+    RGB5A1 = GL_RGB5_A1,
+    RGB10A2 = GL_RGB10_A2,
+    RGB10A2UI = GL_RGB10_A2UI,
+    SRGB8Alpha8 = GL_SRGB8_ALPHA8,
+    R11FG11FB10F = GL_R11F_G11F_B10F,
+    DepthComponent = GL_DEPTH_COMPONENT,
+    DepthComponent16 = GL_DEPTH_COMPONENT16,
+    DepthComponent24 = GL_DEPTH_COMPONENT24,
+    DepthComponent32 = GL_DEPTH_COMPONENT32,
+    DepthComponent32F = GL_DEPTH_COMPONENT32F,
+    StencilIndex = GL_STENCIL_INDEX,
+    StencilIndex1 = GL_STENCIL_INDEX1,
+    StencilIndex4 = GL_STENCIL_INDEX4,
+    StencilIndex8 = GL_STENCIL_INDEX8,
+    StencilIndex16 = GL_STENCIL_INDEX16,
+    DepthStencil = GL_DEPTH_STENCIL,
+    Depth24Stencil8 = GL_DEPTH24_STENCIL8,
+    Depth32FStencil8 = GL_DEPTH32F_STENCIL8
+};
+
+}

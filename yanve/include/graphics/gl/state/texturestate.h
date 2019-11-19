@@ -3,7 +3,7 @@
 #include <common.h>
 #include <graphics/gl/abstracttexture.h>
 
-namespace yanve::gl::state
+namespace yanve::gl::detail
 {
 
 struct TextureState

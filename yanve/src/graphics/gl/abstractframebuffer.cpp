@@ -41,6 +41,20 @@ void AbstractFramebuffer::bindInternal(FramebufferTarget target)
   glBindFramebuffer(GLenum(target), _id);
 }
 
+FramebufferTarget AbstractFramebuffer::bindInternal()
+{
+  auto& state = *Context::current().state().framebuffer;
+
+  if (state.readBinding == _id) return FramebufferTarget::Read;
+  if (state.writeBinding == _id) return FramebufferTarget::Draw;
+
+  state.readBinding = _id;
+
+  _flags |= ObjectFlags::Created;
+  glBindFramebuffer(GLenum(FramebufferTarget::Read), _id);
+  return FramebufferTarget::Read;
+}
+
 AbstractFramebuffer& AbstractFramebuffer::setViewport(const Rectangle2Di& viewport)
 {
   _viewport = viewport;

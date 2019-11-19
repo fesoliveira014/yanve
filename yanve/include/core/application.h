@@ -23,6 +23,8 @@ public:
   virtual void shutdown() = 0;
 
 protected:
+  explicit Application() : Application{ "Yanve", 1024, 768 } {}
+
   Window window;
   gl::DefaultFramebuffer defaultFramebuffer;
 

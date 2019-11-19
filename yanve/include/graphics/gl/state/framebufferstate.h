@@ -3,7 +3,7 @@
 #include <common.h>
 #include <graphics/gl/abstractframebuffer.h>
 
-namespace yanve::gl::state
+namespace yanve::gl::detail
 {
 
 struct FramebufferState
@@ -16,6 +16,7 @@ struct FramebufferState
 
   GLuint readBinding, writeBinding, renderbufferBinding;
   Rectangle2Di viewport;
+  i32 maxColorAttachments;
 };
 
 }

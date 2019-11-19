@@ -130,7 +130,7 @@ void Mesh::bindVAO()
   bindVAOInternal(_vao);
 
   Context::current().state()
-    .buffer->bindings[state::BufferState::indexForTarget(Buffer::Target::ElementArray)] = _indexBuffer.id();
+    .buffer->bindings[detail::BufferState::indexForTarget(Buffer::Target::ElementArray)] = _indexBuffer.id();
 }
 
 void Mesh::bindVAOInternal(GLint id)

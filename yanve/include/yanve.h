@@ -31,11 +31,13 @@
 #include <graphics/gl/texture.h>
 #include <graphics/gl/abstractframebuffer.h>
 #include <graphics/gl/defaultframebuffer.h>
+#include <graphics/gl/framebuffer.h>
+#include <graphics/gl/renderbuffer.h>
+#include <graphics/gl/renderbufferformat.h>
 #include <graphics/gl/renderer.h>
-#include <graphics/gl/pixelformat.h>
-#include <graphics/gl/extensions.h>
-#include <graphics/gl/version.h>
-#include <graphics/gl/context.h>
+//#include <graphics/gl/extensions.h>
+//#include <graphics/gl/version.h>
+//#include <graphics/gl/context.h>
 
 #include <utils/logger.h>
 #include <utils/clock.h>

@@ -256,8 +256,11 @@
     <ClInclude Include="include\graphics\gl\context.h" />
     <ClInclude Include="include\graphics\gl\defaultframebuffer.h" />
     <ClInclude Include="include\graphics\gl\extensions.h" />
+    <ClInclude Include="include\graphics\gl\framebuffer.h" />
     <ClInclude Include="include\graphics\gl\globject.h" />
     <ClInclude Include="include\graphics\gl\pixelformat.h" />
+    <ClInclude Include="include\graphics\gl\renderbuffer.h" />
+    <ClInclude Include="include\graphics\gl\renderbufferformat.h" />
     <ClInclude Include="include\graphics\gl\renderer.h" />
     <ClInclude Include="include\graphics\gl\sampler.h" />
     <ClInclude Include="include\graphics\gl\shader.h" />
@@ -302,6 +305,7 @@
     <ClCompile Include="src\graphics\gl\attribute.cpp" />
     <ClCompile Include="src\graphics\gl\context.cpp" />
     <ClCompile Include="src\graphics\gl\defaultframebuffer.cpp" />
+    <ClCompile Include="src\graphics\gl\framebuffer.cpp" />
     <ClCompile Include="src\graphics\gl\renderer.cpp" />
     <ClCompile Include="src\graphics\gl\shader.cpp" />
     <ClCompile Include="src\graphics\gl\shaderprogram.cpp" />
@@ -313,6 +317,7 @@
     <ClCompile Include="src\graphics\gl\state\state.cpp" />
     <ClCompile Include="src\graphics\gl\state\texturestate.cpp" />
     <ClCompile Include="src\graphics\gl\texture.cpp" />
+    <ClCompile Include="src\graphics\renderbuffer.cpp" />
     <ClCompile Include="src\platform\dllmain.cpp" />
     <ClCompile Include="src\utils\clock.cpp" />
     <ClCompile Include="src\utils\logger.cpp" />

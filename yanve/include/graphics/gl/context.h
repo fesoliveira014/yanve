@@ -11,7 +11,7 @@ namespace yanve::gl
 
 class DefaultFramebuffer;
 
-namespace state 
+namespace detail 
 { 
   struct ContextState;
   struct State;
@@ -101,7 +101,7 @@ public:
   //std::vector<std::string> extensionStrings() const;
 
   Flag flags() const { return _flags; }
-  state::State& state() const { return *_state; }
+  detail::State& state() const { return *_state; }
 
   const std::vector<Extension>& supportedExtensions() const {
     return _supportedExtensions;
@@ -123,7 +123,7 @@ protected:
   Context& operator=(const Context&) = delete;
   Context& operator=(Context&&) = delete;
   
-  std::unique_ptr<state::State> _state;
+  std::unique_ptr<detail::State> _state;
   Version _version;
   Flag _flags;
 

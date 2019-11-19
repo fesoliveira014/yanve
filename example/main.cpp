@@ -81,6 +81,51 @@ private:
   enum: GLuint {TextureUnit = 0};
 };
 
+class TestDepthMapShader : public yanve::gl::ShaderProgram
+{
+public:
+  TestDepthMapShader() : ShaderProgram()
+  {
+    yanve::gl::Shader vertex(yanve::gl::Shader::Type::Vertex);
+    yanve::gl::Shader fragment(yanve::gl::Shader::Type::Fragment);
+
+    vertex.addFile("res/shaders/depthvert.glsl");
+    fragment.addFile("res/shaders/depthfrag.glsl");
+
+    vertex.compile();
+    fragment.compile();
+
+    attachShaders({ vertex, fragment });
+
+    link();
+
+    _uniforms["view"] = getUniformLocation("view");
+    _uniforms["model"] = getUniformLocation("model");
+
+    //setUniform("depth_map", (int)TextureUnit);
+  }
+
+  TestDepthMapShader& setModelMatrix(const glm::mat4& model)
+  {
+    setUniform("model", model);
+    return *this;
+  }
+
+  TestDepthMapShader& setViewMatrix(const glm::mat4& view)
+  {
+    setUniform("view", view);
+    return *this;
+  }
+
+  /*TestDepthMapShader& bindTexture(yanve::gl::Texture2D& texture)
+  {
+    texture.bind(TextureUnit);
+    return *this;
+  }*/
+private:
+  enum : GLuint { TextureUnit = 0 };
+};
+
 class TestApp : public yanve::Application
 {
   typedef typename yanve::gl::Attribute<0, glm::vec3> Position;
@@ -93,8 +138,11 @@ public:
     clock{},
     shaderProgram{},
     textureShaderProgram{},
+    depthMapShaderProgram{},
     mesh{yanve::gl::MeshPrimitive::Triangles},
     texture{},
+    depthMap{},
+    depthBuffer{yanve::NoCreate},
     framesPerSec{0},
     frames{0}
   { 
@@ -207,11 +255,26 @@ public:
       .setCount(vertices.size())
       .setIndexBuffer(indexBuffer, 0, yanve::gl::Mesh::MeshIndexType::UnsignedInt);
 
+    depthMap.setMinificationFilter(yanve::gl::SamplerFilter::Nearest)
+      .setMagnificationFilter(yanve::gl::SamplerFilter::Nearest)
+      .setImage(0, yanve::gl::TextureFormat::DepthComponent, yanve::gl::PixelFormat::DepthComponent, yanve::gl::PixelType::Float, nullptr, { 2048, 2048 });
+
+    yanve::gl::Framebuffer fb{ {{0, 0}, {2048, 2048}} };
+    fb.attachTexture(yanve::gl::Framebuffer::BufferAttachment::Depth, depthMap, 0);
+    if (auto status = fb.checkStatus(yanve::gl::FramebufferTarget::Draw) != yanve::gl::Framebuffer::Status::Complete) {
+      LogError("TestApp::TestApp", "Framebuffer has bad status: %x", status);
+      std::abort();
+    }
+
+    depthBuffer = std::move(fb);
+
     modelMatrix = glm::mat4(1.0f);
     angle = 0.0f;
 
     shaderProgram.setModelMatrix(modelMatrix);
     textureShaderProgram.setModelMatrix(modelMatrix);
+    depthMapShaderProgram.setModelMatrix(modelMatrix);
+    depthMapShaderProgram.setViewMatrix(glm::mat4(1.0f));
   }
 
   void update() override
@@ -226,10 +289,11 @@ public:
     input.update();
 
     if (input.windowResized()) {
-      defaultFramebuffer.setViewport({ {}, {input.windowSize().x, input.windowSize().y} });
+      defaultFramebuffer.setViewport({ {}, input.windowSize() });
       window.resize(input.windowSize());
     }
 
+    depthBuffer.clear(yanve::gl::FramebufferClearMask::Depth);
     defaultFramebuffer.clear(yanve::gl::FramebufferClearMask::Color | yanve::gl::FramebufferClearMask::Depth);
     yanve::GuiManager::beginFrame();
 
@@ -265,6 +329,15 @@ public:
       ImGui::Checkbox("Use texture", &useTexture);
       ImGui::Checkbox("Enable depth test", &enableDepthTest);
       ImGui::Checkbox("Enable face culling", &enableFaceCulling);
+
+      if (ImGui::TreeNode("Depth Map")) {
+        ImTextureID id = (void*)depthMap.id();
+        float dim = ImGui::GetWindowWidth() / 2;
+
+        ImVec2 pos = ImGui::GetCursorScreenPos();
+        ImGui::Image(id, ImVec2(dim, dim), ImVec2(0.f, 0.f), ImVec2(1.f, 1.f));
+        ImGui::TreePop();
+      }
       
       ImGui::End();
     }
@@ -272,6 +345,13 @@ public:
 
   void render() override
   {
+    {
+      depthBuffer.bind();
+      //depthMapShaderProgram.bindTexture(depthMap);
+      mesh.draw(depthMapShaderProgram);
+      defaultFramebuffer.bind();
+    }
+
     if (useTexture) {
       textureShaderProgram.bindTexture(texture);
       mesh.draw(textureShaderProgram);
@@ -321,17 +401,21 @@ protected:
 
   yanve::gl::Mesh mesh;
   yanve::gl::Texture2D texture;
+  yanve::gl::Texture2D depthMap;
+
+  yanve::gl::Framebuffer depthBuffer;
 
   //GLuint shaderProgram;
   TestShader shaderProgram;
   TestTextureShader textureShaderProgram;
+  TestDepthMapShader depthMapShaderProgram;
 
   glm::mat4 modelMatrix;
   float angle = 0.0f;
 
   bool useTexture = false;
-  bool enableDepthTest = false, depthTestState = false;
-  bool enableFaceCulling = false, faceCullingState = false;
+  bool enableDepthTest = false, depthTestState = true;
+  bool enableFaceCulling = false, faceCullingState = true;
 };
 
 int main(int argc, char* argv[])

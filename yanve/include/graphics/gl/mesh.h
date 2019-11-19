@@ -14,7 +14,7 @@
 namespace yanve::gl
 {
 
-namespace state
+namespace detail
 {
 struct MeshState;
 }
@@ -138,7 +138,7 @@ public:
   }
 
 protected:
-  friend struct state::MeshState;
+  friend struct detail::MeshState;
   explicit Mesh(GLuint vao, MeshPrimitive primitive, ObjectFlags flags);
 
   void bindVAO();

@@ -186,7 +186,6 @@ void InputManager::resizeEvent(int width, int height)
 
 void InputManager::focusEvent(bool focus)
 {
-  
   _windowState.focus = focus;
 }
 

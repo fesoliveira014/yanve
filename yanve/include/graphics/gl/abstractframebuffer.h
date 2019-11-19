@@ -88,6 +88,8 @@ protected:
   }
 
   void bindInternal(FramebufferTarget target);
+  FramebufferTarget bindInternal();
+
   void setViewportInternal();
 
   GLuint _id;

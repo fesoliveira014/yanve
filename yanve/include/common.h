@@ -1,7 +1,7 @@
 #pragma once
 
 #ifdef YANVE_NO_EXPORT
-#define YANVE_API
+#define YANVE_API __declspec(dllimport)
 #elif defined(_WIN32)
 #define YANVE_API __declspec(dllexport)
 #define YANVE_IMPORT __declspec(dllimport)

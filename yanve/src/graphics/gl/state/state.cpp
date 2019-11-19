@@ -8,7 +8,7 @@
 
 #include <graphics/gl/context.h>
 
-namespace yanve::gl::state
+namespace yanve::gl::detail
 {
 
 State::State(Context& context) :

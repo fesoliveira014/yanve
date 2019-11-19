@@ -3,7 +3,7 @@
 #include <common.h>
 #include <graphics/gl/buffer.h>
 
-namespace yanve::gl::state
+namespace yanve::gl::detail
 {
 
 struct BufferState

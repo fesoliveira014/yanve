@@ -1,7 +1,7 @@
 #include <graphics/gl/state/bufferstate.h>
 #include <utils/logger.h>
 
-namespace yanve::gl::state
+namespace yanve::gl::detail
 {
 
 Buffer::Target BufferState::targetForIndex[TargetCount-1] = {
@@ -38,6 +38,7 @@ std::size_t BufferState::indexForTarget(Buffer::Target target)
   case Buffer::Target::ShaderStorage:         return 13;
   default:
     LogError("BufferState::indexForTarget", "Reached unreachable code :(");
+    return 0;
   }
 }
 

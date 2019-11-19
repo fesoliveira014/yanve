@@ -40,7 +40,7 @@ Buffer::~Buffer()
 
   auto& state = *Context::current().state().buffer;
 
-  for (uint i = 0; i < state::BufferState::TargetCount; ++i) {
+  for (uint i = 0; i < detail::BufferState::TargetCount; ++i) {
     if (state.bindings[i] == _id) state.bindings[i] = 0;
   }
   
@@ -86,7 +86,7 @@ void Buffer::unbind()
 void Buffer::bindInternal(Target target, Buffer *const buffer)
 {
   const GLuint id = buffer ? buffer->_id : 0;
-  auto& bound = Context::current().state().buffer->bindings[state::BufferState::indexForTarget(target)];
+  auto& bound = Context::current().state().buffer->bindings[detail::BufferState::indexForTarget(target)];
 
   if (bound == id) return;
 

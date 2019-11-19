@@ -2,7 +2,7 @@
 #include <graphics/gl/state/state.h>
 #include <graphics/gl/mesh.h>
 
-namespace yanve::gl::state
+namespace yanve::gl::detail
 {
 
 MeshState::MeshState() : currentVAO{}

@@ -7,7 +7,7 @@ namespace yanve::gl
 
 class Context;
 
-namespace state 
+namespace detail 
 {
 struct BufferState;
 struct MeshState;
