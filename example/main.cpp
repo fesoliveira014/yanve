@@ -6,6 +6,42 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb/stb_image.h"
 
+class QuadShader : public yanve::gl::ShaderProgram
+{
+
+public:
+  typedef yanve::gl::Attribute<0, glm::vec3> Position;
+  typedef yanve::gl::Attribute<1, glm::vec2> UV;
+
+  QuadShader() : ShaderProgram{}
+  {
+    yanve::gl::Shader vertex(yanve::gl::Shader::Type::Vertex);
+    yanve::gl::Shader fragment(yanve::gl::Shader::Type::Fragment);
+
+    vertex.addFile("res/shaders/quadvert.glsl");
+    fragment.addFile("res/shaders/quadfrag.glsl");
+
+    vertex.compile();
+    fragment.compile();
+
+    attachShaders({ vertex, fragment });
+
+    link();
+
+    setUniform("screenTexture", (int)TextureUnit);
+  }
+
+  QuadShader& bindTexture(yanve::gl::Texture2D& texture)
+  {
+    texture.bind(TextureUnit);
+    return *this;
+  }
+
+private:
+  enum : GLuint { TextureUnit = 0 };
+
+};
+
 class TestShader : public yanve::gl::ShaderProgram
 {
 
@@ -81,68 +117,21 @@ private:
   enum: GLuint {TextureUnit = 0};
 };
 
-class TestDepthMapShader : public yanve::gl::ShaderProgram
-{
-public:
-  TestDepthMapShader() : ShaderProgram()
-  {
-    yanve::gl::Shader vertex(yanve::gl::Shader::Type::Vertex);
-    yanve::gl::Shader fragment(yanve::gl::Shader::Type::Fragment);
-
-    vertex.addFile("res/shaders/depthvert.glsl");
-    fragment.addFile("res/shaders/depthfrag.glsl");
-
-    vertex.compile();
-    fragment.compile();
-
-    attachShaders({ vertex, fragment });
-
-    link();
-
-    _uniforms["view"] = getUniformLocation("view");
-    _uniforms["model"] = getUniformLocation("model");
-
-    //setUniform("depth_map", (int)TextureUnit);
-  }
-
-  TestDepthMapShader& setModelMatrix(const glm::mat4& model)
-  {
-    setUniform("model", model);
-    return *this;
-  }
-
-  TestDepthMapShader& setViewMatrix(const glm::mat4& view)
-  {
-    setUniform("view", view);
-    return *this;
-  }
-
-  /*TestDepthMapShader& bindTexture(yanve::gl::Texture2D& texture)
-  {
-    texture.bind(TextureUnit);
-    return *this;
-  }*/
-private:
-  enum : GLuint { TextureUnit = 0 };
-};
-
 class TestApp : public yanve::Application
 {
-  typedef typename yanve::gl::Attribute<0, glm::vec3> Position;
-
 public:
   TestApp(std::string name, int width, int height) : 
     Application{name, width, height},
     running{ true }, 
     deltaTimer{},
     clock{},
+    mesh{yanve::gl::MeshPrimitive::Triangles},
     shaderProgram{},
     textureShaderProgram{},
-    depthMapShaderProgram{},
-    mesh{yanve::gl::MeshPrimitive::Triangles},
+    quadShaderProgram{},
     texture{},
-    depthMap{},
-    depthBuffer{yanve::NoCreate},
+    screenTexture{},
+    screenFramebuffer{yanve::NoCreate},
     framesPerSec{0},
     frames{0}
   { 
@@ -159,6 +148,27 @@ public:
 
     yanve::gl::Renderer::setDepthFunction(yanve::gl::Renderer::DepthFunction::Less);
     yanve::gl::Renderer::enable(yanve::gl::Renderer::Feature::DepthTest);
+
+    quadVertices.push_back(glm::vec3(-1.0,  1.0, 0.0)); quadUV.push_back(glm::vec2(0.0, 1.0));
+    quadVertices.push_back(glm::vec3(-1.0, -1.0, 0.0)); quadUV.push_back(glm::vec2(0.0, 0.0));
+    quadVertices.push_back(glm::vec3( 1.0,  1.0, 0.0)); quadUV.push_back(glm::vec2(1.0, 1.0));
+
+    quadVertices.push_back(glm::vec3( 1.0,  1.0, 0.0)); quadUV.push_back(glm::vec2(1.0, 1.0));
+    quadVertices.push_back(glm::vec3(-1.0, -1.0, 0.0)); quadUV.push_back(glm::vec2(0.0, 0.0));
+    quadVertices.push_back(glm::vec3( 1.0, -1.0, 0.0)); quadUV.push_back(glm::vec2(1.0, 0.0));
+
+    yanve::gl::Buffer qVB{};
+    qVB.setData(quadVertices.data(), quadVertices.size() * sizeof(glm::vec3), yanve::gl::BufferUsage::StaticDraw);
+
+    yanve::gl::Buffer qTB{};
+    qTB.setData(quadUV.data(), quadUV.size() * sizeof(glm::vec2), yanve::gl::BufferUsage::StaticDraw);
+
+    quadVertexBuffer = std::move(qVB);
+    quadTexBuffer = std::move(qTB);
+
+    quadMesh.addBuffer(quadVertexBuffer, 0, QuadShader::Position{})
+      .addBuffer(quadTexBuffer, 0, QuadShader::UV{})
+      .setCount(quadVertices.size());
 
     //front
     vertices.push_back(glm::vec3(-0.5, -0.5, -0.5)); uvs.push_back(glm::vec2(0.0f, 0.0f));
@@ -234,7 +244,6 @@ public:
     indexBuffer = std::move(iBuf);
 
     int width, height, channels;
-    //stbi_set_flip_vertically_on_load(true);
     yanve::byte *data = stbi_load("res/textures/container.jpg", &width, &height, &channels, 0);
 
     if (data == nullptr) {
@@ -255,26 +264,34 @@ public:
       .setCount(vertices.size())
       .setIndexBuffer(indexBuffer, 0, yanve::gl::Mesh::MeshIndexType::UnsignedInt);
 
-    depthMap.setMinificationFilter(yanve::gl::SamplerFilter::Nearest)
-      .setMagnificationFilter(yanve::gl::SamplerFilter::Nearest)
-      .setImage(0, yanve::gl::TextureFormat::DepthComponent, yanve::gl::PixelFormat::DepthComponent, yanve::gl::PixelType::Float, nullptr, { 2048, 2048 });
+    screenTexture.setMinificationFilter(yanve::gl::SamplerFilter::Linear)
+      .setMagnificationFilter(yanve::gl::SamplerFilter::Linear)
+      .setWrapping({ yanve::gl::SamplerWrapping::ClampToEdge })
+      .setStorage(1, yanve::gl::TextureFormat::RGB, { 1024, 1024 });
 
-    yanve::gl::Framebuffer fb{ {{0, 0}, {2048, 2048}} };
-    fb.attachTexture(yanve::gl::Framebuffer::BufferAttachment::Depth, depthMap, 0);
-    if (auto status = fb.checkStatus(yanve::gl::FramebufferTarget::Draw) != yanve::gl::Framebuffer::Status::Complete) {
+    yanve::gl::Renderbuffer rb{};
+    rb.setStorage(yanve::gl::RenderbufferFormat::Depth24Stencil8, { 1024, 1024 });
+
+    renderbuffer = std::move(rb);
+
+    yanve::gl::Framebuffer fb{ {{0, 0}, { 1024, 1024 }} };
+    fb.attachTexture(yanve::gl::Framebuffer::BufferAttachment{ yanve::gl::Framebuffer::ColorAttachment{0} }, screenTexture, 0)
+      .attachRenderbuffer(yanve::gl::Framebuffer::BufferAttachment::DepthStencil, renderbuffer);
+
+    auto status = fb.checkStatus(yanve::gl::FramebufferTarget::Draw);
+    if (status != yanve::gl::Framebuffer::Status::Complete) {
       LogError("TestApp::TestApp", "Framebuffer has bad status: %x", status);
       std::abort();
     }
 
-    depthBuffer = std::move(fb);
+    screenFramebuffer = std::move(fb);
 
     modelMatrix = glm::mat4(1.0f);
     angle = 0.0f;
 
     shaderProgram.setModelMatrix(modelMatrix);
     textureShaderProgram.setModelMatrix(modelMatrix);
-    depthMapShaderProgram.setModelMatrix(modelMatrix);
-    depthMapShaderProgram.setViewMatrix(glm::mat4(1.0f));
+    static_cast<void>(quadShaderProgram);
   }
 
   void update() override
@@ -289,13 +306,10 @@ public:
     input.update();
 
     if (input.windowResized()) {
+      screenFramebuffer.setViewport({ {}, input.windowSize() });
       defaultFramebuffer.setViewport({ {}, input.windowSize() });
       window.resize(input.windowSize());
     }
-
-    depthBuffer.clear(yanve::gl::FramebufferClearMask::Depth);
-    defaultFramebuffer.clear(yanve::gl::FramebufferClearMask::Color | yanve::gl::FramebufferClearMask::Depth);
-    yanve::GuiManager::beginFrame();
 
     if (enableDepthTest != depthTestState) {
       depthTestState = enableDepthTest;
@@ -318,6 +332,10 @@ public:
 
     running = !input.quit();
     frames++;
+
+    //defaultFramebuffer.clear(yanve::gl::FramebufferClearMask::Color | yanve::gl::FramebufferClearMask::Depth);
+
+    yanve::GuiManager::beginFrame();
   }
   
   void updateGui() override
@@ -329,9 +347,10 @@ public:
       ImGui::Checkbox("Use texture", &useTexture);
       ImGui::Checkbox("Enable depth test", &enableDepthTest);
       ImGui::Checkbox("Enable face culling", &enableFaceCulling);
+      ImGui::Checkbox("Quad polygon mode", &polygonMode);
 
-      if (ImGui::TreeNode("Depth Map")) {
-        ImTextureID id = (void*)depthMap.id();
+      if (ImGui::TreeNode("Screen Texture")) {
+        ImTextureID id = (void*)screenTexture.id();
         float dim = ImGui::GetWindowWidth() / 2;
 
         ImVec2 pos = ImGui::GetCursorScreenPos();
@@ -345,15 +364,26 @@ public:
 
   void render() override
   {
-    {
-      depthBuffer.bind();
-      //depthMapShaderProgram.bindTexture(depthMap);
-      mesh.draw(depthMapShaderProgram);
-      defaultFramebuffer.bind();
-    }
-
+    screenFramebuffer
+      .clear(yanve::gl::FramebufferClearMask::Color | yanve::gl::FramebufferClearMask::Depth)
+      .bind();
+    yanve::gl::Renderer::enable(yanve::gl::Renderer::Feature::DepthTest);
     if (useTexture) {
       textureShaderProgram.bindTexture(texture);
+      mesh.draw(textureShaderProgram);
+    }
+    else {
+      mesh.draw(shaderProgram);
+    }
+
+    defaultFramebuffer
+      .clear(yanve::gl::FramebufferClearMask::Color | yanve::gl::FramebufferClearMask::Depth)
+      .bind();
+    /*yanve::gl::Renderer::disable(yanve::gl::Renderer::Feature::DepthTest);
+    quadShaderProgram.bindTexture(screenTexture);
+    quadMesh.draw(quadShaderProgram);*/
+    if (useTexture) {
+      textureShaderProgram.bindTexture(screenTexture);
       mesh.draw(textureShaderProgram);
     }
     else {
@@ -394,21 +424,29 @@ protected:
   std::vector<glm::vec2> uvs;
   std::vector<GLuint> indices;
 
+  std::vector<glm::vec3> quadVertices;
+  std::vector<glm::vec2> quadUV;
+
   yanve::gl::Buffer vertexBuffer;
   yanve::gl::Buffer colorBuffer;
   yanve::gl::Buffer texBuffer;
   yanve::gl::Buffer indexBuffer;
 
-  yanve::gl::Mesh mesh;
-  yanve::gl::Texture2D texture;
-  yanve::gl::Texture2D depthMap;
+  yanve::gl::Buffer quadVertexBuffer;
+  yanve::gl::Buffer quadTexBuffer;
 
-  yanve::gl::Framebuffer depthBuffer;
+  yanve::gl::Mesh mesh;
+  yanve::gl::Mesh quadMesh;
+  yanve::gl::Texture2D texture;
+  yanve::gl::Texture2D screenTexture;
+  
+  yanve::gl::Renderbuffer renderbuffer;
+  yanve::gl::Framebuffer screenFramebuffer;
 
   //GLuint shaderProgram;
   TestShader shaderProgram;
   TestTextureShader textureShaderProgram;
-  TestDepthMapShader depthMapShaderProgram;
+  QuadShader quadShaderProgram;
 
   glm::mat4 modelMatrix;
   float angle = 0.0f;
@@ -416,6 +454,7 @@ protected:
   bool useTexture = false;
   bool enableDepthTest = false, depthTestState = true;
   bool enableFaceCulling = false, faceCullingState = true;
+  bool polygonMode = false;
 };
 
 int main(int argc, char* argv[])

@@ -8,7 +8,9 @@ namespace yanve
 {
 static const std::string LOG_TAG = "Window";
 
-Window::Window(std::string title, int width, int height)
+Window::Window(std::string title, int width, int height) : 
+  _size{width, height},
+  _title{title}
 {
   if (SDL_Init(SDL_INIT_EVERYTHING) < 0) {
     LogError(LOG_TAG + __func__, "Could not initialize SDL2.");
@@ -35,17 +37,12 @@ Window::Window(std::string title, int width, int height)
 
   SDL_GL_SetSwapInterval(0);
 
-  glewExperimental = GL_TRUE;
+  //glewExperimental = GL_TRUE;
 
-  if (glewInit() != GLEW_OK) {
-    LogError(LOG_TAG + __func__, "Could not initialize GLAD.");
-    throw std::exception("GLAD can't be initalized.");
-  }
-
-  //// TODO: this has to be moved to context
-  //glViewport(0, 0, GLsizei(width), GLsizei(height));
-
-  _title = title;
+  //if (glewInit() != GLEW_OK) {
+  //  LogError(LOG_TAG + __func__, "Could not initialize GLAD.");
+  //  throw std::exception("GLAD can't be initalized.");
+  //}
 }
 
 Window::~Window()

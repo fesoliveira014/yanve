@@ -148,6 +148,12 @@ public:
     return *this;
   }
 
+  Texture<dimensions>& setStorage(GLint levels, TextureFormat internalFormat, const utils::vecTypeFor<dimensions, uint>& size)
+  {
+    AbstractTexture::Helper<dimensions>::setStorage(*this, levels, internalFormat, size);
+    return *this;
+  }
+
   Texture<dimensions>& generateMipMap()
   {
     AbstractTexture::generateMipmap();

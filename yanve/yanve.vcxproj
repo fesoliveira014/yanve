@@ -317,7 +317,7 @@
     <ClCompile Include="src\graphics\gl\state\state.cpp" />
     <ClCompile Include="src\graphics\gl\state\texturestate.cpp" />
     <ClCompile Include="src\graphics\gl\texture.cpp" />
-    <ClCompile Include="src\graphics\renderbuffer.cpp" />
+    <ClCompile Include="src\graphics\gl\renderbuffer.cpp" />
     <ClCompile Include="src\platform\dllmain.cpp" />
     <ClCompile Include="src\utils\clock.cpp" />
     <ClCompile Include="src\utils\logger.cpp" />

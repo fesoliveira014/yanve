@@ -30,6 +30,8 @@
     <None Include="res\shaders\simplevertex.glsl" />
     <None Include="res\shaders\depthvert.glsl" />
     <None Include="res\shaders\depthfrag.glsl" />
+    <None Include="res\shaders\quadvert.glsl" />
+    <None Include="res\shaders\quadfrag.glsl" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stb\stb_image.h">

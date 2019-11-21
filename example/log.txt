@@ -1,14 +1,3 @@
-<16:45:24> - Session Initiated.
+<00:02:32> - Session Initiated.
 
-<16:45:24> [Error] addFile: Could not load shader res/shaders/texturevertex.glsl
-<16:45:24> [Error] link: Error linking program: Vertex info
------------
-(0) : error C5145: must write to gl_Position
-
-
-<16:45:49> - There were 0 warnings and 0 errors.
-
----------------------------------------
-
-
----------------------------------------
+<00:02:32> [Error] TestApp::TestApp: Framebuffer has bad status: 8cd6

@@ -266,7 +266,7 @@
     <ClCompile Include="src\graphics\gl\framebuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\graphics\renderbuffer.cpp">
+    <ClCompile Include="src\graphics\gl\renderbuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
