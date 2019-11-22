@@ -9,5 +9,5 @@ uniform sampler2D texture1;
 
 void main()
 {
-    fragColor = texture(texture1, texCoords);
+    fragColor = vec4(texture2D(texture1, texCoords).rgb, 1.0);
 }

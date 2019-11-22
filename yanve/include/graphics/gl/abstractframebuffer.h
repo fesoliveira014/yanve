@@ -32,7 +32,7 @@ enum class FramebufferBlitFilter : GLenum
 enum class FramebufferTarget : GLenum 
 {
   Read = GL_READ_FRAMEBUFFER,
-  Draw = GL_DRAW_FRAMEBUFFER,
+  Draw = GL_DRAW_FRAMEBUFFER
 };
 
 class YANVE_API AbstractFramebuffer

@@ -75,7 +75,7 @@ public:
     ArmMali = 1 << 7
   };
 
-  explicit Context(DefaultFramebuffer& defaultFramebuffer);
+  explicit Context(/*DefaultFramebuffer& defaultFramebuffer*/);
   explicit Context(NoCreateT);
   //explicit Context(NoCreateT, int argc, char** argv);
   //explicit Context(NoCreateT, std::vector<std::string> args);

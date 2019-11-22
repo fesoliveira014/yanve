@@ -6,6 +6,8 @@
 namespace yanve::gl
 {
 
+DefaultFramebuffer defaultFramebuffer;
+
 DefaultFramebuffer::Status DefaultFramebuffer::checkStatus(FramebufferTarget target)
 {
   return Status(AbstractFramebuffer::checkStatus(target));

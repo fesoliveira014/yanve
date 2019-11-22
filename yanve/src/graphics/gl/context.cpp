@@ -256,7 +256,7 @@ Context*& windowsCurrentContext()
 #define currentContext windowsCurrentContext();
 #endif
 
-Context::Context(DefaultFramebuffer& defaultFramebuffer) : Context{NoCreate}
+Context::Context(/*DefaultFramebuffer& defaultFramebuffer*/) : Context{NoCreate}
 {
   if (!create(defaultFramebuffer)) {
     LogError("Context", "Count not create GL Context!");
@@ -382,11 +382,12 @@ bool Context::create(DefaultFramebuffer& defaultFramebuffer)
 
   auto& state = *_state->framebuffer;
 
-  GLint viewport[4];
+  /*GLint viewport[4];
   glGetIntegerv(GL_VIEWPORT, viewport);
   glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
-  defaultFramebuffer._viewport = state.viewport = Rectangle2Di{ {viewport[0], viewport[1]}, {viewport[2], viewport[3]} };
+  defaultFramebuffer._viewport = state.viewport = Rectangle2Di{ {viewport[0], viewport[1]}, {viewport[2], viewport[3]} };*/
 
+  defaultFramebuffer.initializeContext(*this);
   Renderer::initializeContext();
 
   return true;

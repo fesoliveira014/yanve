@@ -3,7 +3,6 @@
 #include <common.h>
 #include <core/window.h>
 #include <graphics/gl/context.h>
-#include <graphics/gl/defaultframebuffer.h>
 
 namespace yanve
 {
@@ -26,9 +25,8 @@ protected:
   explicit Application() : Application{ "Yanve", 1024, 768 } {}
 
   Window window;
-  gl::DefaultFramebuffer defaultFramebuffer;
+  gl::Context context;
 
 private:
-  gl::Context context;
 };
 }

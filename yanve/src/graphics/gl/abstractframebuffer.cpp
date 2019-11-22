@@ -174,7 +174,7 @@ void AbstractFramebuffer::clearu(const GLenum buffer, const GLint drawBuffer, co
 void AbstractFramebuffer::clearf(const GLenum buffer, const GLint drawBuffer, const GLfloat* const value)
 {
   // TODO: linter is complaining about glClearNamedFramebufferfv pointer argument
-  bindInternal(FramebufferTarget::Read);
+  bindInternal(FramebufferTarget::Draw);
   glClearBufferfv(buffer, drawBuffer, value);
 }
 

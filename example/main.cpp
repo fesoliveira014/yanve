@@ -266,8 +266,9 @@ public:
 
     screenTexture.setMinificationFilter(yanve::gl::SamplerFilter::Linear)
       .setMagnificationFilter(yanve::gl::SamplerFilter::Linear)
-      .setWrapping({ yanve::gl::SamplerWrapping::ClampToEdge })
-      .setStorage(1, yanve::gl::TextureFormat::RGB, { 1024, 1024 });
+      //.setWrapping({ yanve::gl::SamplerWrapping::ClampToEdge, yanve::gl::SamplerWrapping::ClampToEdge })
+      //.setStorage(1, yanve::gl::TextureFormat::RGB, { 1024, 1024 });
+      .setImage(0, yanve::gl::TextureFormat::RGBA8, yanve::gl::PixelFormat::RGBA, yanve::gl::PixelType::UnsignedByte, nullptr, { 1024, 1024 });
 
     yanve::gl::Renderbuffer rb{};
     rb.setStorage(yanve::gl::RenderbufferFormat::Depth24Stencil8, { 1024, 1024 });
@@ -292,6 +293,8 @@ public:
     shaderProgram.setModelMatrix(modelMatrix);
     textureShaderProgram.setModelMatrix(modelMatrix);
     static_cast<void>(quadShaderProgram);
+
+    yanve::gl::defaultFramebuffer.setViewport({ {}, window.size() });
   }
 
   void update() override
@@ -307,7 +310,7 @@ public:
 
     if (input.windowResized()) {
       screenFramebuffer.setViewport({ {}, input.windowSize() });
-      defaultFramebuffer.setViewport({ {}, input.windowSize() });
+      yanve::gl::defaultFramebuffer.setViewport({ {}, input.windowSize() });
       window.resize(input.windowSize());
     }
 
@@ -367,7 +370,7 @@ public:
     screenFramebuffer
       .clear(yanve::gl::FramebufferClearMask::Color | yanve::gl::FramebufferClearMask::Depth)
       .bind();
-    yanve::gl::Renderer::enable(yanve::gl::Renderer::Feature::DepthTest);
+    //yanve::gl::Renderer::enable(yanve::gl::Renderer::Feature::DepthTest);
     if (useTexture) {
       textureShaderProgram.bindTexture(texture);
       mesh.draw(textureShaderProgram);
@@ -376,12 +379,14 @@ public:
       mesh.draw(shaderProgram);
     }
 
-    defaultFramebuffer
+    //glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+
+    yanve::gl::defaultFramebuffer
       .clear(yanve::gl::FramebufferClearMask::Color | yanve::gl::FramebufferClearMask::Depth)
       .bind();
-    /*yanve::gl::Renderer::disable(yanve::gl::Renderer::Feature::DepthTest);
-    quadShaderProgram.bindTexture(screenTexture);
-    quadMesh.draw(quadShaderProgram);*/
+    //yanve::gl::Renderer::disable(yanve::gl::Renderer::Feature::DepthTest);
+    //quadShaderProgram.bindTexture(screenTexture);
+    //quadMesh.draw(quadShaderProgram);
     if (useTexture) {
       textureShaderProgram.bindTexture(screenTexture);
       mesh.draw(textureShaderProgram);
