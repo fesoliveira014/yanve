@@ -12,7 +12,9 @@ AbstractTexture::AbstractTexture(GLenum target) :
   _flags{ObjectFlags::DestroyOnDestruction},
   _target{target}
 {
-  glGenTextures(1, &_id);
+  //glGenTextures(1, &_id);
+  glCreateTextures(target, 1, &_id);
+  _flags |= ObjectFlags::Created;
 }
 
 AbstractTexture::~AbstractTexture()
@@ -63,7 +65,6 @@ void AbstractTexture::bind(GLuint textureUnit)
   if (state.currentTextureUnit != textureUnit)
     glActiveTexture(GL_TEXTURE0 + (state.currentTextureUnit = textureUnit));
   
-  _flags |= ObjectFlags::Created;
   glBindTexture(_target, _id);
 }
 

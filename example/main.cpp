@@ -6,6 +6,29 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb/stb_image.h"
 
+static void openglCallbackFunction(
+  GLenum source,
+  GLenum type,
+  GLuint id,
+  GLenum severity,
+  GLsizei length,
+  const GLchar* message,
+  const void* userParam
+) {
+  static bool nomore = false;
+  (void)source; (void)type; (void)id;
+  (void)severity; (void)length; (void)userParam;
+  if (!nomore) {
+    if (severity == GL_DEBUG_SEVERITY_HIGH) LogError("OpenGL", "%s", message);
+    else LogInfo("OpenGL", "%s", message);
+
+    if (severity == GL_DEBUG_SEVERITY_HIGH) {
+      LogError("OpenGL", "This probably is breaking something.");
+      //nomore = true;
+    }
+  }
+}
+
 class QuadShader : public yanve::gl::ShaderProgram
 {
 
@@ -149,6 +172,15 @@ public:
     yanve::gl::Renderer::setDepthFunction(yanve::gl::Renderer::DepthFunction::Less);
     yanve::gl::Renderer::enable(yanve::gl::Renderer::Feature::DepthTest);
 
+    yanve::gl::Renderer::disable(yanve::gl::Renderer::Feature::Blending);
+
+    /*glEnable(GL_DEBUG_OUTPUT);
+    glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+    glDebugMessageCallback(openglCallbackFunction, nullptr);
+    glDebugMessageControl(
+      GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, NULL, true
+    );*/
+
     quadVertices.push_back(glm::vec3(-1.0,  1.0, 0.0)); quadUV.push_back(glm::vec2(0.0, 1.0));
     quadVertices.push_back(glm::vec3(-1.0, -1.0, 0.0)); quadUV.push_back(glm::vec2(0.0, 0.0));
     quadVertices.push_back(glm::vec3( 1.0,  1.0, 0.0)); quadUV.push_back(glm::vec2(1.0, 1.0));
@@ -253,7 +285,7 @@ public:
     texture.setWrapping({ yanve::gl::SamplerWrapping::Repeat, yanve::gl::SamplerWrapping::Repeat })
       .setMinificationFilter(yanve::gl::SamplerFilter::Linear)
       .setMagnificationFilter(yanve::gl::SamplerFilter::Linear)
-      .setImage(0, yanve::gl::TextureFormat::RGB, yanve::gl::PixelFormat::RGB, yanve::gl::PixelType::UnsignedByte, data, glm::uvec2{ width, height })
+      .setImage(0, yanve::gl::TextureFormat::RGB, yanve::gl::PixelFormat::RGB, yanve::gl::PixelType::UnsignedByte, data, { width, height })
       .generateMipMap();
 
     stbi_image_free(data);
@@ -264,11 +296,10 @@ public:
       .setCount(vertices.size())
       .setIndexBuffer(indexBuffer, 0, yanve::gl::Mesh::MeshIndexType::UnsignedInt);
 
-    screenTexture.setMinificationFilter(yanve::gl::SamplerFilter::Linear)
+    screenTexture.setWrapping({ yanve::gl::SamplerWrapping::ClampToEdge, yanve::gl::SamplerWrapping::ClampToEdge })
+      .setMinificationFilter(yanve::gl::SamplerFilter::Linear)
       .setMagnificationFilter(yanve::gl::SamplerFilter::Linear)
-      //.setWrapping({ yanve::gl::SamplerWrapping::ClampToEdge, yanve::gl::SamplerWrapping::ClampToEdge })
-      //.setStorage(1, yanve::gl::TextureFormat::RGB, { 1024, 1024 });
-      .setImage(0, yanve::gl::TextureFormat::RGBA8, yanve::gl::PixelFormat::RGBA, yanve::gl::PixelType::UnsignedByte, nullptr, { 1024, 1024 });
+      .setStorage(1, yanve::gl::TextureFormat::RGBA8, { 1024, 1024 });
 
     yanve::gl::Renderbuffer rb{};
     rb.setStorage(yanve::gl::RenderbufferFormat::Depth24Stencil8, { 1024, 1024 });
@@ -276,8 +307,9 @@ public:
     renderbuffer = std::move(rb);
 
     yanve::gl::Framebuffer fb{ {{0, 0}, { 1024, 1024 }} };
-    fb.attachTexture(yanve::gl::Framebuffer::BufferAttachment{ yanve::gl::Framebuffer::ColorAttachment{0} }, screenTexture, 0)
-      .attachRenderbuffer(yanve::gl::Framebuffer::BufferAttachment::DepthStencil, renderbuffer);
+    fb.attachTexture(yanve::gl::Framebuffer::ColorAttachment{0}, screenTexture, 0)
+      .attachRenderbuffer(yanve::gl::Framebuffer::BufferAttachment::DepthStencil, renderbuffer)
+      .mapForDraw({ yanve::gl::Framebuffer::ColorAttachment{0} });
 
     auto status = fb.checkStatus(yanve::gl::FramebufferTarget::Draw);
     if (status != yanve::gl::Framebuffer::Status::Complete) {
@@ -327,7 +359,7 @@ public:
     glm::mat4 transform = glm::rotate(modelMatrix, angle, glm::vec3(1.0, 1.0, 0.0));
     shaderProgram.setModelMatrix(transform);
     textureShaderProgram.setModelMatrix(transform);
-    
+
     angle += 0.0001f;
 
     if (angle > 2.0f * glm::pi<float>())
@@ -335,8 +367,6 @@ public:
 
     running = !input.quit();
     frames++;
-
-    //defaultFramebuffer.clear(yanve::gl::FramebufferClearMask::Color | yanve::gl::FramebufferClearMask::Depth);
 
     yanve::GuiManager::beginFrame();
   }
@@ -351,15 +381,6 @@ public:
       ImGui::Checkbox("Enable depth test", &enableDepthTest);
       ImGui::Checkbox("Enable face culling", &enableFaceCulling);
       ImGui::Checkbox("Quad polygon mode", &polygonMode);
-
-      if (ImGui::TreeNode("Screen Texture")) {
-        ImTextureID id = (void*)screenTexture.id();
-        float dim = ImGui::GetWindowWidth() / 2;
-
-        ImVec2 pos = ImGui::GetCursorScreenPos();
-        ImGui::Image(id, ImVec2(dim, dim), ImVec2(0.f, 0.f), ImVec2(1.f, 1.f));
-        ImGui::TreePop();
-      }
       
       ImGui::End();
     }
@@ -367,10 +388,10 @@ public:
 
   void render() override
   {
+    yanve::gl::Renderer::enable(yanve::gl::Renderer::Feature::DepthTest);
     screenFramebuffer
       .clear(yanve::gl::FramebufferClearMask::Color | yanve::gl::FramebufferClearMask::Depth)
       .bind();
-    //yanve::gl::Renderer::enable(yanve::gl::Renderer::Feature::DepthTest);
     if (useTexture) {
       textureShaderProgram.bindTexture(texture);
       mesh.draw(textureShaderProgram);
@@ -379,21 +400,13 @@ public:
       mesh.draw(shaderProgram);
     }
 
-    //glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+    yanve::gl::Renderer::disable(yanve::gl::Renderer::Feature::DepthTest);
 
     yanve::gl::defaultFramebuffer
-      .clear(yanve::gl::FramebufferClearMask::Color | yanve::gl::FramebufferClearMask::Depth)
+      .clear(yanve::gl::FramebufferClearMask::Color)
       .bind();
-    //yanve::gl::Renderer::disable(yanve::gl::Renderer::Feature::DepthTest);
-    //quadShaderProgram.bindTexture(screenTexture);
-    //quadMesh.draw(quadShaderProgram);
-    if (useTexture) {
-      textureShaderProgram.bindTexture(screenTexture);
-      mesh.draw(textureShaderProgram);
-    }
-    else {
-      mesh.draw(shaderProgram);
-    }
+    quadShaderProgram.bindTexture(screenTexture);
+    quadMesh.draw(quadShaderProgram);
 
     updateGui();
     yanve::GuiManager::endFrame();
@@ -448,7 +461,6 @@ protected:
   yanve::gl::Renderbuffer renderbuffer;
   yanve::gl::Framebuffer screenFramebuffer;
 
-  //GLuint shaderProgram;
   TestShader shaderProgram;
   TestTextureShader textureShaderProgram;
   QuadShader quadShaderProgram;
@@ -464,6 +476,6 @@ protected:
 
 int main(int argc, char* argv[])
 {
-  TestApp app{"test", 1024, 768};
+  TestApp app{"test", 512, 512};
   return app.run();
 }

@@ -123,7 +123,7 @@ public:
   Framebuffer& mapForDraw(std::initializer_list<std::pair<uint, DrawAttachment>> attachments);
   Framebuffer& mapForDraw(DrawAttachment attachment);
 
-  Framebuffer& mapForRead(ColorAttachment attachment);
+  Framebuffer& mapForRead(const ColorAttachment attachment);
 
   void invalidate(std::initializer_list<InvalidationAttachment> attachments);
   void invalidate(std::initializer_list<InvalidationAttachment> attachments, const Rectangle2Di& rect);
