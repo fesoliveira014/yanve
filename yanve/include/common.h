@@ -17,13 +17,14 @@
 
 #include <iostream>
 #include <string>
-#include <fstream>
 #include <vector>
 #include <array>
+#include <list>
+#include <unordered_map>
+#include <fstream>
 #include <sstream>
 #include <algorithm>
 #include <memory>
-#include <unordered_map>
 #include <optional>
 
 #include <GL/glew.h>
@@ -31,6 +32,8 @@
 //#ifndef GLEW_STATIC
 //#define GLEW_STATIC
 //#endif
+
+#define GLM_ENABLE_EXPERIMENTAL
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>

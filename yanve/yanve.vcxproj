@@ -277,6 +277,13 @@
     <ClInclude Include="include\graphics\gl\texture.h" />
     <ClInclude Include="include\graphics\gl\textureformat.h" />
     <ClInclude Include="include\graphics\gl\version.h" />
+    <ClInclude Include="include\math\aabb.h" />
+    <ClInclude Include="include\math\angle.h" />
+    <ClInclude Include="include\math\constants.h" />
+    <ClInclude Include="include\scene\abstracttransformation2d.h" />
+    <ClInclude Include="include\scene\abstracttransformation.h" />
+    <ClInclude Include="include\scene\camera.h" />
+    <ClInclude Include="include\scene\scenenode.h" />
     <ClInclude Include="include\utils\clock.h" />
     <ClInclude Include="include\utils\enumoperators.h" />
     <ClInclude Include="include\utils\enumset.h" />
@@ -319,6 +326,7 @@
     <ClCompile Include="src\graphics\gl\texture.cpp" />
     <ClCompile Include="src\graphics\gl\renderbuffer.cpp" />
     <ClCompile Include="src\platform\dllmain.cpp" />
+    <ClCompile Include="src\scene\scenenode.cpp" />
     <ClCompile Include="src\utils\clock.cpp" />
     <ClCompile Include="src\utils\logger.cpp" />
     <ClCompile Include="src\yanve.cpp" />

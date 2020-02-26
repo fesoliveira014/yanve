@@ -78,10 +78,32 @@ void Buffer::bind()
   bindInternal(_target);
 }
 
+Buffer& Buffer::bind(Target target, GLuint index)
+{
+  glBindBufferBase(GLenum(target), index, _id);
+  return *this;
+}
+
+Buffer& Buffer::bind(Target target, GLuint index, GLintptr offset, GLsizeiptr size)
+{
+  glBindBufferRange(GLenum(target), index, _id, offset, size);
+  return *this;
+}
+
 void Buffer::unbind()
 {
   unbindInternal(_target);
 }
+
+void Buffer::unbind(Target target, GLint index)
+{
+  glBindBufferBase(GLenum(target), index, 0);
+}
+
+//void Buffer::unbind(Target target, GLuint index, GLintptr offset, GLsizeiptr size)
+//{
+//  glBindBufferRange(GLenum(target), index, 0, offset, size);
+//}
 
 void Buffer::bindInternal(Target target, Buffer *const buffer)
 {
