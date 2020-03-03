@@ -319,12 +319,17 @@ public:
 
     screenFramebuffer = std::move(fb);
 
+    camera = new yanve::scene::Camera(&scene);
+    camera->translate({ -5.0f, 20.0f, 0.0f });
+    camera->lookAt(glm::vec3(0));
+    
+    scene.update();
+    
     modelMatrix = glm::mat4(1.0f);
     angle = 0.0f;
 
     shaderProgram.setModelMatrix(modelMatrix);
     textureShaderProgram.setModelMatrix(modelMatrix);
-    static_cast<void>(quadShaderProgram);
 
     yanve::gl::defaultFramebuffer.setViewport({ {}, window.size() });
   }
@@ -345,6 +350,42 @@ public:
       yanve::gl::defaultFramebuffer.setViewport({ {}, input.windowSize() });
       window.resize(input.windowSize());
     }
+
+    // forward
+    if (input.pressed(yanve::InputManager::Key::keyW)) {
+
+    }
+    
+    // back
+    if (input.pressed(yanve::InputManager::Key::keyS)) {
+
+    }
+
+    // rotate left
+    if (input.pressed(yanve::InputManager::Key::keyS)) {
+
+    }
+
+    // rotate right
+    if (input.pressed(yanve::InputManager::Key::keyD)) {
+
+    }
+
+    // strafe left
+    if (input.pressed(yanve::InputManager::Key::keyQ)) {
+
+    }
+     
+    // strafe right
+    if (input.pressed(yanve::InputManager::Key::keyE)) {
+
+    }
+
+    if (input.mouseMoved()) {
+
+    }
+
+    scene.update();
 
     if (enableDepthTest != depthTestState) {
       depthTestState = enableDepthTest;
@@ -461,6 +502,9 @@ protected:
   yanve::gl::Renderbuffer renderbuffer;
   yanve::gl::Framebuffer screenFramebuffer;
 
+  yanve::scene::Scene scene;
+  yanve::scene::Camera* camera;
+
   TestShader shaderProgram;
   TestTextureShader textureShaderProgram;
   QuadShader quadShaderProgram;
@@ -472,6 +516,9 @@ protected:
   bool enableDepthTest = false, depthTestState = true;
   bool enableFaceCulling = false, faceCullingState = true;
   bool polygonMode = false;
+
+  float _cameraSpeed = 0.001f;
+  float _cameraRotationSpeed = 0.0001f;
 };
 
 int main(int argc, char* argv[])

@@ -9,10 +9,13 @@ class Scene : public SceneNode
 {
 public:
   explicit Scene() = default;
+  Scene(SceneNode* parent) = delete;
 
   ~Scene();
 
   bool isScene() override { return true; }
+
+private:
 };
 
 }

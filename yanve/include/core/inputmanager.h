@@ -131,6 +131,7 @@ public:
   glm::vec2 YANVE_API windowSize() const { return glm::vec2{ _windowState.width, _windowState.height }; }
   bool YANVE_API pressed(const Key& keyboardKey) { return _keyboardState[keyboardKey].pressed; }
   bool YANVE_API pressed(const Mouse& button) { return _mouseButtonState[button].pressed; }
+  bool YANVE_API mouseMoved() { return _mouseCursorState.dx == _mouseCursorState.dy == 0 ? false : true; }
   glm::vec2 YANVE_API mousePosition() const { return glm::vec2{ _mouseCursorState.x, _mouseCursorState.y }; }
   glm::vec2 YANVE_API mouseDisplacement(const Mouse& button) const { return glm::vec2{ _mouseButtonState[button].x1 - _mouseButtonState[button].x0, _mouseButtonState[button].y1 - _mouseButtonState[button].y0 }; }
   glm::vec2 YANVE_API scroll() const { return _mouseCursorState.scroll; }
@@ -159,6 +160,8 @@ private:
   {
     int x;
     int y;
+    int dx;
+    int dy;
     glm::vec2 scroll = glm::vec2{ 0.0 };
   };
 

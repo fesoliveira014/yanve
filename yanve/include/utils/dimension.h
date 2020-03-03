@@ -17,7 +17,7 @@ struct dimensionsHelper
 template <size_t dimension, typename T>
 struct matrixDimensionsHelper
 {
-  matrixDimensionHelper() = delete;
+  matrixDimensionsHelper() = delete;
 };
 
 template <size_t dimension, typename T> using vecTypeFor = typename dimensionsHelper<dimension, T>::value;

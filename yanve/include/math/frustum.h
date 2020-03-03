@@ -7,7 +7,7 @@
 namespace yanve::math
 {
 
-class Frustum
+class YANVE_API Frustum
 {
 public:
   glm::vec3 getCorner(int corner) const { return _corners[corner]; }

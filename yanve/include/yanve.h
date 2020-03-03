@@ -39,6 +39,18 @@
 #include <graphics/gl/version.h>
 #include <graphics/gl/context.h>
 
+#include <math/constants.h>
+#include <math/angle.h>
+#include <math/aabb.h>
+#include <math/plane.h>
+#include <math/frustum.h>
+
+#include <scene/scenenode.h>
+#include <scene/scene.h>
+#include <scene/camera.h>
+
 #include <utils/logger.h>
 #include <utils/clock.h>
+#include <utils/nocreate.h>
+#include <utils/random.h>
 

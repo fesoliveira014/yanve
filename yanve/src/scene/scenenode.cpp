@@ -26,21 +26,25 @@ SceneNode::SceneNode() :
 
 }
 
-SceneNode::SceneNode(SceneNodePtr parent) :
+SceneNode::SceneNode(SceneNode* parent) :
   SceneNode()
 {
-  _parent = parent;
+  _parent->addChild(this);
 }
 
 SceneNode::~SceneNode() 
 {
+  for (auto& child : _children) {
+    delete child;
+  }
+
   _children.clear();
   _parent = nullptr;
 }
 
 SceneNode& SceneNode::translate(const glm::vec3& translation)
 {
-  _translation = translation;
+  _relativeTransform = glm::translate(_relativeTransform, translation);
   
   markDirty();
 
@@ -51,6 +55,8 @@ SceneNode& SceneNode::rotate(float angle, const glm::vec3& basis)
 {
   glm::vec3 axis = basis * glm::sin(angle * 0.5f);
   _rotation = glm::quat(glm::cos(angle * 0.5f), axis);
+
+  _relativeTransform = glm::toMat4(_rotation) * _relativeTransform;
   
   markDirty();
   
@@ -75,7 +81,8 @@ SceneNode& SceneNode::rotateZ(float angle)
 SceneNode& SceneNode::scale(const glm::vec3& factor)
 {
   _scale = factor;
-  
+  _relativeTransform = glm::scale(_relativeTransform, _scale);
+
   markDirty();
 
   return *this;
@@ -113,12 +120,12 @@ void SceneNode::addChild(SceneNode* node)
   if (!isAttachable())
     return;
 
-  SceneNodePtr newNode{ node };
+  SceneNode* newNode{ node };
   newNode->_id = utils::RandomGenerator::getNextUInt64();
   _children.push_back(std::move(newNode));
 }
 
-bool SceneNode::removeChild(const SceneNodePtr node)
+bool SceneNode::removeChild(const SceneNode* node)
 {
   bool removed = false;
   auto it = std::find(_children.begin(), _children.end(), node);
@@ -137,7 +144,7 @@ bool SceneNode::removeChild(const SceneNodePtr node)
   return removed;
 }
 
-void SceneNode::updateTree()
+void SceneNode::update()
 {
   if (!_dirty) return;
 
@@ -159,9 +166,9 @@ void SceneNode::updateTree()
 
   for (auto& child : _children) {
     if (child != nullptr)
-      child->updateTree();
+      child->update();
     else
-      LogError("SceneNode::updateTree", "null child found, this should be unreachable");
+      LogError("SceneNode::update", "null child found, this should be unreachable");
   }
   onFinishedUpdate();
 }
@@ -170,11 +177,11 @@ void SceneNode::markDirty()
 {
   _dirty = true;
 
-  std::optional<SceneNodeRef> nodeRef = _parent;
-  while (nodeRef.has_value()) {
-    auto& node = nodeRef.value().get();
-    node._dirty = true;
-    nodeRef = node._parent;
+  SceneNode* node = _parent;
+  while (node != nullptr) {
+    node->_dirty = true;
+    node->_transformed = true;
+    node = node->_parent;
   }
 
   markChildrenDirty();
@@ -182,11 +189,11 @@ void SceneNode::markDirty()
 
 void SceneNode::markChildrenDirty()
 {
-  for (auto& childRef : _children) {
-    auto& child = childRef.get();
-    if (!child._dirty) {
-      child._dirty = true;
-      child.markChildrenDirty();
+  for (auto& child : _children) {
+    if (!child->_dirty) {
+      child->_dirty = true;
+      child->_transformed = true;
+      child->markChildrenDirty();
     }
   }
 }

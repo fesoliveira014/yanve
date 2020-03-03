@@ -8,13 +8,13 @@
 
 namespace yanve::scene
 {
-class SceneNode
+class YANVE_API SceneNode
 {
 public:
-  using SceneNodePtr = std::shared_ptr<SceneNode>;
+  //using SceneNode* = std::shared_ptr<SceneNode>;
 
   explicit SceneNode();
-  explicit SceneNode(SceneNodePtr parent);
+  explicit SceneNode(SceneNode* parent);
 
   SceneNode(const SceneNode&) = delete;
   SceneNode(SceneNode&&) = delete;
@@ -37,15 +37,15 @@ public:
   glm::vec3 scale() const { return _scale; }
 
   std::string name() const { return _name; }
-  SceneNode& setName(std::string name) { _name = name; }
+  SceneNode& setName(std::string name) { _name = name; return *this; }
 
-  SceneNodePtr parent() const { return _parent; }
-  std::list<SceneNodePtr>& children() { return _children; }
+  SceneNode* parent() const { return _parent; }
+  std::list<SceneNode*>& children() { return _children; }
 
   void addChild(SceneNode* node);
-  bool removeChild(const SceneNodePtr child);
+  bool removeChild(const SceneNode* child);
 
-  void updateTree();
+  void update();
 
   virtual bool isScene() { return false; }
   virtual bool isAttachable() { return true; }
@@ -69,8 +69,8 @@ protected:
 
   std::string _name;
 
-  SceneNodePtr _parent;
-  std::list<SceneNodePtr> _children;
+  SceneNode* _parent;
+  std::list<SceneNode*> _children;
 
   bool _dirty;
   bool _transformed;

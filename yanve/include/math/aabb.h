@@ -5,7 +5,7 @@
 namespace yanve::math
 {
 
-struct AABB
+struct YANVE_API AABB
 {
   glm::vec3 min, max;
 

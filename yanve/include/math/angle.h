@@ -8,13 +8,13 @@ namespace yanve::math
 {
 
 template <typename T>
-inline T radians(T deg)
+inline YANVE_API T radians(T deg)
 {
   return deg * pi_over_180<T>;
 }
 
 template <typename T>
-inline T degrees(T rad)
+inline YANVE_API T degrees(T rad)
 {
   return rad * one_over_pi_time_180<T>;
 }

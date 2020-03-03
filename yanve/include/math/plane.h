@@ -5,7 +5,7 @@
 namespace yanve::math
 {
 
-struct Plane
+struct YANVE_API Plane
 {
   glm::vec3 normal;
   float scalar;

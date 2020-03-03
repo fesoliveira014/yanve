@@ -36,6 +36,8 @@ InputManager::InputManager()
 
   _mouseCursorState.x = 0;
   _mouseCursorState.y = 0;
+  _mouseCursorState.dx = 0;
+  _mouseCursorState.dy = 0;
   _mouseCursorState.scroll = glm::vec2(0.0);
 
   _windowState.width = 0;
@@ -59,6 +61,8 @@ void InputManager::update()
     button.last = false;
   }
 
+  _mouseCursorState.dx = 0;
+  _mouseCursorState.dy = 0;
   _mouseCursorState.scroll = glm::vec2(0.0);
   _windowState.resized = false;
 
@@ -118,7 +122,7 @@ void InputManager::update()
       break;
     case SDL_MOUSEMOTION:
       if (!_windowState.minimized && _windowState.focus) {
-        mouseMovedEvent(e.motion.x, e.motion.y);
+        mouseMovedEvent(e.motion.x, e.motion.y, e.motion.xrel, e.motion.yrel);
         LogVerbose(LOG_TAG + __func__, "Mouse motion event: (%d,%d)", e.motion.x, e.motion.y);
       }
       break;
@@ -168,6 +172,8 @@ void InputManager::mousePressedEvent(int button, int action)
 
 void InputManager::mouseMovedEvent(int x, int y)
 {
+  _mouseCursorState.dx = _mouseCursorState.x - x;
+  _mouseCursorState.dy = _mouseCursorState.y - y;
   _mouseCursorState.x = x;
   _mouseCursorState.y = y;
 }
