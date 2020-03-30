@@ -11,7 +11,7 @@ public:
   explicit Scene() = default;
   Scene(SceneNode* parent) = delete;
 
-  ~Scene();
+  ~Scene() {};
 
   bool isScene() override { return true; }
 

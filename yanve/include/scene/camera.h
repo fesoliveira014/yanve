@@ -22,6 +22,8 @@ public:
   const glm::mat4& getViewMatrix() const { return _view; }
   const glm::mat4& getProjectionMatrix() const { return _projection; }
   const glm::vec3& getAbsolutePosition() const { return _absPosition; }
+  
+  const glm::vec3& getUp() const { return glm::vec3{  }; }
 
 protected:
   void onPostUpdate() override;

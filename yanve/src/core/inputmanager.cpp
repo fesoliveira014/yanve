@@ -122,14 +122,14 @@ void InputManager::update()
       break;
     case SDL_MOUSEMOTION:
       if (!_windowState.minimized && _windowState.focus) {
-        mouseMovedEvent(e.motion.x, e.motion.y, e.motion.xrel, e.motion.yrel);
-        LogVerbose(LOG_TAG + __func__, "Mouse motion event: (%d,%d)", e.motion.x, e.motion.y);
+        mouseMovedEvent(e.motion.x, e.motion.y);
+        LogVerbose(LOG_TAG + __func__, "MouseButtom motion event: (%d,%d)", e.motion.x, e.motion.y);
       }
       break;
     case SDL_MOUSEWHEEL:
       if (!_windowState.minimized && _windowState.focus) {
         mouseScrolledEvent(e.wheel.x, e.wheel.y);
-        LogVerbose(LOG_TAG + __func__, "Mouse scroll event: (%d,%d)", e.wheel.x, e.wheel.y);
+        LogVerbose(LOG_TAG + __func__, "MouseButtom scroll event: (%d,%d)", e.wheel.x, e.wheel.y);
       }
       break;
     default:
@@ -173,9 +173,10 @@ void InputManager::mousePressedEvent(int button, int action)
 void InputManager::mouseMovedEvent(int x, int y)
 {
   _mouseCursorState.dx = _mouseCursorState.x - x;
-  _mouseCursorState.dy = _mouseCursorState.y - y;
+  _mouseCursorState.dy = y - _mouseCursorState.y;
   _mouseCursorState.x = x;
   _mouseCursorState.y = y;
+  _mouseCursorState.moved = true;
 }
 
 void InputManager::mouseScrolledEvent(int xOffset, int yOffset)

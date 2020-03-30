@@ -2,8 +2,5 @@
 
 namespace yanve::scene
 {
-Scene::~Scene()
-{
-  
-}
+
 }

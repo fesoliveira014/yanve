@@ -22,6 +22,7 @@ public:
   virtual ~SceneNode();
 
   SceneNode& translate(const glm::vec3& translation);
+  SceneNode& rotate(const glm::vec3& euler);
   SceneNode& rotate(float angle, const glm::vec3& basis);
   SceneNode& rotateX(float angle);
   SceneNode& rotateY(float angle);

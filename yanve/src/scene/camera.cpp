@@ -2,6 +2,7 @@
 
 #include <scene/camera.h>
 #include <math/angle.h>
+#include <glm/gtx/quaternion.hpp>
 
 namespace yanve::scene
 {
@@ -17,6 +18,7 @@ Camera::Camera() :
   _orthographic{ false },
   _manualProjection{ false }
 {
+  _name = "camera";
 }
 
 Camera::Camera(SceneNode* parent) : 
@@ -31,6 +33,7 @@ Camera::Camera(SceneNode* parent) :
   _orthographic{ false },
   _manualProjection{ false }
 {
+  _name = "camera";
 }
 
 void Camera::setViewParameters(float fov, float aspect, float nearPlane, float farPlane)
@@ -39,6 +42,16 @@ void Camera::setViewParameters(float fov, float aspect, float nearPlane, float f
   _aspect = aspect;
   _near = nearPlane;
   _far = farPlane;
+
+  float ymax = _near * glm::tan(math::radians(fov));
+  float xmax = ymax * _aspect;
+
+  _frustumLeft = -xmax;
+  _frustumRight = xmax;
+  _frustumBottom = -ymax;
+  _frustumTop = ymax;
+  _frustumNear = nearPlane;
+  _frustumFar = farPlane;
 
   _manualProjection = false;
 
@@ -56,6 +69,9 @@ void Camera::setProjectionMatrix(const glm::mat4& projection)
 void Camera::lookAt(const glm::vec3& position)
 {
   _rotation = glm::quatLookAt(position, _rotation * glm::vec3(0, 1, 0));
+  _relativeTransform = glm::toMat4(_rotation) * _relativeTransform;
+
+  markDirty();
 }
 
 void Camera::onPostUpdate()

@@ -12,11 +12,11 @@ namespace yanve::scene
 {
 
 SceneNode::SceneNode() :
-  _translation{},
-  _rotation{},
-  _scale{},
-  _relativeTransform{},
-  _absoluteTransform{},
+  _translation{glm::vec3(0)},
+  _rotation{ glm::quat(1, 0, 0, 0) },
+  _scale{ glm::vec3{1, 1, 1} },
+  _relativeTransform{ glm::mat4(1) },
+  _absoluteTransform{ glm::mat4(1) },
   _name{},
   _parent{ nullptr },
   _children{},
@@ -29,6 +29,7 @@ SceneNode::SceneNode() :
 SceneNode::SceneNode(SceneNode* parent) :
   SceneNode()
 {
+  _parent = parent;
   _parent->addChild(this);
 }
 
@@ -44,8 +45,23 @@ SceneNode::~SceneNode()
 
 SceneNode& SceneNode::translate(const glm::vec3& translation)
 {
-  _relativeTransform = glm::translate(_relativeTransform, translation);
+  _translation = translation;
+  //glm::mat4 translationM = glm::translate(glm::mat4{ 1 }, translation);
+  //_relativeTransform = translationM * _relativeTransform;
   
+  markDirty();
+
+  return *this;
+}
+
+SceneNode& SceneNode::rotate(const glm::vec3& euler) 
+{
+  glm::quat roll{ cosf(euler.x * 0.5f), sinf(euler.x * 0.5f), 0, 0 };
+  glm::quat pitch{ cosf(euler.y * 0.5f), 0, sinf(euler.y * 0.5f), 0 };
+  glm::quat yaw{ cosf(euler.z * 0.5f), 0, 0, sinf(euler.z * 0.5f) };
+
+  _rotation = pitch * roll * yaw;
+
   markDirty();
 
   return *this;
@@ -56,7 +72,7 @@ SceneNode& SceneNode::rotate(float angle, const glm::vec3& basis)
   glm::vec3 axis = basis * glm::sin(angle * 0.5f);
   _rotation = glm::quat(glm::cos(angle * 0.5f), axis);
 
-  _relativeTransform = glm::toMat4(_rotation) * _relativeTransform;
+  //_relativeTransform = glm::toMat4(_rotation) * _relativeTransform;
   
   markDirty();
   
@@ -81,7 +97,8 @@ SceneNode& SceneNode::rotateZ(float angle)
 SceneNode& SceneNode::scale(const glm::vec3& factor)
 {
   _scale = factor;
-  _relativeTransform = glm::scale(_relativeTransform, _scale);
+  //glm::mat4 scaleM = glm::scale(glm::mat4{ 1 }, _scale);
+  //_relativeTransform = scaleM * _relativeTransform;
 
   markDirty();
 
@@ -103,7 +120,7 @@ void SceneNode::doTransform()
 {
   //glm::mat4 translation = glm::translate(glm::mat4{}, _translation);
   //glm::mat4 rotation = glm::toMat4(_rotation);
-  glm::mat4 scaling = glm::scale(glm::mat4{}, _scale);
+  glm::mat4 scaling = glm::scale(glm::mat4{1.0}, _scale);
 
   glm::mat3 rotation = glm::toMat3(_rotation);
   glm::mat4 rotationTranslation{ glm::vec4{ rotation[0], 0}, 
@@ -111,7 +128,8 @@ void SceneNode::doTransform()
                                  glm::vec4{ rotation[2], 0}, 
                                  glm::vec4{_translation, 1} };
 
-  _relativeTransform = rotationTranslation * scaling;
+  _relativeTransform = scaling;
+  _relativeTransform = rotationTranslation * _relativeTransform;
   _transformed = true;
 }
 
@@ -176,11 +194,12 @@ void SceneNode::update()
 void SceneNode::markDirty()
 {
   _dirty = true;
+  //_transformed = true;
 
   SceneNode* node = _parent;
   while (node != nullptr) {
     node->_dirty = true;
-    node->_transformed = true;
+    //node->_transformed = true;
     node = node->_parent;
   }
 

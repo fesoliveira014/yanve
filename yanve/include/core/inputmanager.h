@@ -103,7 +103,7 @@ public:
     numKeys
   };
 
-  enum YANVE_API Mouse
+  enum YANVE_API MouseButtom
   {
     buttonLeft = SDL_BUTTON_LEFT,
     buttonMiddle = SDL_BUTTON_MIDDLE,
@@ -111,33 +111,6 @@ public:
     numButtons
   };
 
-private:
-  void keyPressedEvent(int key, int action);
-  void mousePressedEvent(int button, int action);
-  void mouseMovedEvent(int x, int y);
-  void mouseScrolledEvent(int xOffset, int yOffset);
-  void resizeEvent(int width, int height);
-  void focusEvent(bool focus);
-  void minimizedEvent(bool minimized);
-
-  friend class Application;
-
-public:
-  void YANVE_API update();
-
-  bool YANVE_API windowResized() { return _windowState.resized; }
-  bool YANVE_API windowMinimized() { return _windowState.minimized; }
-  bool YANVE_API windowFocus() { return _windowState.focus; }
-  glm::vec2 YANVE_API windowSize() const { return glm::vec2{ _windowState.width, _windowState.height }; }
-  bool YANVE_API pressed(const Key& keyboardKey) { return _keyboardState[keyboardKey].pressed; }
-  bool YANVE_API pressed(const Mouse& button) { return _mouseButtonState[button].pressed; }
-  bool YANVE_API mouseMoved() { return _mouseCursorState.dx == _mouseCursorState.dy == 0 ? false : true; }
-  glm::vec2 YANVE_API mousePosition() const { return glm::vec2{ _mouseCursorState.x, _mouseCursorState.y }; }
-  glm::vec2 YANVE_API mouseDisplacement(const Mouse& button) const { return glm::vec2{ _mouseButtonState[button].x1 - _mouseButtonState[button].x0, _mouseButtonState[button].y1 - _mouseButtonState[button].y0 }; }
-  glm::vec2 YANVE_API scroll() const { return _mouseCursorState.scroll; }
-  bool YANVE_API quit() { return _quit; }
-
-private:
   struct KeyState
   {
     bool pressed;
@@ -162,6 +135,7 @@ private:
     int y;
     int dx;
     int dy;
+    bool moved;
     glm::vec2 scroll = glm::vec2{ 0.0 };
   };
 
@@ -173,9 +147,32 @@ private:
     bool minimized;
     bool focus;
   };
+
+private:
+  void keyPressedEvent(int key, int action);
+  void mousePressedEvent(int button, int action);
+  void mouseMovedEvent(int x, int y);
+  void mouseScrolledEvent(int xOffset, int yOffset);
+  void resizeEvent(int width, int height);
+  void focusEvent(bool focus);
+  void minimizedEvent(bool minimized);
+
+  friend class Application;
+
+public:
+  void YANVE_API update();
+
+  const KeyState keyState(Key key) const { return _keyboardState[key]; }
+  const MouseButtonState mouseButtonState(MouseButtom button) const { return _mouseButtonState[button]; }
+  const MouseCursorState mouseCursorState() const { return _mouseCursorState; }
+  const WindowState windowState() const { return _windowState; }
+  bool quit() const { return _quit; }
+
+private:
+  
   
   KeyState _keyboardState[Key::numKeys];
-  MouseButtonState _mouseButtonState[Mouse::numButtons];
+  MouseButtonState _mouseButtonState[MouseButtom::numButtons];
   MouseCursorState _mouseCursorState;
   WindowState _windowState;
   bool _quit;
