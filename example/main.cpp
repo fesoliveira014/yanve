@@ -88,11 +88,25 @@ public:
     link();
 
     _uniforms["model"] = getUniformLocation("model");
+    _uniforms["view"] = getUniformLocation("view");
+    _uniforms["projection"] = getUniformLocation("projection");
   }
 
   TestShader& setModelMatrix(const glm::mat4& model)
   {
     setUniform("model", model);
+    return *this;
+  }
+
+  TestShader& setViewMatrix(const glm::mat4& view)
+  {
+    setUniform("view", view);
+    return *this;
+  }
+
+  TestShader& setProjectionMatrix(const glm::mat4& projection)
+  {
+    setUniform("projection", projection);
     return *this;
   }
 };
@@ -120,6 +134,8 @@ public:
     link();
 
     _uniforms["model"] = getUniformLocation("model");
+    _uniforms["view"] = getUniformLocation("view");
+    _uniforms["projection"] = getUniformLocation("projection");
     _uniforms["texture1"] = getUniformLocation("texture1");
 
     setUniform("texture1", (int)TextureUnit);
@@ -128,6 +144,18 @@ public:
   TestTextureShader& setModelMatrix(const glm::mat4& model)
   {
     setUniform("model", model);
+    return *this;
+  }
+
+  TestTextureShader& setViewMatrix(const glm::mat4& view)
+  {
+    setUniform("view", view);
+    return *this;
+  }
+
+  TestTextureShader& setProjectionMatrix(const glm::mat4& projection)
+  {
+    setUniform("projection", projection);
     return *this;
   }
 
@@ -149,14 +177,20 @@ public:
     deltaTimer{},
     clock{},
     mesh{yanve::gl::MeshPrimitive::Triangles},
+    cube2{ yanve::gl::MeshPrimitive::Triangles },
     shaderProgram{},
     textureShaderProgram{},
     quadShaderProgram{},
     texture{},
     screenTexture{},
     screenFramebuffer{yanve::NoCreate},
-    framesPerSec{0},
-    frames{0}
+    framesPerSec{ 0 },
+    frames{ 0 },
+    cameraPosition{ 0 },
+    cameraRotation{ 0 },
+    cameraForward{ 0 },
+    cameraUp{ 0 },
+    cameraRight{ 0 }
   { 
     
   }
@@ -296,6 +330,12 @@ public:
       .setCount(vertices.size())
       .setIndexBuffer(indexBuffer, 0, yanve::gl::Mesh::MeshIndexType::UnsignedInt);
 
+    cube2.addBuffer(vertexBuffer, 0, TestShader::Position{})
+      .addBuffer(colorBuffer, 0, TestShader::Color{})
+      .addBuffer(texBuffer, 0, TestTextureShader::UV{})
+      .setCount(vertices.size())
+      .setIndexBuffer(indexBuffer, 0, yanve::gl::Mesh::MeshIndexType::UnsignedInt);
+
     screenTexture.setWrapping({ yanve::gl::SamplerWrapping::ClampToEdge, yanve::gl::SamplerWrapping::ClampToEdge })
       .setMinificationFilter(yanve::gl::SamplerFilter::Linear)
       .setMagnificationFilter(yanve::gl::SamplerFilter::Linear)
@@ -319,12 +359,29 @@ public:
 
     screenFramebuffer = std::move(fb);
 
+    auto& input = yanve::InputManager::instance();
+    glm::vec2 windowSize = glm::vec2(input.windowState().width, input.windowState().height);
+
+    scene = new yanve::scene::Scene();
+
+    camera = new yanve::scene::Camera(scene);
+    camera->setViewParameters(45.0,  windowSize.x / windowSize.y, 0.1f, 1000.f);
+    camera->translate({ 0, 0, 10 });
+    camera->rotate({ 0, 0, 0 });
+
+    scene->update();
+
+    cameraUp = camera->up();
+    cameraForward = camera->forward();
+    cameraRight = camera->right();
+    cameraPosition = camera->absolutePosition();
+    //cameraRotation = glm::eulerAngles(camera->rotation());
+    
     modelMatrix = glm::mat4(1.0f);
     angle = 0.0f;
 
     shaderProgram.setModelMatrix(modelMatrix);
     textureShaderProgram.setModelMatrix(modelMatrix);
-    static_cast<void>(quadShaderProgram);
 
     yanve::gl::defaultFramebuffer.setViewport({ {}, window.size() });
   }
@@ -340,11 +397,77 @@ public:
     auto& input = yanve::InputManager::instance();
     input.update();
 
-    if (input.windowResized()) {
-      screenFramebuffer.setViewport({ {}, input.windowSize() });
-      yanve::gl::defaultFramebuffer.setViewport({ {}, input.windowSize() });
-      window.resize(input.windowSize());
+    if (input.windowState().resized) {
+      glm::vec2 windowSize{ input.windowState().width, input.windowState().height };
+      screenFramebuffer.setViewport({ {}, windowSize });
+      yanve::gl::defaultFramebuffer.setViewport({ {}, windowSize });
+      window.resize(windowSize);
+      camera->setViewParameters(45.0, windowSize.x / windowSize.y, 0.1f, 1000.f);
     }
+
+    if (input.mouseButtonState(yanve::InputManager::MouseButtom::buttonRight).pressed && 
+        input.mouseCursorState().moved) {
+      glm::vec2 dmouse{ input.mouseCursorState().dx, input.mouseCursorState().dy };
+
+      // Look left/right
+      cameraRotation.y += dmouse.x * cameraRotationSpeed;
+
+      // Loop up/down but only in a limited range
+      cameraRotation.x -= dmouse.y * cameraRotationSpeed;
+      if (cameraRotation.x > 90)  cameraRotation.x = 90;
+      if (cameraRotation.x < -90) cameraRotation.x = -90;
+    }
+
+    float speed = cameraSpeed / framesPerSec;
+    float pitch = yanve::math::radians(cameraRotation.x);
+    float yaw = yanve::math::radians(cameraRotation.y);
+
+    // forward
+    if (input.keyState(yanve::InputManager::Key::keyW).pressed) {
+      cameraPosition.x -= sinf(yaw) * cosf(-pitch) * speed;
+      cameraPosition.y -= sinf(-pitch) * speed;
+      cameraPosition.z -= cosf(yaw) * cosf(-pitch) * speed;
+    }
+    
+    // back
+    if (input.keyState(yanve::InputManager::Key::keyS).pressed) {
+      cameraPosition.x += sinf(yaw) * cosf(-pitch) * speed;
+      cameraPosition.y += sinf(-pitch) * speed;
+      cameraPosition.z += cosf(yaw) * cosf(-pitch) * speed;
+    }
+
+    // rotate left
+    if (input.keyState(yanve::InputManager::Key::keyA).pressed) {
+      cameraPosition.x += sinf(yanve::math::radians(cameraRotation.y - 90)) * speed;
+      cameraPosition.z += cosf(yanve::math::radians(cameraRotation.y - 90)) * speed;
+    }
+
+    // rotate right
+    if (input.keyState(yanve::InputManager::Key::keyD).pressed) {
+      cameraPosition.x += sinf(yanve::math::radians(cameraRotation.y + 90)) * speed;
+      cameraPosition.z += cosf(yanve::math::radians(cameraRotation.y + 90)) * speed;
+    }
+
+    // strafe left
+    if (input.keyState(yanve::InputManager::Key::keyQ).pressed) {
+      
+    }
+     
+    // strafe right
+    if (input.keyState(yanve::InputManager::Key::keyE).pressed) {
+      
+    }
+
+    camera->translate(cameraPosition);
+    camera->rotate(cameraRotation);
+
+    scene->update();
+
+    cameraUp = camera->up();
+    cameraForward = camera->forward();
+    cameraRight = camera->right();
+    cameraPosition = camera->absolutePosition();
+    //cameraRotation = glm::eulerAngles(camera->rotation());
 
     if (enableDepthTest != depthTestState) {
       depthTestState = enableDepthTest;
@@ -357,8 +480,16 @@ public:
     }
 
     glm::mat4 transform = glm::rotate(modelMatrix, angle, glm::vec3(1.0, 1.0, 0.0));
+    glm::mat4 view = camera->view();
+    glm::mat4 projection = camera->projection();
+
     shaderProgram.setModelMatrix(transform);
+    shaderProgram.setViewMatrix(view);
+    shaderProgram.setProjectionMatrix(projection);
+
     textureShaderProgram.setModelMatrix(transform);
+    textureShaderProgram.setViewMatrix(view);
+    textureShaderProgram.setProjectionMatrix(projection);
 
     angle += 0.0001f;
 
@@ -381,6 +512,17 @@ public:
       ImGui::Checkbox("Enable depth test", &enableDepthTest);
       ImGui::Checkbox("Enable face culling", &enableFaceCulling);
       ImGui::Checkbox("Quad polygon mode", &polygonMode);
+
+      if (ImGui::CollapsingHeader("Camera")) {
+        ImGui::Text("Camera pos: (%.2f, %.2f, %.2f)", cameraPosition.x, cameraPosition.y, cameraPosition.z);
+        ImGui::Text("Camera angles: (%.2f, %.2f, %.2f)", cameraRotation.x, cameraRotation.y, cameraRotation.z);
+        ImGui::SliderFloat("Camera speed", &cameraSpeed, 5.0f, 20.0f, "%.2f", 0.5f);
+        ImGui::SliderFloat("Camera rotation speed", &cameraRotationSpeed, 0.001f, 0.1f, "%.4f", 0.005f);
+        if (ImGui::Button("Reset Camera")) {
+          cameraPosition = glm::vec3{ 0, 0, 10 };
+          cameraRotation = glm::vec3{ 0 };
+        }
+      }
       
       ImGui::End();
     }
@@ -454,12 +596,16 @@ protected:
   yanve::gl::Buffer quadTexBuffer;
 
   yanve::gl::Mesh mesh;
+  yanve::gl::Mesh cube2;
   yanve::gl::Mesh quadMesh;
   yanve::gl::Texture2D texture;
   yanve::gl::Texture2D screenTexture;
   
   yanve::gl::Renderbuffer renderbuffer;
   yanve::gl::Framebuffer screenFramebuffer;
+
+  yanve::scene::Scene* scene;
+  yanve::scene::Camera* camera;
 
   TestShader shaderProgram;
   TestTextureShader textureShaderProgram;
@@ -472,10 +618,19 @@ protected:
   bool enableDepthTest = false, depthTestState = true;
   bool enableFaceCulling = false, faceCullingState = true;
   bool polygonMode = false;
+
+  float cameraSpeed = 10.f;
+  float cameraRotationSpeed = .3f;
+  glm::vec3 cameraPosition;
+  glm::vec3 cameraRotation;
+  glm::vec3 cameraUp;
+  glm::vec3 cameraForward;
+  glm::vec3 cameraRight;
+  bool resetCamera = false;
 };
 
 int main(int argc, char* argv[])
 {
-  TestApp app{"test", 512, 512};
+  TestApp app{"test", 1000, 1000};
   return app.run();
 }

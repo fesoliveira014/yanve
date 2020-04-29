@@ -14,7 +14,14 @@ struct dimensionsHelper
   dimensionsHelper() = delete;
 };
 
+template <size_t dimension, typename T>
+struct matrixDimensionsHelper
+{
+  matrixDimensionsHelper() = delete;
+};
+
 template <size_t dimension, typename T> using vecTypeFor = typename dimensionsHelper<dimension, T>::value;
+template <size_t dimension, typename T> using matTypeFor = typename matrixDimensionsHelper<dimension, T>::value;
 
 template <>
 struct dimensionsHelper<1, uint>
@@ -78,4 +85,66 @@ struct dimensionsHelper<3, f32>
   typedef glm::vec3 value;
 };
 
+template <>
+struct matrixDimensionsHelper<2, uint>
+{
+  matrixDimensionsHelper() = delete;
+  typedef glm::mat<2, 2, glm::u32> value;
+};
+
+template <>
+struct matrixDimensionsHelper<2, i32>
+{
+  matrixDimensionsHelper() = delete;
+  typedef glm::mat<2, 2, glm::i32> value;
+};
+
+template <>
+struct matrixDimensionsHelper<2, f32>
+{
+  matrixDimensionsHelper() = delete;
+  typedef glm::mat<2, 2, glm::f32> value;
+};
+
+template <>
+struct matrixDimensionsHelper<3, uint>
+{
+  matrixDimensionsHelper() = delete;
+  typedef glm::mat<3, 3, glm::u32> value;
+};
+
+template <>
+struct matrixDimensionsHelper<3, i32>
+{
+  matrixDimensionsHelper() = delete;
+  typedef glm::mat<3, 3, glm::i32> value;
+};
+
+template <>
+struct matrixDimensionsHelper<3, f32>
+{
+  matrixDimensionsHelper() = delete;
+  typedef glm::mat<3, 3, glm::f32> value;
+};
+
+template <>
+struct matrixDimensionsHelper<4, uint>
+{
+  matrixDimensionsHelper() = delete;
+  typedef glm::mat<4, 4, glm::u32> value;
+};
+
+template <>
+struct matrixDimensionsHelper<4, i32>
+{
+  matrixDimensionsHelper() = delete;
+  typedef glm::mat<4, 4, glm::i32> value;
+};
+
+template <>
+struct matrixDimensionsHelper<4, f32>
+{
+  matrixDimensionsHelper() = delete;
+  typedef glm::mat<4, 4, glm::f32> value;
+};
 }

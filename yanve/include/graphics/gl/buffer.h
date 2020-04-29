@@ -79,8 +79,14 @@ public:
   void getData(size_t size, void* data);
   void getSubData(size_t offset, size_t size, void* data);
 
+  
   void bind();
+  Buffer& bind(Target target, GLuint index);
+  Buffer& bind(Target target, GLuint index, GLintptr offset, GLsizeiptr size);
+
   void unbind();
+  void unbind(Target target, GLint index);
+  //void unbind(Target target, GLuint index, GLintptr offset, GLsizeiptr size);
 
   GLuint id() const { return _id; }
   Target target() const { return _target; }
@@ -94,8 +100,7 @@ protected:
   static void bindInternal(Target target, Buffer *const buffer);
   static void unbindInternal(Target target) { bindInternal(target, nullptr); };
   void bindInternal(Target target) { bindInternal(target, this); }
-
-  
+ 
   GLuint _id;
   Target _target;
   size_t _size;

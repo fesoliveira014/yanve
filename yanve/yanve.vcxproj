@@ -134,7 +134,7 @@
       <Optimization>Disabled</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>NDEBUG;YANVE_TARGET_WINDOWS;YANVE_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>YANVE_DEBUG;NDEBUG;YANVE_TARGET_WINDOWS;YANVE_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <ObjectFileName>$(IntDir)%(RelativeDir)\</ObjectFileName>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -277,12 +277,24 @@
     <ClInclude Include="include\graphics\gl\texture.h" />
     <ClInclude Include="include\graphics\gl\textureformat.h" />
     <ClInclude Include="include\graphics\gl\version.h" />
+    <ClInclude Include="include\math\aabb.h" />
+    <ClInclude Include="include\math\angle.h" />
+    <ClInclude Include="include\math\constants.h" />
+    <ClInclude Include="include\math\frustum.h" />
+    <ClInclude Include="include\math\plane.h" />
+    <ClInclude Include="include\scene\abstracttransformation2d.h" />
+    <ClInclude Include="include\scene\abstracttransformation.h" />
+    <ClInclude Include="include\scene\camera.h" />
+    <ClInclude Include="include\scene\scene.h" />
+    <ClInclude Include="include\scene\scenemanager.h" />
+    <ClInclude Include="include\scene\scenenode.h" />
     <ClInclude Include="include\utils\clock.h" />
     <ClInclude Include="include\utils\enumoperators.h" />
     <ClInclude Include="include\utils\enumset.h" />
     <ClInclude Include="include\utils\mesh\interleave.h" />
     <ClInclude Include="include\utils\misc.h" />
     <ClInclude Include="include\utils\nocreate.h" />
+    <ClInclude Include="include\utils\random.h" />
     <ClInclude Include="include\yanve.h" />
     <ClInclude Include="include\platform\targetver.h" />
     <ClInclude Include="include\utils\dimension.h" />
@@ -318,7 +330,11 @@
     <ClCompile Include="src\graphics\gl\state\texturestate.cpp" />
     <ClCompile Include="src\graphics\gl\texture.cpp" />
     <ClCompile Include="src\graphics\gl\renderbuffer.cpp" />
+    <ClCompile Include="src\math\frustum.cpp" />
     <ClCompile Include="src\platform\dllmain.cpp" />
+    <ClCompile Include="src\scene\camera.cpp" />
+    <ClCompile Include="src\scene\scene.cpp" />
+    <ClCompile Include="src\scene\scenenode.cpp" />
     <ClCompile Include="src\utils\clock.cpp" />
     <ClCompile Include="src\utils\logger.cpp" />
     <ClCompile Include="src\yanve.cpp" />
