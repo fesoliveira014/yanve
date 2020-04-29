@@ -54,8 +54,9 @@ SceneNode& SceneNode::translate(const glm::vec3& translation)
   return *this;
 }
 
-SceneNode& SceneNode::rotate(const glm::vec3& euler) 
+SceneNode& SceneNode::rotate(const glm::vec3& angles) 
 {
+  glm::vec3 euler = angles * math::pi_over_180<float>;
   glm::quat roll{ cosf(euler.x * 0.5f), sinf(euler.x * 0.5f), 0, 0 };
   glm::quat pitch{ cosf(euler.y * 0.5f), 0, sinf(euler.y * 0.5f), 0 };
   glm::quat yaw{ cosf(euler.z * 0.5f), 0, 0, sinf(euler.z * 0.5f) };

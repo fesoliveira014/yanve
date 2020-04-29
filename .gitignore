@@ -14,7 +14,7 @@
 *.user
 *.userosscache
 *.sln.docstates
-log.txt
+**/log.txt
 imgui.ini
 packages.config
 

@@ -177,16 +177,20 @@ public:
     deltaTimer{},
     clock{},
     mesh{yanve::gl::MeshPrimitive::Triangles},
+    cube2{ yanve::gl::MeshPrimitive::Triangles },
     shaderProgram{},
     textureShaderProgram{},
     quadShaderProgram{},
     texture{},
     screenTexture{},
     screenFramebuffer{yanve::NoCreate},
-    framesPerSec{0},
-    frames{0},
+    framesPerSec{ 0 },
+    frames{ 0 },
     cameraPosition{ 0 },
-    cameraRotation{ 0 }
+    cameraRotation{ 0 },
+    cameraForward{ 0 },
+    cameraUp{ 0 },
+    cameraRight{ 0 }
   { 
     
   }
@@ -326,6 +330,12 @@ public:
       .setCount(vertices.size())
       .setIndexBuffer(indexBuffer, 0, yanve::gl::Mesh::MeshIndexType::UnsignedInt);
 
+    cube2.addBuffer(vertexBuffer, 0, TestShader::Position{})
+      .addBuffer(colorBuffer, 0, TestShader::Color{})
+      .addBuffer(texBuffer, 0, TestTextureShader::UV{})
+      .setCount(vertices.size())
+      .setIndexBuffer(indexBuffer, 0, yanve::gl::Mesh::MeshIndexType::UnsignedInt);
+
     screenTexture.setWrapping({ yanve::gl::SamplerWrapping::ClampToEdge, yanve::gl::SamplerWrapping::ClampToEdge })
       .setMinificationFilter(yanve::gl::SamplerFilter::Linear)
       .setMagnificationFilter(yanve::gl::SamplerFilter::Linear)
@@ -357,8 +367,15 @@ public:
     camera = new yanve::scene::Camera(scene);
     camera->setViewParameters(45.0,  windowSize.x / windowSize.y, 0.1f, 1000.f);
     camera->translate({ 0, 0, 10 });
+    camera->rotate({ 0, 0, 0 });
 
     scene->update();
+
+    cameraUp = camera->up();
+    cameraForward = camera->forward();
+    cameraRight = camera->right();
+    cameraPosition = camera->absolutePosition();
+    //cameraRotation = glm::eulerAngles(camera->rotation());
     
     modelMatrix = glm::mat4(1.0f);
     angle = 0.0f;
@@ -367,8 +384,6 @@ public:
     textureShaderProgram.setModelMatrix(modelMatrix);
 
     yanve::gl::defaultFramebuffer.setViewport({ {}, window.size() });
-
-    cameraPosition = camera->getAbsolutePosition();
   }
 
   void update() override
@@ -387,28 +402,50 @@ public:
       screenFramebuffer.setViewport({ {}, windowSize });
       yanve::gl::defaultFramebuffer.setViewport({ {}, windowSize });
       window.resize(windowSize);
+      camera->setViewParameters(45.0, windowSize.x / windowSize.y, 0.1f, 1000.f);
+    }
+
+    if (input.mouseButtonState(yanve::InputManager::MouseButtom::buttonRight).pressed && 
+        input.mouseCursorState().moved) {
+      glm::vec2 dmouse{ input.mouseCursorState().dx, input.mouseCursorState().dy };
+
+      // Look left/right
+      cameraRotation.y += dmouse.x * cameraRotationSpeed;
+
+      // Loop up/down but only in a limited range
+      cameraRotation.x -= dmouse.y * cameraRotationSpeed;
+      if (cameraRotation.x > 90)  cameraRotation.x = 90;
+      if (cameraRotation.x < -90) cameraRotation.x = -90;
     }
 
     float speed = cameraSpeed / framesPerSec;
+    float pitch = yanve::math::radians(cameraRotation.x);
+    float yaw = yanve::math::radians(cameraRotation.y);
 
     // forward
     if (input.keyState(yanve::InputManager::Key::keyW).pressed) {
-      cameraPosition -= glm::vec3(0, 0, 1) * speed;
+      cameraPosition.x -= sinf(yaw) * cosf(-pitch) * speed;
+      cameraPosition.y -= sinf(-pitch) * speed;
+      cameraPosition.z -= cosf(yaw) * cosf(-pitch) * speed;
     }
     
     // back
     if (input.keyState(yanve::InputManager::Key::keyS).pressed) {
-      cameraPosition += glm::vec3(0, 0, 1) * speed;
+      cameraPosition.x += sinf(yaw) * cosf(-pitch) * speed;
+      cameraPosition.y += sinf(-pitch) * speed;
+      cameraPosition.z += cosf(yaw) * cosf(-pitch) * speed;
     }
 
     // rotate left
     if (input.keyState(yanve::InputManager::Key::keyA).pressed) {
-      cameraPosition -= glm::vec3(1, 0, 0) * speed;
+      cameraPosition.x += sinf(yanve::math::radians(cameraRotation.y - 90)) * speed;
+      cameraPosition.z += cosf(yanve::math::radians(cameraRotation.y - 90)) * speed;
     }
 
     // rotate right
     if (input.keyState(yanve::InputManager::Key::keyD).pressed) {
-      cameraPosition += glm::vec3(1, 0, 0) * speed;
+      cameraPosition.x += sinf(yanve::math::radians(cameraRotation.y + 90)) * speed;
+      cameraPosition.z += cosf(yanve::math::radians(cameraRotation.y + 90)) * speed;
     }
 
     // strafe left
@@ -421,23 +458,16 @@ public:
       
     }
 
-    if (input.mouseButtonState(yanve::InputManager::MouseButtom::buttonRight).pressed && input.mouseCursorState().moved) {
-      glm::vec2 dmouse{ input.mouseCursorState().dx, input.mouseCursorState().dy };
-      // Look left/right
-      cameraRotation.y += dmouse.x * cameraRotationSpeed;
-
-      // Loop up/down but only in a limited range
-      cameraRotation.x -= dmouse.y * cameraRotationSpeed;
-      if (cameraRotation.x > 90)  cameraRotation.x = 90;
-      if (cameraRotation.x < -90) cameraRotation.x = -90;
-    }
-
     camera->translate(cameraPosition);
     camera->rotate(cameraRotation);
 
     scene->update();
 
-    cameraUp = camera->getUp();
+    cameraUp = camera->up();
+    cameraForward = camera->forward();
+    cameraRight = camera->right();
+    cameraPosition = camera->absolutePosition();
+    //cameraRotation = glm::eulerAngles(camera->rotation());
 
     if (enableDepthTest != depthTestState) {
       depthTestState = enableDepthTest;
@@ -450,8 +480,8 @@ public:
     }
 
     glm::mat4 transform = glm::rotate(modelMatrix, angle, glm::vec3(1.0, 1.0, 0.0));
-    glm::mat4 view = camera->getViewMatrix();
-    glm::mat4 projection = camera->getProjectionMatrix();
+    glm::mat4 view = camera->view();
+    glm::mat4 projection = camera->projection();
 
     shaderProgram.setModelMatrix(transform);
     shaderProgram.setViewMatrix(view);
@@ -484,10 +514,10 @@ public:
       ImGui::Checkbox("Quad polygon mode", &polygonMode);
 
       if (ImGui::CollapsingHeader("Camera")) {
-        glm::vec3 cameraPos = camera->getAbsolutePosition();
-        ImGui::Text("Camera pos: (%.2f, %.2f, %.2f)", cameraPos.x, cameraPos.y, cameraPos.z);
+        ImGui::Text("Camera pos: (%.2f, %.2f, %.2f)", cameraPosition.x, cameraPosition.y, cameraPosition.z);
+        ImGui::Text("Camera angles: (%.2f, %.2f, %.2f)", cameraRotation.x, cameraRotation.y, cameraRotation.z);
         ImGui::SliderFloat("Camera speed", &cameraSpeed, 5.0f, 20.0f, "%.2f", 0.5f);
-        ImGui::SliderFloat("Camera rotation speed", &cameraRotationSpeed, 0.0001f, 0.1f, "%.4f", 0.0005f);
+        ImGui::SliderFloat("Camera rotation speed", &cameraRotationSpeed, 0.001f, 0.1f, "%.4f", 0.005f);
         if (ImGui::Button("Reset Camera")) {
           cameraPosition = glm::vec3{ 0, 0, 10 };
           cameraRotation = glm::vec3{ 0 };
@@ -566,6 +596,7 @@ protected:
   yanve::gl::Buffer quadTexBuffer;
 
   yanve::gl::Mesh mesh;
+  yanve::gl::Mesh cube2;
   yanve::gl::Mesh quadMesh;
   yanve::gl::Texture2D texture;
   yanve::gl::Texture2D screenTexture;
@@ -589,11 +620,12 @@ protected:
   bool polygonMode = false;
 
   float cameraSpeed = 10.f;
-  float cameraRotationSpeed = .01f;
+  float cameraRotationSpeed = .3f;
   glm::vec3 cameraPosition;
   glm::vec3 cameraRotation;
   glm::vec3 cameraUp;
   glm::vec3 cameraForward;
+  glm::vec3 cameraRight;
   bool resetCamera = false;
 };
 

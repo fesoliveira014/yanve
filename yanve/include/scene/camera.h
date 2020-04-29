@@ -18,12 +18,22 @@ public:
   void setProjectionMatrix(const glm::mat4& projection);
   void lookAt(const glm::vec3& position);
 
-  const math::Frustum& getFrustum() const { return _frustum; }
-  const glm::mat4& getViewMatrix() const { return _view; }
-  const glm::mat4& getProjectionMatrix() const { return _projection; }
-  const glm::vec3& getAbsolutePosition() const { return _absPosition; }
+  const math::Frustum& frustum() const { return _frustum; }
+  const glm::mat4& view() const { return _view; }
+  const glm::mat4& projection() const { return _projection; }
+  const glm::vec3& absolutePosition() const { return _absPosition; }
   
-  const glm::vec3& getUp() const { return glm::vec3{  }; }
+  const glm::vec3& right() const { 
+    return glm::conjugate(_rotation) * glm::vec3(1.0f, 0.0f, 0.0f);
+  }
+  
+  const glm::vec3& up() const { 
+    return glm::conjugate(_rotation) * glm::vec3(0.0f, 1.0f, 0.0f);
+  }
+
+  const glm::vec3& forward() const { 
+    return glm::conjugate(_rotation) * glm::vec3(0.0, 0.0f, -1.0f);
+  }
 
 protected:
   void onPostUpdate() override;
