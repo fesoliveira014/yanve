@@ -1,22 +1,17 @@
 #pragma once
 
 #include <common.h>
-#include <utils/enumoperators.h>
+#include <utils/enumset.h>
 
 namespace yanve::gl
 {
-enum ObjectFlags : uint32_t
+enum class ObjectFlag : uint32_t
 {
   Created = 1 << 0,
   DestroyOnDestruction = 1 << 1
 };
 
-
-
-//inline ObjectFlags operator |(ObjectFlags a, ObjectFlags b) { return static_cast<ObjectFlags>(static_cast<uint32_t>(a) | static_cast<uint32_t>(b)); }
-//inline ObjectFlags operator &(ObjectFlags a, ObjectFlags b) { return static_cast<ObjectFlags>(static_cast<uint32_t>(a) & static_cast<uint32_t>(b)); }
-//inline ObjectFlags& operator |=(ObjectFlags& a, ObjectFlags b) { return a = a | b; }
-//inline ObjectFlags& operator &=(ObjectFlags& a, ObjectFlags b) { return a = a | b; }
+typedef EnumSet <ObjectFlag> ObjectFlags;
 
 class YANVE_API GLObject
 {
@@ -26,6 +21,6 @@ public:
 
 };
 
-ENUM_OPERATORS(ObjectFlags, uint32_t)
+ENUMSET_OPERATORS(ObjectFlags)
 
 }

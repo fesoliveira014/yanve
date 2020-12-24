@@ -6,11 +6,22 @@
 namespace yanve::scene
 {
 
+struct YANVE_API CameraData : SceneNodeData
+{
+  float fov, aspect, nearPlane, farPlane;
+  bool orthographic;
+
+  CameraData(const std::string& name) :
+    SceneNodeData{SceneNodeType::Camera, name},
+    fov{45.0}, aspect{4.0f/3.0f}, nearPlane{0.1f}, farPlane{100.0f}, orthographic{ false } 
+  {
+  }
+};
+
 class YANVE_API Camera : public SceneNode
 {
 public:
-  explicit Camera();
-  explicit Camera(SceneNode* parent);
+  explicit Camera(const CameraData& data);
 
   bool isAttachable() override { return false; }
 

@@ -29,14 +29,14 @@ static void openglCallbackFunction(
   }
 }
 
-class QuadShader : public yanve::gl::ShaderProgram
+class QuadShader : public yanve::gl::ShaderPipeline
 {
 
 public:
   typedef yanve::gl::Attribute<0, glm::vec3> Position;
   typedef yanve::gl::Attribute<1, glm::vec2> UV;
 
-  QuadShader() : ShaderProgram{}
+  QuadShader() : ShaderPipeline{}
   {
     yanve::gl::Shader vertex(yanve::gl::Shader::Type::Vertex);
     yanve::gl::Shader fragment(yanve::gl::Shader::Type::Fragment);
@@ -65,14 +65,14 @@ private:
 
 };
 
-class TestShader : public yanve::gl::ShaderProgram
+class TestShader : public yanve::gl::ShaderPipeline
 {
 
 public:
   typedef yanve::gl::Attribute<0, glm::vec3> Position;
   typedef yanve::gl::Attribute<1, glm::vec4> Color;
 
-  TestShader() : ShaderProgram()
+  TestShader() : ShaderPipeline()
   {
     yanve::gl::Shader vertex(yanve::gl::Shader::Type::Vertex);
     yanve::gl::Shader fragment(yanve::gl::Shader::Type::Fragment);
@@ -111,14 +111,14 @@ public:
   }
 };
 
-class TestTextureShader : public yanve::gl::ShaderProgram
+class TestTextureShader : public yanve::gl::ShaderPipeline
 {
 public:
   typedef yanve::gl::Attribute<0, glm::vec3> Position;
   typedef yanve::gl::Attribute<1, glm::vec4> Color;
   typedef yanve::gl::Attribute<2, glm::vec2> UV;
 
-  TestTextureShader() : ShaderProgram()
+  TestTextureShader() : ShaderPipeline()
   {
     yanve::gl::Shader vertex(yanve::gl::Shader::Type::Vertex);
     yanve::gl::Shader fragment(yanve::gl::Shader::Type::Fragment);
@@ -292,6 +292,17 @@ public:
       indices.push_back(i);
     }
 
+    yanve::math::AABB bBox{ glm::vec3{std::numeric_limits<float>::max()}, 
+                            glm::vec3{-std::numeric_limits<float>::max()} };
+    for (const glm::vec3& v : vertices) {
+      if (v.x < bBox.min.x) bBox.min.x = v.x;
+      if (v.y < bBox.min.y) bBox.min.y = v.y;
+      if (v.z < bBox.min.z) bBox.min.z = v.z;
+      if (v.x > bBox.max.x) bBox.min.x = v.x;
+      if (v.y > bBox.max.y) bBox.min.y = v.y;
+      if (v.z > bBox.max.z) bBox.min.z = v.z;
+    }
+
     yanve::gl::Buffer vBuf{};
     vBuf.setData(vertices.data(), vertices.size() * sizeof(glm::vec3), yanve::gl::BufferUsage::StaticDraw);
 
@@ -362,20 +373,31 @@ public:
     auto& input = yanve::InputManager::instance();
     glm::vec2 windowSize = glm::vec2(input.windowState().width, input.windowState().height);
 
-    scene = new yanve::scene::Scene();
+    yanve::scene::CameraData cameraData{ "camera" };
+    cameraData.fov = 45.0f;
+    cameraData.aspect = windowSize.x / windowSize.y;
+    cameraData.nearPlane = 0.1f;
+    cameraData.farPlane = 1000.f;
+    cameraData.translation = glm::vec3{ 0, 0, 10 };
+    cameraData.rotation = yanve::math::eulerToQuat({ 0, 0, 0 });
+    yanve::scene::Camera* camera = new yanve::scene::Camera(cameraData);
 
-    camera = new yanve::scene::Camera(scene);
-    camera->setViewParameters(45.0,  windowSize.x / windowSize.y, 0.1f, 1000.f);
-    camera->translate({ 0, 0, 10 });
-    camera->rotate({ 0, 0, 0 });
+    yanve::scene::MeshNodeData meshData{ "cube", &mesh,  bBox};
+    yanve::scene::MeshNode* meshNode1 = new yanve::scene::MeshNode(meshData);
+    meshData.name = "cube2";
+    meshData.translation = glm::vec3{ 0, 3, 0 };
+    yanve::scene::MeshNode*  meshNode2 = new yanve::scene::MeshNode(meshData);
 
-    scene->update();
+    auto& sm= yanve::scene::SceneManager::getInstance();
+    cameraId = sm.addNode(camera, sm.getRootNode());
+    mesh1Id = sm.addNode(meshNode1, sm.getRootNode());
+    mesh2Id = sm.addNode(meshNode2, sm.getRootNode());
 
-    cameraUp = camera->up();
-    cameraForward = camera->forward();
-    cameraRight = camera->right();
-    cameraPosition = camera->absolutePosition();
-    //cameraRotation = glm::eulerAngles(camera->rotation());
+    // todo: improve this
+    cameraUp = ((yanve::scene::Camera*)sm.resolveNodeID(cameraId))->up();
+    cameraForward = ((yanve::scene::Camera*)sm.resolveNodeID(cameraId))->forward();
+    cameraRight = ((yanve::scene::Camera*)sm.resolveNodeID(cameraId))->right();
+    LogInfo("TestApp::TestApp", "after update: camera position: {%.2f, %.2f, %.2f}", camera->translation().x, camera->translation().y, camera->translation().z);
     
     modelMatrix = glm::mat4(1.0f);
     angle = 0.0f;
@@ -394,79 +416,93 @@ public:
       frames = 0;
     }
 
-    auto& input = yanve::InputManager::instance();
-    input.update();
+    auto& sm = yanve::scene::SceneManager::getInstance();
 
-    if (input.windowState().resized) {
-      glm::vec2 windowSize{ input.windowState().width, input.windowState().height };
-      screenFramebuffer.setViewport({ {}, windowSize });
-      yanve::gl::defaultFramebuffer.setViewport({ {}, windowSize });
-      window.resize(windowSize);
-      camera->setViewParameters(45.0, windowSize.x / windowSize.y, 0.1f, 1000.f);
-    }
+    // input processing
+    {
+      auto& input = yanve::InputManager::instance();
+      input.update();
 
-    if (input.mouseButtonState(yanve::InputManager::MouseButtom::buttonRight).pressed && 
+      if (input.windowState().resized) {
+        glm::vec2 windowSize{ input.windowState().width, input.windowState().height };
+        screenFramebuffer.setViewport({ {}, windowSize });
+        yanve::gl::defaultFramebuffer.setViewport({ {}, windowSize });
+        window.resize(windowSize);
+        ((yanve::scene::Camera*)sm.resolveNodeID(cameraId))->setViewParameters(45.0, windowSize.x / windowSize.y, 0.1f, 1000.f);
+      }
+
+      if (input.mouseButtonState(yanve::InputManager::MouseButtom::buttonRight).pressed &&
         input.mouseCursorState().moved) {
-      glm::vec2 dmouse{ input.mouseCursorState().dx, input.mouseCursorState().dy };
+        glm::vec2 dmouse{ input.mouseCursorState().dx, input.mouseCursorState().dy };
 
-      // Look left/right
-      cameraRotation.y += dmouse.x * cameraRotationSpeed;
+        // Look left/right
+        cameraRotation.y += dmouse.x * cameraRotationSpeed;
 
-      // Loop up/down but only in a limited range
-      cameraRotation.x -= dmouse.y * cameraRotationSpeed;
-      if (cameraRotation.x > 90)  cameraRotation.x = 90;
-      if (cameraRotation.x < -90) cameraRotation.x = -90;
+        // Loop up/down but only in a limited range
+        cameraRotation.x -= dmouse.y * cameraRotationSpeed;
+        if (cameraRotation.x > 90)  cameraRotation.x = 90;
+        if (cameraRotation.x < -90) cameraRotation.x = -90;
+      }
+
+      float speed = cameraSpeed / framesPerSec;
+      float pitch = yanve::math::radians(cameraRotation.x);
+      float yaw = yanve::math::radians(cameraRotation.y);
+
+      cameraPosition = ((yanve::scene::Camera*)sm.resolveNodeID(cameraId))->absolutePosition();
+
+      // forward
+      if (input.keyState(yanve::InputManager::Key::keyW).pressed) {
+        cameraPosition.x -= sinf(yaw) * cosf(-pitch) * speed;
+        cameraPosition.y -= sinf(-pitch) * speed;
+        cameraPosition.z -= cosf(yaw) * cosf(-pitch) * speed;
+      }
+
+      // back
+      if (input.keyState(yanve::InputManager::Key::keyS).pressed) {
+        cameraPosition.x += sinf(yaw) * cosf(-pitch) * speed;
+        cameraPosition.y += sinf(-pitch) * speed;
+        cameraPosition.z += cosf(yaw) * cosf(-pitch) * speed;
+      }
+
+      // rotate left
+      if (input.keyState(yanve::InputManager::Key::keyA).pressed) {
+        cameraPosition.x += sinf(yanve::math::radians(cameraRotation.y - 90)) * speed;
+        cameraPosition.z += cosf(yanve::math::radians(cameraRotation.y - 90)) * speed;
+      }
+
+      // rotate right
+      if (input.keyState(yanve::InputManager::Key::keyD).pressed) {
+        cameraPosition.x += sinf(yanve::math::radians(cameraRotation.y + 90)) * speed;
+        cameraPosition.z += cosf(yanve::math::radians(cameraRotation.y + 90)) * speed;
+      }
+
+      // strafe left
+      if (input.keyState(yanve::InputManager::Key::keyQ).pressed) {
+
+      }
+
+      // strafe right
+      if (input.keyState(yanve::InputManager::Key::keyE).pressed) {
+
+      }
+
+      running = !input.quit();
     }
 
-    float speed = cameraSpeed / framesPerSec;
-    float pitch = yanve::math::radians(cameraRotation.x);
-    float yaw = yanve::math::radians(cameraRotation.y);
-
-    // forward
-    if (input.keyState(yanve::InputManager::Key::keyW).pressed) {
-      cameraPosition.x -= sinf(yaw) * cosf(-pitch) * speed;
-      cameraPosition.y -= sinf(-pitch) * speed;
-      cameraPosition.z -= cosf(yaw) * cosf(-pitch) * speed;
-    }
     
-    // back
-    if (input.keyState(yanve::InputManager::Key::keyS).pressed) {
-      cameraPosition.x += sinf(yaw) * cosf(-pitch) * speed;
-      cameraPosition.y += sinf(-pitch) * speed;
-      cameraPosition.z += cosf(yaw) * cosf(-pitch) * speed;
-    }
+    ((yanve::scene::Camera*)sm.resolveNodeID(cameraId))->translate(cameraPosition);
+    ((yanve::scene::Camera*)sm.resolveNodeID(cameraId))->rotate(cameraRotation);
 
-    // rotate left
-    if (input.keyState(yanve::InputManager::Key::keyA).pressed) {
-      cameraPosition.x += sinf(yanve::math::radians(cameraRotation.y - 90)) * speed;
-      cameraPosition.z += cosf(yanve::math::radians(cameraRotation.y - 90)) * speed;
-    }
+    ((yanve::scene::Camera*)sm.resolveNodeID(mesh1Id))->rotate(angle, { 1,1,0 });
+    ((yanve::scene::Camera*)sm.resolveNodeID(mesh2Id))->rotate(-angle, { 1,1,0 });
 
-    // rotate right
-    if (input.keyState(yanve::InputManager::Key::keyD).pressed) {
-      cameraPosition.x += sinf(yanve::math::radians(cameraRotation.y + 90)) * speed;
-      cameraPosition.z += cosf(yanve::math::radians(cameraRotation.y + 90)) * speed;
-    }
+    sm.updateNodes();
+    sm.updateQueues();
 
-    // strafe left
-    if (input.keyState(yanve::InputManager::Key::keyQ).pressed) {
-      
-    }
-     
-    // strafe right
-    if (input.keyState(yanve::InputManager::Key::keyE).pressed) {
-      
-    }
-
-    camera->translate(cameraPosition);
-    camera->rotate(cameraRotation);
-
-    scene->update();
-
-    cameraUp = camera->up();
-    cameraForward = camera->forward();
-    cameraRight = camera->right();
-    cameraPosition = camera->absolutePosition();
+    cameraUp = ((yanve::scene::Camera*)sm.resolveNodeID(cameraId))->up();
+    cameraForward = ((yanve::scene::Camera*)sm.resolveNodeID(cameraId))->forward();
+    cameraRight = ((yanve::scene::Camera*)sm.resolveNodeID(cameraId))->right();
+    
     //cameraRotation = glm::eulerAngles(camera->rotation());
 
     if (enableDepthTest != depthTestState) {
@@ -479,32 +515,58 @@ public:
       yanve::gl::Renderer::setFeature(yanve::gl::Renderer::Feature::FaceCulling, faceCullingState);
     }
 
-    glm::mat4 transform = glm::rotate(modelMatrix, angle, glm::vec3(1.0, 1.0, 0.0));
-    glm::mat4 view = camera->view();
-    glm::mat4 projection = camera->projection();
+    //glm::mat4 transform = glm::rotate(modelMatrix, angle, glm::vec3(1.0, 1.0, 0.0));
+    glm::mat4 view = ((yanve::scene::Camera*)sm.resolveNodeID(cameraId))->view();
+    glm::mat4 projection = ((yanve::scene::Camera*)sm.resolveNodeID(cameraId))->projection();
 
-    shaderProgram.setModelMatrix(transform);
+    //shaderProgram.setModelMatrix(transform);
     shaderProgram.setViewMatrix(view);
     shaderProgram.setProjectionMatrix(projection);
 
-    textureShaderProgram.setModelMatrix(transform);
+    //textureShaderProgram.setModelMatrix(transform);
     textureShaderProgram.setViewMatrix(view);
     textureShaderProgram.setProjectionMatrix(projection);
 
     angle += 0.0001f;
+    if (angle >= 360.0f) angle = 0.0f;
 
     if (angle > 2.0f * glm::pi<float>())
       angle = 0.0f;
 
-    running = !input.quit();
+    
     frames++;
 
     yanve::GuiManager::beginFrame();
+  }
+
+  void sceneGui(yanve::scene::SceneNode& node)
+  {
+    if (&node != nullptr) {
+      std::string nodeName = yanve::scene::nodeTypeStr(node.type());
+      ImGui::PushID(&node);
+      if (ImGui::TreeNode(nodeName.data())) {
+        ImGui::Text("name: \"%s\"", node.name());
+        ImGui::Text("translation: {%.02f, %.02f, %.02f}", node.translation().x, node.translation().y, node.translation().z);
+        ImGui::Text("rotation:    {%.02f, %.02f, %.02f, %.02f}", node.rotation().x, node.rotation().y, node.rotation().z, node.rotation().w);
+        ImGui::Text("scale:       {%.02f, %.02f, %.02f}", node.scale().x, node.scale().y, node.scale().z);
+        if (node.children().size() > 0) {
+          ImGui::Text("children (%d):", node.children().size());
+          for (auto child : node.children()) {
+            sceneGui(*child);
+          }
+        }
+        ImGui::TreePop();
+        ImGui::Separator();
+      }
+      ImGui::PopID();
+    }
   }
   
   void updateGui() override
   {
     {
+      auto& sm = yanve::scene::SceneManager::getInstance();
+
       ImGui::Begin("Test Box");
 
       ImGui::Text("FPS: %d", framesPerSec);
@@ -519,10 +581,20 @@ public:
         ImGui::SliderFloat("Camera speed", &cameraSpeed, 5.0f, 20.0f, "%.2f", 0.5f);
         ImGui::SliderFloat("Camera rotation speed", &cameraRotationSpeed, 0.001f, 0.1f, "%.4f", 0.005f);
         if (ImGui::Button("Reset Camera")) {
-          cameraPosition = glm::vec3{ 0, 0, 10 };
-          cameraRotation = glm::vec3{ 0 };
+          ((yanve::scene::Camera*)sm.resolveNodeID(cameraId))->translate(glm::vec3{ 0, 0, 10 });
+          ((yanve::scene::Camera*)sm.resolveNodeID(cameraId))->rotate(glm::vec3{ 0 });
+          sm.updateNodes();
+          sm.updateQueues();
+          cameraUp = ((yanve::scene::Camera*)sm.resolveNodeID(cameraId))->up();
+          cameraForward = ((yanve::scene::Camera*)sm.resolveNodeID(cameraId))->forward();
+          cameraRight = ((yanve::scene::Camera*)sm.resolveNodeID(cameraId))->right();
         }
       }
+
+      if (ImGui::CollapsingHeader("Scene")) {
+        sceneGui(sm.getRootNode());
+      }
+      
       
       ImGui::End();
     }
@@ -530,25 +602,35 @@ public:
 
   void render() override
   {
-    yanve::gl::Renderer::enable(yanve::gl::Renderer::Feature::DepthTest);
     screenFramebuffer
-      .clear(yanve::gl::FramebufferClearMask::Color | yanve::gl::FramebufferClearMask::Depth)
+      .clear(yanve::gl::FramebufferClear::Color | yanve::gl::FramebufferClear::Depth)
       .bind();
-    if (useTexture) {
-      textureShaderProgram.bindTexture(texture);
-      mesh.draw(textureShaderProgram);
-    }
-    else {
-      mesh.draw(shaderProgram);
+
+    auto& sm = yanve::scene::SceneManager::getInstance();
+    for (auto item : sm.getRenderQueue()) {
+      if (item.node->isRenderable()) {
+        yanve::gl::Renderer::enable(yanve::gl::Renderer::Feature::DepthTest);
+        
+        if (useTexture) {
+          textureShaderProgram.setModelMatrix(item.node->absTransform());
+          textureShaderProgram.bindTexture(texture);
+          dynamic_cast<yanve::scene::MeshNode*>(item.node)->mesh().draw(textureShaderProgram);
+        }
+        else {
+          shaderProgram.setModelMatrix(item.node->absTransform());
+          dynamic_cast<yanve::scene::MeshNode*>(item.node)->mesh().draw(shaderProgram);
+        }
+      }
     }
 
     yanve::gl::Renderer::disable(yanve::gl::Renderer::Feature::DepthTest);
 
     yanve::gl::defaultFramebuffer
-      .clear(yanve::gl::FramebufferClearMask::Color)
+      .clear(yanve::gl::FramebufferClear::Color)
       .bind();
     quadShaderProgram.bindTexture(screenTexture);
-    quadMesh.draw(quadShaderProgram);
+    quadMesh.draw(quadShaderProgram); // this is not part of the scene, as we rendered the scene to a texture, 
+                                      // and now the texture on a quad
 
     updateGui();
     yanve::GuiManager::endFrame();
@@ -567,7 +649,15 @@ public:
     return 0; // add error code variable maybe?
   }
 
-  void shutdown() override {}
+  void shutdown() override 
+  {
+    // this is currently wrong, it should be moved to a scene manager or similar system
+    //if (scene != nullptr) delete scene;
+    //if (camera != nullptr) delete camera;
+    //if (meshNode1 != nullptr) delete meshNode1;
+    //if (meshNode2 != nullptr) delete meshNode2;
+  }
+  
   bool isRunning() { return running; }
 
 protected:
@@ -604,8 +694,9 @@ protected:
   yanve::gl::Renderbuffer renderbuffer;
   yanve::gl::Framebuffer screenFramebuffer;
 
-  yanve::scene::Scene* scene;
-  yanve::scene::Camera* camera;
+  /*yanve::scene::Camera* camera;
+  yanve::scene::MeshNode *meshNode1, *meshNode2;*/
+  size_t cameraId, mesh1Id, mesh2Id;
 
   TestShader shaderProgram;
   TestTextureShader textureShaderProgram;

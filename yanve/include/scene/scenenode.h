@@ -8,13 +8,53 @@
 
 namespace yanve::scene
 {
+
+enum class YANVE_API SceneNodeType
+{
+  Undefined = 0,
+  Mesh,
+  //Model,
+  //Light,
+  Camera,
+  //Emmiter,
+  //Compute
+};
+
+struct YANVE_API SceneNodeData
+{
+  glm::vec3 translation = glm::vec3{ 0 };
+  glm::quat rotation = glm::quat{ 1, 0, 0, 0 };
+  glm::vec3 scale;
+
+  std::string name;
+  SceneNodeType type;
+
+  //std::vector<SceneNodeData*> children;
+
+  SceneNodeData(SceneNodeType type, const std::string& name) :
+    type{type},
+    name{ name },
+    scale{ glm::vec3{1,1,1} }
+  {
+
+  }
+
+  virtual ~SceneNodeData()
+  {
+    /*for (int i = 0; i < children.size(); ++i) {
+      if (children[i] != nullptr) delete children[i];
+    }*/
+  }
+};
+
 class YANVE_API SceneNode
 {
 public:
   //using SceneNode* = std::shared_ptr<SceneNode>;
 
-  explicit SceneNode();
-  explicit SceneNode(SceneNode* parent);
+  /*explicit SceneNode();
+  explicit SceneNode(SceneNode* parent);*/
+  SceneNode(const SceneNodeData& data);
 
   SceneNode(const SceneNode&) = delete;
   SceneNode(SceneNode&&) = delete;
@@ -30,9 +70,9 @@ public:
   SceneNode& scale(const glm::vec3& factor);
   //SceneNode& setTransformation(const glm::mat4& transformation);
 
-  glm::mat4 transform() { if (_transformed) doTransform(); return _relativeTransform; }
-  // whenever node is const, the node should not have been modified, so no update needed
+  glm::mat4 transform() { if (!_transformed) doTransform(); return _relativeTransform; }
   glm::mat4 transform() const { return _relativeTransform; } 
+  glm::mat4 absTransform() const { return _absoluteTransform; }
   glm::vec3 translation() const { return _translation; }
   glm::quat rotation() const { return _rotation; }
   glm::vec3 scale() const { return _scale; }
@@ -41,20 +81,23 @@ public:
   SceneNode& setName(std::string name) { _name = name; return *this; }
 
   SceneNode* parent() const { return _parent; }
-  std::list<SceneNode*>& children() { return _children; }
+  std::vector<SceneNode*>& children() { return _children; }
 
-  void addChild(SceneNode* node);
-  bool removeChild(const SceneNode* child);
+  SceneNodeType type() const { return _type; }
 
   void update();
 
   virtual bool isScene() { return false; }
   virtual bool isAttachable() { return true; }
-
-protected:
-  void doTransform();
+  virtual bool isRenderable() { return _renderable; }
+  
   void markDirty();
   void markChildrenDirty();
+
+protected:
+  SceneNode() = delete;
+  void doTransform();
+  
 
   virtual void onPostUpdate() {}
   virtual void onFinishedUpdate() {}
@@ -69,14 +112,22 @@ protected:
   glm::mat4 _relativeTransform, _absoluteTransform;
 
   std::string _name;
+  SceneNodeType _type;
 
   SceneNode* _parent;
-  std::list<SceneNode*> _children;
+  std::vector<SceneNode*> _children;
+
+  math::AABB _bBox;
 
   bool _dirty;
   bool _transformed;
+  bool _renderable;
 
   size_t _id;
+
+  friend class SceneManager;
 };
+
+YANVE_API std::string nodeTypeStr(SceneNodeType type);
 
 }

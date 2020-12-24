@@ -1,27 +1,32 @@
 #pragma once
 
 #include <common.h>
-#include <utils/enumoperators.h>
+//#include <utils/enumoperators.h>
 #include <graphics/gl/globject.h>
 #include <graphics/gl/texture.h>
 #include <graphics/gl/pixelformat.h>
+#include <utils/enumset.h>
 
 namespace yanve::gl
 {
 
-enum class FramebufferClearMask : GLbitfield 
+enum class FramebufferClear : GLbitfield 
 {
   Color = GL_COLOR_BUFFER_BIT,
   Depth = GL_DEPTH_BUFFER_BIT,
   Stencil = GL_STENCIL_BUFFER_BIT
 };
 
-enum class FramebufferBlitMask : GLbitfield 
+typedef EnumSet<FramebufferClear> FramebufferClearMask;
+
+enum class FramebufferBlit : GLbitfield 
 {
   Color = GL_COLOR_BUFFER_BIT,
   Depth = GL_DEPTH_BUFFER_BIT,
   Stencil = GL_STENCIL_BUFFER_BIT
 };
+
+typedef EnumSet<FramebufferBlit> FramebufferBlitMask;
 
 enum class FramebufferBlitFilter : GLenum 
 {
@@ -111,7 +116,6 @@ protected:
   void readBuffer(GLenum buffer);
 };
 
-
-ENUM_OPERATORS(FramebufferClearMask, GLbitfield)
-ENUM_OPERATORS(FramebufferBlitMask, GLbitfield)
+ENUMSET_OPERATORS(FramebufferClearMask);
+ENUMSET_OPERATORS(FramebufferBlitMask);
 }

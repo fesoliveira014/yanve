@@ -1,4 +1,4 @@
-#include <graphics/gl/shaderprogram.h>
+#include <graphics/gl/shaderpipeline.h>
 #include <graphics/gl/shader.h>
 #include <utils/logger.h>
 
@@ -9,25 +9,25 @@
 namespace yanve::gl
 {
 
-ShaderProgram::ShaderProgram() : 
+ShaderPipeline::ShaderPipeline() : 
   _id{glCreateProgram()}
 {
   
 }
 
-ShaderProgram::ShaderProgram(ShaderProgram&& shader) noexcept : 
+ShaderPipeline::ShaderPipeline(ShaderPipeline&& shader) noexcept : 
   _id{ shader._id }
 {
   shader._id = 0;
 }
 
-ShaderProgram& ShaderProgram::operator=(ShaderProgram&& other) noexcept
+ShaderPipeline& ShaderPipeline::operator=(ShaderPipeline&& other) noexcept
 {
   std::swap(_id, other._id);
   return *this;
 }
 
-ShaderProgram::~ShaderProgram() {
+ShaderPipeline::~ShaderPipeline() {
   auto& state = *Context::current().state().shader;
 
   if (state.current == _id)
@@ -37,7 +37,7 @@ ShaderProgram::~ShaderProgram() {
   _id = 0;
 }
 
-void ShaderProgram::use()
+void ShaderPipeline::use()
 {
   auto& state = *Context::current().state().shader;
 
@@ -46,17 +46,17 @@ void ShaderProgram::use()
   glUseProgram(state.current = _id);
 }
 
-void ShaderProgram::attachShader(Shader& shader)
+void ShaderPipeline::attachShader(Shader& shader)
 {
   glAttachShader(_id, shader.id());
 }
 
-void ShaderProgram::attachShaders(std::initializer_list<std::reference_wrapper<Shader>> shaders)
+void ShaderPipeline::attachShaders(std::initializer_list<std::reference_wrapper<Shader>> shaders)
 {
   for (auto& shader : shaders) attachShader(shader);
 }
 
-bool ShaderProgram::link()
+bool ShaderPipeline::link()
 {
   GLint success;
 
@@ -73,7 +73,7 @@ bool ShaderProgram::link()
   return true;
 }
 
-bool ShaderProgram::hasUniform(std::string name)
+bool ShaderPipeline::hasUniform(std::string name)
 {
   if (_uniforms.find(name) == _uniforms.end())
     return false;
@@ -81,7 +81,7 @@ bool ShaderProgram::hasUniform(std::string name)
   return true;
 }
 
-GLint ShaderProgram::getUniformLocation(std::string name)
+GLint ShaderPipeline::getUniformLocation(std::string name)
 {
   if (!hasUniform(name)) {
     GLuint location = glGetUniformLocation(_id, name.data());
@@ -92,55 +92,55 @@ GLint ShaderProgram::getUniformLocation(std::string name)
   return _uniforms[name];
 }
 
-void ShaderProgram::setUniform(std::string name, bool value)
+void ShaderPipeline::setUniform(std::string name, bool value)
 {
   use();
   glUniform1i(_uniforms[name], static_cast<GLint>(value));
 }
 
-void ShaderProgram::setUniform(std::string name, int value)
+void ShaderPipeline::setUniform(std::string name, int value)
 {
   use();
   glUniform1i(_uniforms[name], value);
 }
 
-void ShaderProgram::setUniform(std::string name, float value)
+void ShaderPipeline::setUniform(std::string name, float value)
 {
   use();
   glUniform1f(_uniforms[name], value);
 }
 
-void ShaderProgram::setUniform(std::string name, const glm::vec2& value)
+void ShaderPipeline::setUniform(std::string name, const glm::vec2& value)
 {
   use();
   glUniform2f(_uniforms[name], value.x, value.y);
 }
 
-void ShaderProgram::setUniform(std::string name, const glm::vec3& value)
+void ShaderPipeline::setUniform(std::string name, const glm::vec3& value)
 {
   use();
   glUniform3f(_uniforms[name], value.x, value.y, value.z);
 }
 
-void ShaderProgram::setUniform(std::string name, const glm::vec4& value)
+void ShaderPipeline::setUniform(std::string name, const glm::vec4& value)
 {
   use();
   glUniform4f(_uniforms[name], value.x, value.y, value.z, value.w);
 }
 
-void ShaderProgram::setUniform(std::string name, const glm::mat2& value)
+void ShaderPipeline::setUniform(std::string name, const glm::mat2& value)
 {
   use();
   glUniformMatrix2fv(_uniforms[name], 1, GL_FALSE, glm::value_ptr(value));
 }
 
-void ShaderProgram::setUniform(std::string name, const glm::mat3& value)
+void ShaderPipeline::setUniform(std::string name, const glm::mat3& value)
 {
   use();
   glUniformMatrix3fv(_uniforms[name], 1, GL_FALSE, glm::value_ptr(value));
 }
 
-void ShaderProgram::setUniform(std::string name, const glm::mat4& value)
+void ShaderPipeline::setUniform(std::string name, const glm::mat4& value)
 {
   use();
   glUniformMatrix4fv(_uniforms[name], 1, GL_FALSE, glm::value_ptr(value));

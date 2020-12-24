@@ -7,7 +7,7 @@ namespace yanve::gl
 {
   class Shader;
 
-  class YANVE_API ShaderProgram : public GLObject
+  class YANVE_API ShaderPipeline : public GLObject
   {
   protected:
     GLuint _id;
@@ -15,14 +15,14 @@ namespace yanve::gl
     ObjectFlags _flags;
 
   public:
-    ShaderProgram();
-    ShaderProgram(const ShaderProgram&) = delete;
-    ShaderProgram(ShaderProgram&& shader) noexcept;
+    ShaderPipeline();
+    ShaderPipeline(const ShaderPipeline&) = delete;
+    ShaderPipeline(ShaderPipeline&& shader) noexcept;
 
-    ShaderProgram& operator=(const Shader&) = delete;
-    ShaderProgram& operator=(ShaderProgram&& other) noexcept;
+    ShaderPipeline& operator=(const Shader&) = delete;
+    ShaderPipeline& operator=(ShaderPipeline&& other) noexcept;
 
-    ~ShaderProgram();
+    ~ShaderPipeline();
 
     void use();
 

@@ -2,7 +2,7 @@
 #include <utils/logger.h>
 
 #include <external/imgui/imgui.h>
-#include <external/imgui/imgui_impl_sdl_gl3.h>
+#include <external/imgui/imgui_impl_sdl.h>
 #include <SDL2/SDL.h>
 
 namespace yanve
@@ -68,11 +68,11 @@ void InputManager::update()
 
   SDL_Event e;
   while (SDL_PollEvent(&e)) {
-    ImGui_ImplSdlGL3_ProcessEvent(&e);
+    ImGui_ImplSDL2_ProcessEvent(&e);
     switch (e.type) {
     case SDL_QUIT:
       _quit = true;
-      LogVerbose(LOG_TAG + __func__, "Quit event");
+      LogInfo(LOG_TAG + __func__, "Quit event");
       break;
     case SDL_WINDOWEVENT:
       if (e.window.event == SDL_WINDOWEVENT_RESIZED) {

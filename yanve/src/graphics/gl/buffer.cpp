@@ -13,7 +13,7 @@ Buffer::Buffer(Target target) :
   _size{0}
 {
   glGenBuffers(1, &_id);
-  _flags |= ObjectFlags::Created | ObjectFlags::DestroyOnDestruction;
+  _flags |= ObjectFlag::Created | ObjectFlag::DestroyOnDestruction;
 }
 
 Buffer::Buffer(GLuint id, Target target, ObjectFlags flags):
@@ -36,7 +36,7 @@ Buffer::Buffer(Buffer&& other) noexcept
 
 Buffer::~Buffer()
 {
-  if (!_id || !(_flags & ObjectFlags::DestroyOnDestruction)) return;
+  if (!_id || !(_flags & ObjectFlag::DestroyOnDestruction)) return;
 
   auto& state = *Context::current().state().buffer;
 
@@ -113,7 +113,7 @@ void Buffer::bindInternal(Target target, Buffer *const buffer)
   if (bound == id) return;
 
   bound = id;
-  if (id) buffer->_flags |= ObjectFlags::Created;
+  if (id) buffer->_flags |= ObjectFlag::Created;
   glBindBuffer(GLenum(target), id);
 }
 

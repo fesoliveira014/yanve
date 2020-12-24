@@ -54,7 +54,7 @@ public:
     Stencil = GL_STENCIL
   };
 
-  constexpr explicit DefaultFramebuffer() : AbstractFramebuffer{ 0, {}, ObjectFlags::Created | ObjectFlags::DestroyOnDestruction } {}
+  constexpr explicit DefaultFramebuffer() : AbstractFramebuffer{ 0, {}, ObjectFlag::Created | ObjectFlag::DestroyOnDestruction } {}
 
   DefaultFramebuffer(const DefaultFramebuffer&) = delete;
   DefaultFramebuffer(DefaultFramebuffer&&) = delete;

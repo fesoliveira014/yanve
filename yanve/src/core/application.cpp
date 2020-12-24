@@ -13,7 +13,7 @@ Application::Application(std::string title, int width, int height) :
 {
   gl::Context::makeCurrent(&context);
   InputManager::instance().resizeEvent(width, height);
-  GuiManager::setup(window.handle());
+  GuiManager::setup(window.handle(), window.context());
 }
 
 }

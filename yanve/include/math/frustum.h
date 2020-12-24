@@ -23,7 +23,7 @@ public:
   bool cullBox(const AABB& box) const;
   bool cullFrustum(const Frustum& frustum);
 
-  AABB calculateAABB() const;
+  void calculateAABB(glm::vec3& min, glm::vec3& max) const;
 
 protected:
   Plane _planes[6];

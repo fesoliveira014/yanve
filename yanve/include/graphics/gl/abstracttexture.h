@@ -34,7 +34,7 @@ protected:
   template <size_t dimensionss> struct Helper {};
 
   explicit AbstractTexture(GLenum target);
-  explicit AbstractTexture(NoCreateT, GLenum target) : _target{ target }, _id{ 0 }, _flags{ ObjectFlags::DestroyOnDestruction } {};
+  explicit AbstractTexture(NoCreateT, GLenum target) : _target{ target }, _id{ 0 }, _flags{ ObjectFlag::DestroyOnDestruction } {};
   explicit AbstractTexture(GLuint id, GLenum target, ObjectFlags flags) : _target{target}, _id{id}, _flags{flags} {}
 
   void bindImageInternal(GLuint unit, GLint level, GLboolean layered, GLint layer, GLenum access, GLenum format);
@@ -96,7 +96,7 @@ private:
 protected:
   GLuint _id;
   GLenum _target;
-  uint32_t _flags;
+  ObjectFlags _flags;
 
 };
 

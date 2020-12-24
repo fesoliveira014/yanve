@@ -237,13 +237,15 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="include\core\types.h" />
+    <ClInclude Include="include\data\geometrydata.h" />
     <ClInclude Include="include\external\imgui\imconfig.h" />
     <ClInclude Include="include\external\imgui\imgui.h" />
-    <ClInclude Include="include\external\imgui\imgui_impl_sdl_gl3.h" />
+    <ClInclude Include="include\external\imgui\imgui_impl_opengl3.h" />
+    <ClInclude Include="include\external\imgui\imgui_impl_sdl.h" />
     <ClInclude Include="include\external\imgui\imgui_internal.h" />
-    <ClInclude Include="include\external\imgui\stb_rect_pack.h" />
-    <ClInclude Include="include\external\imgui\stb_textedit.h" />
-    <ClInclude Include="include\external\imgui\stb_truetype.h" />
+    <ClInclude Include="include\external\imgui\imstb_rectpack.h" />
+    <ClInclude Include="include\external\imgui\imstb_textedit.h" />
+    <ClInclude Include="include\external\imgui\imstb_truetype.h" />
     <ClInclude Include="include\external\stb\stb_image.h" />
     <ClInclude Include="include\external\stb\stb_image_resize.h" />
     <ClInclude Include="include\external\stb\stb_image_write.h" />
@@ -264,7 +266,7 @@
     <ClInclude Include="include\graphics\gl\renderer.h" />
     <ClInclude Include="include\graphics\gl\sampler.h" />
     <ClInclude Include="include\graphics\gl\shader.h" />
-    <ClInclude Include="include\graphics\gl\shaderprogram.h" />
+    <ClInclude Include="include\graphics\gl\shaderpipeline.h" />
     <ClInclude Include="include\graphics\gl\mesh.h" />
     <ClInclude Include="include\graphics\gl\abstracttexture.h" />
     <ClInclude Include="include\graphics\gl\state\bufferstate.h" />
@@ -285,6 +287,7 @@
     <ClInclude Include="include\scene\abstracttransformation2d.h" />
     <ClInclude Include="include\scene\abstracttransformation.h" />
     <ClInclude Include="include\scene\camera.h" />
+    <ClInclude Include="include\scene\meshnode.h" />
     <ClInclude Include="include\scene\scene.h" />
     <ClInclude Include="include\scene\scenemanager.h" />
     <ClInclude Include="include\scene\scenenode.h" />
@@ -300,11 +303,14 @@
     <ClInclude Include="include\utils\dimension.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="include\core\inputmanager.h" />
     <ClCompile Include="include\external\imgui\imgui.cpp" />
     <ClCompile Include="include\external\imgui\imgui_demo.cpp" />
     <ClCompile Include="include\external\imgui\imgui_draw.cpp" />
-    <ClCompile Include="include\external\imgui\imgui_impl_sdl_gl3.cpp" />
-    <ClCompile Include="include\core\inputmanager.h" />
+    <ClCompile Include="include\external\imgui\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="include\external\imgui\imgui_impl_sdl.cpp" />
+    <ClCompile Include="include\external\imgui\imgui_tables.cpp" />
+    <ClCompile Include="include\external\imgui\imgui_widgets.cpp" />
     <ClCompile Include="include\graphics\gl\attribute.h" />
     <ClCompile Include="include\utils\logger.h" />
     <ClCompile Include="src\core\application.cpp" />
@@ -320,7 +326,7 @@
     <ClCompile Include="src\graphics\gl\framebuffer.cpp" />
     <ClCompile Include="src\graphics\gl\renderer.cpp" />
     <ClCompile Include="src\graphics\gl\shader.cpp" />
-    <ClCompile Include="src\graphics\gl\shaderprogram.cpp" />
+    <ClCompile Include="src\graphics\gl\shaderpipeline.cpp" />
     <ClCompile Include="src\graphics\gl\mesh.cpp" />
     <ClCompile Include="src\graphics\gl\state\bufferstate.cpp" />
     <ClCompile Include="src\graphics\gl\state\meshstate.cpp" />
@@ -333,7 +339,9 @@
     <ClCompile Include="src\math\frustum.cpp" />
     <ClCompile Include="src\platform\dllmain.cpp" />
     <ClCompile Include="src\scene\camera.cpp" />
+    <ClCompile Include="src\scene\meshnode.cpp" />
     <ClCompile Include="src\scene\scene.cpp" />
+    <ClCompile Include="src\scene\scenemanager.cpp" />
     <ClCompile Include="src\scene\scenenode.cpp" />
     <ClCompile Include="src\utils\clock.cpp" />
     <ClCompile Include="src\utils\logger.cpp" />

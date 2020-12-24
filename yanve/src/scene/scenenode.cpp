@@ -11,30 +11,31 @@
 namespace yanve::scene
 {
 
-SceneNode::SceneNode() :
-  _translation{glm::vec3(0)},
-  _rotation{ glm::quat(1, 0, 0, 0) },
-  _scale{ glm::vec3{1, 1, 1} },
-  _relativeTransform{ glm::mat4(1) },
-  _absoluteTransform{ glm::mat4(1) },
-  _name{},
+static const std::string LOG_TAG = "SceneNode::";
+
+SceneNode::SceneNode(const SceneNodeData& data) :
+  _translation{data.translation},
+  _rotation{ data.rotation },
+  _scale{ data.scale },
+  _name{ data.name },
+  _type{ SceneNodeType::Undefined },
   _parent{ nullptr },
-  _children{},
   _dirty{ false },
   _transformed{ false }
 {
+  LogInfo(LOG_TAG + __func__, "SceneNode \"%s\" {", _name);
+  LogInfo(LOG_TAG + __func__, "  translation: {%.02f, %.02f, %.02f},", _translation.x, _translation.y, _translation.z);
+  LogInfo(LOG_TAG + __func__, "  rotation:    {%.02f, %.02f, %.02f, %.02f},", _rotation.x, _rotation.y, _rotation.z, _rotation.w);
+  LogInfo(LOG_TAG + __func__, "  scale:       {%.02f, %.02f, %.02f},", _translation.x, _translation.y, _translation.z);
+  LogInfo(LOG_TAG + __func__, "}", _name);
 
-}
-
-SceneNode::SceneNode(SceneNode* parent) :
-  SceneNode()
-{
-  _parent = parent;
-  _parent->addChild(this);
+  doTransform();
 }
 
 SceneNode::~SceneNode() 
 {
+  // this is wrong, scene node should not be responsible for this
+  // move to scene manager instead
   for (auto& child : _children) {
     delete child;
   }
@@ -56,12 +57,7 @@ SceneNode& SceneNode::translate(const glm::vec3& translation)
 
 SceneNode& SceneNode::rotate(const glm::vec3& angles) 
 {
-  glm::vec3 euler = angles * math::pi_over_180<float>;
-  glm::quat roll{ cosf(euler.x * 0.5f), sinf(euler.x * 0.5f), 0, 0 };
-  glm::quat pitch{ cosf(euler.y * 0.5f), 0, sinf(euler.y * 0.5f), 0 };
-  glm::quat yaw{ cosf(euler.z * 0.5f), 0, 0, sinf(euler.z * 0.5f) };
-
-  _rotation = pitch * roll * yaw;
+  _rotation = math::eulerToQuat(angles);
 
   markDirty();
 
@@ -70,7 +66,7 @@ SceneNode& SceneNode::rotate(const glm::vec3& angles)
 
 SceneNode& SceneNode::rotate(float angle, const glm::vec3& basis)
 {
-  glm::vec3 axis = basis * glm::sin(angle * 0.5f);
+  glm::vec3 axis = glm::normalize(basis) * glm::sin(angle * 0.5f);
   _rotation = glm::quat(glm::cos(angle * 0.5f), axis);
 
   //_relativeTransform = glm::toMat4(_rotation) * _relativeTransform;
@@ -119,48 +115,21 @@ SceneNode& SceneNode::scale(const glm::vec3& factor)
 
 void SceneNode::doTransform()
 {
-  //glm::mat4 translation = glm::translate(glm::mat4{}, _translation);
-  //glm::mat4 rotation = glm::toMat4(_rotation);
+  glm::mat4 translation = glm::translate(glm::mat4{1}, _translation);
+  glm::mat4 rotation = glm::toMat4(_rotation);
   glm::mat4 scaling = glm::scale(glm::mat4{1.0}, _scale);
 
-  glm::mat3 rotation = glm::toMat3(_rotation);
-  glm::mat4 rotationTranslation{ glm::vec4{ rotation[0], 0}, 
-                                 glm::vec4{ rotation[1], 0}, 
-                                 glm::vec4{ rotation[2], 0}, 
-                                 glm::vec4{_translation, 1} };
+  //glm::mat3 rotation = glm::toMat3(_rotation);
+  //glm::mat4 rotationTranslation{ glm::vec4{ rotation[0], 0}, 
+  //                               glm::vec4{ rotation[1], 0}, 
+  //                               glm::vec4{ rotation[2], 0}, 
+  //                               glm::vec4{_translation, 1} };
 
   _relativeTransform = scaling;
-  _relativeTransform = rotationTranslation * _relativeTransform;
+  _relativeTransform = rotation * _relativeTransform;
+  _relativeTransform = translation * _relativeTransform;
+  //_relativeTransform = rotationTranslation * _relativeTransform;
   _transformed = true;
-}
-
-void SceneNode::addChild(SceneNode* node)
-{
-  if (!isAttachable())
-    return;
-
-  SceneNode* newNode{ node };
-  newNode->_id = utils::RandomGenerator::getNextUInt64();
-  _children.push_back(std::move(newNode));
-}
-
-bool SceneNode::removeChild(const SceneNode* node)
-{
-  bool removed = false;
-  auto it = std::find(_children.begin(), _children.end(), node);
-  if (it != _children.end()) {
-    _children.erase(it);
-    removed = true;
-  }
-  else {
-    for (auto& child : _children) {
-      if (child->removeChild(node)) {
-        removed = true;
-        break;
-      }
-    }
-  }
-  return removed;
 }
 
 void SceneNode::update()
@@ -218,6 +187,37 @@ void SceneNode::markChildrenDirty()
   }
 }
 
+std::string nodeTypeStr(SceneNodeType type)
+{
+  std::string typeStr = "";
+  switch (type) {
+  case SceneNodeType::Undefined:
+    typeStr = "Undefined";
+    break;
+  case SceneNodeType::Mesh:
+    typeStr = "Mesh";
+    break;
+  //case SceneNodeType::Model:
+    //typeStr = "Model";
+    //break;
+  //case SceneNodeType::Light:
+    //typeStr = "Light";
+    //break;
+  case SceneNodeType::Camera:
+    typeStr = "Camera";
+    break;
+  //case SceneNodeType::Emmiter:
+    //typeStr = "Emmiter";
+    //break;
+  //case SceneNodeType::Compute:
+    //typeStr = "Compute";
+    //break;
+  default:
+    LogError(__func__, "non-existent scene node type %d", (int)type);
+    break;
+  }
 
+  return typeStr;
+}
 
 }

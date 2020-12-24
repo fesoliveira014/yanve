@@ -31,6 +31,11 @@ struct YANVE_API Plane
   Plane(Plane&&) = default;
   inline Plane& operator=(const Plane& other) = default;
   inline Plane& operator=(Plane&& other) = default;
+
+  float distanceToPoint(const glm::vec3& p) const
+  {
+    return glm::dot(normal, p) + scalar;
+  }
 };
 
 }

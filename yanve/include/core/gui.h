@@ -3,7 +3,8 @@
 #include <common.h>
 
 #include <external/imgui/imgui.h>
-#include <external/imgui/imgui_impl_sdl_gl3.h>
+#include <external/imgui/imgui_impl_sdl.h>
+#include <external/imgui/imgui_impl_opengl3.h>
 
 struct SDL_Window;
 
@@ -18,7 +19,7 @@ public:
     return gui;
   }
 
-  static void setup(SDL_Window* windowPtr);
+  static void setup(SDL_Window* windowPtr, void* context);
   static void beginFrame();
   static void endFrame();
 
@@ -27,7 +28,7 @@ private:
   GuiManager(const GuiManager&) = delete;
   GuiManager(GuiManager&&) = delete;
 
-  void _setup(SDL_Window* windowPtr);
+  void _setup(SDL_Window* windowPtr, void* context);
   void _beginFrame();
 
   ~GuiManager();

@@ -2,7 +2,7 @@
 
 #include <common.h>
 #include <utils/nocreate.h>
-#include <utils/enumoperators.h>
+#include <utils/enumset.h>
 
 #include <graphics/gl/version.h>
 
@@ -49,6 +49,8 @@ public:
     RobustAccess = GL_CONTEXT_FLAG_ROBUST_ACCESS_BIT
   };
 
+  typedef EnumSet<Flag> Flags;
+
   enum class States : uint {
     Buffers = 1 << 0,
     Framebuffers = 1 << 1,
@@ -63,6 +65,8 @@ public:
     EnterExternal = MeshVao,
     ExitExternal = Buffers | Framebuffers | Meshes | MeshVao | PixelStorage | Renderer | Shaders | Textures | TransformFeedback
   };
+
+  typedef EnumSet<States> State;
 
   enum class DetectedDriver : uint{
     Amd = 1 << 0,
@@ -134,7 +138,7 @@ protected:
   std::vector<std::string> _disabledExtensions;
 };
 
-ENUM_OPERATORS(Context::Flag, GLint)
-ENUM_OPERATORS(Context::States, uint)
+ENUMSET_OPERATORS(Context::Flags)
+ENUMSET_OPERATORS(Context::State)
 
 }

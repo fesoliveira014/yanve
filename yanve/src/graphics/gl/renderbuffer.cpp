@@ -9,7 +9,7 @@
 namespace yanve::gl
 {
 
-Renderbuffer::Renderbuffer() : _flags{ObjectFlags::DestroyOnDestruction}
+Renderbuffer::Renderbuffer() : _flags{ObjectFlag::DestroyOnDestruction}
 {
   create();
 }
@@ -17,12 +17,12 @@ Renderbuffer::Renderbuffer() : _flags{ObjectFlags::DestroyOnDestruction}
 void Renderbuffer::create()
 {
   glCreateRenderbuffers(1, &_id);
-  _flags |= ObjectFlags::Created;
+  _flags |= ObjectFlag::Created;
 }
 
 Renderbuffer::~Renderbuffer()
 {
-  if (!_id || !(_flags & ObjectFlags::DestroyOnDestruction)) return;
+  if (!_id || !(_flags & ObjectFlag::DestroyOnDestruction)) return;
 
   auto& binding = Context::current().state().framebuffer->renderbufferBinding;
   if (binding == _id) binding = 0;

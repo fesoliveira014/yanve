@@ -114,24 +114,60 @@ void Frustum::buildBoxFrustum(const glm::mat4& transformation, float left, float
 
 bool Frustum::cullSphere(glm::vec3 origin, float radius) const
 {
+  for (size_t i = 0; i < 6; ++i) {
+    if (_planes[i].distanceToPoint(origin) > radius) 
+      return true;
+  }
   return false;
 }
 
 bool Frustum::cullBox(const AABB& box) const
 {
+  for (size_t i = 0; i < 6; ++i) {
+    const glm::vec3& normal = _planes[i].normal;
+
+    glm::vec3 positive = box.min;
+    if (normal.x <= 0) positive.x = box.max.x;
+    if (normal.y <= 0) positive.y = box.max.y;
+    if (normal.z <= 0) positive.z = box.max.z;
+
+    if (_planes[i].distanceToPoint(positive) > 0) return true;
+  }
   return false;
 }
 
 bool Frustum::cullFrustum(const Frustum& frustum)
 {
+  for (size_t i = 0; i < 6; ++i) {
+    bool out = true;
+
+    for (size_t j = 0; j < 8; ++j) {
+      if (_planes[i].distanceToPoint(frustum._corners[j]) < 0) {
+        out = false;
+        break;
+      }
+    }
+
+    if (out) return true;
+  }
   return false;
 }
 
-AABB Frustum::calculateAABB() const
+void Frustum::calculateAABB(glm::vec3& min, glm::vec3& max) const
 {
-  return AABB();
+  constexpr float maxFloat = std::numeric_limits<float>::max();
+
+  min.x =  maxFloat; min.y =  maxFloat; min.z =  maxFloat;
+  max.x = -maxFloat; max.y = -maxFloat; max.z = -maxFloat;
+
+  for (size_t i = 0; i < 8; ++i) {
+    if (_corners[i].x < min.x) min.x = _corners[i].x;
+    if (_corners[i].y < min.y) min.y = _corners[i].y;
+    if (_corners[i].z < min.z) min.z = _corners[i].z;
+    if (_corners[i].x > max.x) max.x = _corners[i].x;
+    if (_corners[i].y > max.y) max.y = _corners[i].y;
+    if (_corners[i].z > max.z) max.z = _corners[i].z;
+  }
 }
-
-
 
 }

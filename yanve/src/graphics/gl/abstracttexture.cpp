@@ -9,17 +9,17 @@
 namespace yanve::gl
 {
 AbstractTexture::AbstractTexture(GLenum target) :
-  _flags{ObjectFlags::DestroyOnDestruction},
+  _flags{ObjectFlag::DestroyOnDestruction},
   _target{target}
 {
   //glGenTextures(1, &_id);
   glCreateTextures(target, 1, &_id);
-  _flags |= ObjectFlags::Created;
+  _flags |= ObjectFlag::Created;
 }
 
 AbstractTexture::~AbstractTexture()
 {
-  if (!_id || !(_flags & ObjectFlags::DestroyOnDestruction)) return;
+  if (!_id || !(_flags & ObjectFlag::DestroyOnDestruction)) return;
 
   // TODO: update global state to reflect deletion
   auto& state = *Context::current().state().texture;

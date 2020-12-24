@@ -26,6 +26,7 @@ public:
   
 protected:
   SDL_Window* handle() { return _window; }
+  SDL_GLContext* context() { return &_context; }
 
   SDL_Window* _window;
   SDL_GLContext _context;

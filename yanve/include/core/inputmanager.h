@@ -169,8 +169,6 @@ public:
   bool quit() const { return _quit; }
 
 private:
-  
-  
   KeyState _keyboardState[Key::numKeys];
   MouseButtonState _mouseButtonState[MouseButtom::numButtons];
   MouseCursorState _mouseCursorState;

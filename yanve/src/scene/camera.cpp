@@ -3,37 +3,32 @@
 #include <scene/camera.h>
 #include <math/angle.h>
 #include <glm/gtx/quaternion.hpp>
+#include <utils/logger.h>
 
 namespace yanve::scene
 {
-Camera::Camera() : 
-  SceneNode(),
-  _view{},
-  _projection{},
-  _absPosition{},
-  _frustumLeft{}, _frustumRight{},
-  _frustumTop{}, _frustumBottom{},
-  _frustumNear{}, _frustumFar{},
-  _frustum{},
-  _orthographic{ false },
-  _manualProjection{ false }
-{
-  _name = "camera";
-}
+static const std::string LOG_TAG = "Camera::";
 
-Camera::Camera(SceneNode* parent) : 
-  SceneNode(parent),
+Camera::Camera(const CameraData& data) : 
+  SceneNode(data),
   _view{},
   _projection{},
   _absPosition{},
   _frustumLeft{}, _frustumRight{},
   _frustumTop{}, _frustumBottom{},
   _frustumNear{}, _frustumFar{},
+  _fov{data.fov},
+  _aspect{data.aspect},
+  _near{data.nearPlane},
+  _far{data.farPlane},
   _frustum{},
-  _orthographic{ false },
+  _orthographic{ data.orthographic },
   _manualProjection{ false }
 {
-  _name = "camera";
+  _renderable = false;
+  _type = SceneNodeType::Camera;
+  LogInfo(LOG_TAG + __func__, "cameraData translation: {%.2f, %.2f, %.2f}", data.translation.x, data.translation.y, data.translation.z);
+  LogInfo(LOG_TAG + __func__, "camera position: {%.2f, %.2f, %.2f}", _absPosition.x, _absPosition.y, _absPosition.z);
 }
 
 void Camera::setViewParameters(float fov, float aspect, float nearPlane, float farPlane)

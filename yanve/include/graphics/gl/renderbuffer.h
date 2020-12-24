@@ -25,7 +25,7 @@ public:
   }
 
   explicit Renderbuffer();
-  explicit Renderbuffer(NoCreateT) noexcept : _id{ 0 }, _flags{ ObjectFlags::DestroyOnDestruction } {}
+  explicit Renderbuffer(NoCreateT) noexcept : _id{ 0 }, _flags{ ObjectFlag::DestroyOnDestruction } {}
 
   Renderbuffer(const Renderbuffer&) = delete;
   inline Renderbuffer(Renderbuffer&& other) noexcept;

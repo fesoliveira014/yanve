@@ -37,7 +37,7 @@ void AbstractFramebuffer::bindInternal(FramebufferTarget target)
     state.writeBinding = _id;
   }
 
-  _flags |= ObjectFlags::Created;
+  _flags |= ObjectFlag::Created;
   glBindFramebuffer(GLenum(target), _id);
 }
 
@@ -50,7 +50,7 @@ FramebufferTarget AbstractFramebuffer::bindInternal()
 
   state.readBinding = _id;
 
-  _flags |= ObjectFlags::Created;
+  _flags |= ObjectFlag::Created;
   glBindFramebuffer(GLenum(FramebufferTarget::Read), _id);
   return FramebufferTarget::Read;
 }

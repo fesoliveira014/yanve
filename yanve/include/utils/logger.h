@@ -10,7 +10,7 @@
 #define LogError(tag, str, ...) LogInstance.LogE(tag, yanve::utils::stringFormat(str, __VA_ARGS__))
 #define LogWarning(tag, str, ...) LogInstance.LogW(tag, yanve::utils::stringFormat(str, __VA_ARGS__))
 
-#ifdef YANVE_DEBUG
+#ifdef YANVE_VERBOSE
 #define LogVerbose(tag, str, ...) LogInfo(tag, str, __VA_ARGS__)
 #else
 #define LogVerbose(tag, str, ...)

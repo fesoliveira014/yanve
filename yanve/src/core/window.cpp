@@ -18,7 +18,7 @@ Window::Window(std::string title, int width, int height) :
   }
 
   _window = SDL_CreateWindow(title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-                             width, height, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
+                             width, height, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
 
   if (_window == nullptr) {
     LogError(LOG_TAG + __func__, "Could not initialize SDL window.");

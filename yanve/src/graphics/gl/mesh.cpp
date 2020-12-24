@@ -1,5 +1,5 @@
 #include <graphics/gl/mesh.h>
-#include <graphics/gl/shaderprogram.h>
+#include <graphics/gl/shaderpipeline.h>
 
 #include <graphics/gl/context.h>
 #include <graphics/gl/state/state.h>
@@ -13,7 +13,7 @@ Mesh::Mesh(MeshPrimitive primitive) :
   _primitive{ primitive }
 {
   glCreateVertexArrays(1, &_vao);
-  _flags |= ObjectFlags::Created;
+  _flags |= ObjectFlag::Created;
 }
 
 Mesh::Mesh(GLuint vao, MeshPrimitive primitive, ObjectFlags flags) :
@@ -41,7 +41,7 @@ Mesh::Mesh(Mesh&& other) noexcept :
 
 Mesh::~Mesh()
 {
-  if (!(_vao && (_flags & ObjectFlags::DestroyOnDestruction))) return;
+  if (!(_vao && (_flags & ObjectFlag::DestroyOnDestruction))) return;
 
   auto& state = *Context::current().state().mesh;
 
@@ -83,7 +83,7 @@ Mesh& Mesh::setIndexBuffer(Buffer&& buffer, GLintptr offset, MeshIndexType type,
   return *this;
 }
 
-Mesh& Mesh::draw(ShaderProgram& shader)
+Mesh& Mesh::draw(ShaderPipeline& shader)
 {
   if (!_count) return *this;
 
@@ -126,7 +126,7 @@ void Mesh::bindVAO()
 
   if (current == _vao) return;
 
-  _flags |= ObjectFlags::Created;
+  _flags |= ObjectFlag::Created;
   bindVAOInternal(_vao);
 
   Context::current().state()

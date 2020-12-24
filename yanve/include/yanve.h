@@ -22,7 +22,7 @@
 #include <graphics/gl/attribute.h>
 #include <graphics/gl/buffer.h>
 #include <graphics/gl/shader.h>
-#include <graphics/gl/shaderprogram.h>
+#include <graphics/gl/shaderpipeline.h>
 #include <graphics/gl/mesh.h>
 #include <graphics/gl/pixelformat.h>
 #include <graphics/gl/sampler.h>
@@ -45,9 +45,11 @@
 #include <math/plane.h>
 #include <math/frustum.h>
 
+#include <scene/scenemanager.h>
 #include <scene/scenenode.h>
 #include <scene/scene.h>
 #include <scene/camera.h>
+#include <scene/meshnode.h>
 
 #include <utils/logger.h>
 #include <utils/clock.h>

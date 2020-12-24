@@ -1,7 +1,7 @@
 #pragma once
 
 #include <common.h>
-#include <graphics/gl/shaderprogram.h>
+#include <graphics/gl/shaderpipeline.h>
 
 namespace yanve::gl::detail
 {

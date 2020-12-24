@@ -28,7 +28,7 @@ i32 Framebuffer::maxColorAttachments()
   return value;
 }
 
-Framebuffer::Framebuffer(const Rectangle2Di& viewport) : AbstractFramebuffer{ 0, viewport, ObjectFlags::DestroyOnDestruction }
+Framebuffer::Framebuffer(const Rectangle2Di& viewport) : AbstractFramebuffer{ 0, viewport, ObjectFlag::DestroyOnDestruction }
 {
   _viewport = viewport;
   create();
@@ -37,12 +37,12 @@ Framebuffer::Framebuffer(const Rectangle2Di& viewport) : AbstractFramebuffer{ 0,
 void Framebuffer::create()
 {
   glCreateFramebuffers(1, &_id);
-  _flags |= ObjectFlags::Created;
+  _flags |= ObjectFlag::Created;
 }
 
 Framebuffer::~Framebuffer()
 {
-  if (!_id || !(_flags & ObjectFlags::DestroyOnDestruction)) return;
+  if (!_id || !(_flags & ObjectFlag::DestroyOnDestruction)) return;
 
   auto& state = *Context::current().state().framebuffer;
   

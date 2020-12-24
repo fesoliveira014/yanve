@@ -37,7 +37,7 @@ enum class MeshPrimitive
   TriangleStripAdjacency = GL_TRIANGLE_STRIP_ADJACENCY
 };
 
-class ShaderProgram;
+class ShaderPipeline;
 
 class YANVE_API Mesh : public GLObject
 {
@@ -128,8 +128,8 @@ public:
   MeshIndexType indexType() const { return _indexType; }
   GLsizei indexTypeSize() const { return meshIndexTypeSize(_indexType); }
 
-  Mesh& draw(ShaderProgram& shader);
-  Mesh& draw(ShaderProgram&& shader) { return draw(shader); }
+  Mesh& draw(ShaderPipeline& shader);
+  Mesh& draw(ShaderPipeline&& shader) { return draw(shader); }
 
   template <class ... T>
   Mesh& addBuffer(Buffer& buffer, GLintptr offset, const T& ... attributes){
@@ -183,6 +183,6 @@ protected:
   GLsizei meshIndexTypeSize(MeshIndexType type) const;
 };
 
-inline Mesh::Mesh(NoCreateT) : _vao{ 0 }, _flags{ObjectFlags::DestroyOnDestruction} {}
+inline Mesh::Mesh(NoCreateT) : _vao{ 0 }, _flags{ObjectFlag::DestroyOnDestruction} {}
 
 }
