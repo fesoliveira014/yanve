@@ -2,6 +2,8 @@
 
 #include <common.h>
 #include <graphics/gl/globject.h>
+#include <graphics/gl/mesh.h>
+#include <graphics/gl/meshview.h>
 
 namespace yanve::gl 
 {
@@ -25,6 +27,9 @@ namespace yanve::gl
     ~ShaderPipeline();
 
     void use();
+
+    void draw(Mesh& mesh);
+    void draw(MeshView& meshView);
 
     void attachShader(Shader& shader);
     void attachShaders(std::initializer_list<std::reference_wrapper<Shader>> shaders);

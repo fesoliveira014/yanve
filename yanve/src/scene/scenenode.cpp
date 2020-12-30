@@ -34,14 +34,6 @@ SceneNode::SceneNode(const SceneNodeData& data) :
 
 SceneNode::~SceneNode() 
 {
-  // this is wrong, scene node should not be responsible for this
-  // move to scene manager instead
-  for (auto& child : _children) {
-    delete child;
-  }
-
-  _children.clear();
-  _parent = nullptr;
 }
 
 SceneNode& SceneNode::translate(const glm::vec3& translation)

@@ -46,6 +46,24 @@ void ShaderPipeline::use()
   glUseProgram(state.current = _id);
 }
 
+void ShaderPipeline::draw(Mesh& mesh)
+{
+  if (!mesh._count || !mesh._instanceCount) return;
+
+  use();
+  
+  mesh.drawInternal(mesh._count, mesh._baseVertex, mesh._instanceCount, mesh._baseInstance, mesh._indexOffset, mesh._indexStart, mesh._indexEnd);
+}
+
+void ShaderPipeline::draw(MeshView& mesh)
+{
+  if (!mesh._count || !mesh._instanceCount) return;
+
+  use();
+
+  mesh._mesh.get().drawInternal(mesh._count, mesh._baseVertex, mesh._instanceCount, mesh._baseInstance, mesh._indexOffset, mesh._indexStart, mesh._indexEnd);
+}
+
 void ShaderPipeline::attachShader(Shader& shader)
 {
   glAttachShader(_id, shader.id());

@@ -236,6 +236,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="include\asset\asset.h" />
     <ClInclude Include="include\core\types.h" />
     <ClInclude Include="include\data\geometrydata.h" />
     <ClInclude Include="include\external\imgui\imconfig.h" />
@@ -260,6 +261,7 @@
     <ClInclude Include="include\graphics\gl\extensions.h" />
     <ClInclude Include="include\graphics\gl\framebuffer.h" />
     <ClInclude Include="include\graphics\gl\globject.h" />
+    <ClInclude Include="include\graphics\gl\meshview.h" />
     <ClInclude Include="include\graphics\gl\pixelformat.h" />
     <ClInclude Include="include\graphics\gl\renderbuffer.h" />
     <ClInclude Include="include\graphics\gl\renderbufferformat.h" />
@@ -336,6 +338,7 @@
     <ClCompile Include="src\graphics\gl\state\texturestate.cpp" />
     <ClCompile Include="src\graphics\gl\texture.cpp" />
     <ClCompile Include="src\graphics\gl\renderbuffer.cpp" />
+    <ClCompile Include="src\graphics\meshview.cpp" />
     <ClCompile Include="src\math\frustum.cpp" />
     <ClCompile Include="src\platform\dllmain.cpp" />
     <ClCompile Include="src\scene\camera.cpp" />

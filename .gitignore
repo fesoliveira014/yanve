@@ -352,3 +352,4 @@ healthchecksdb
 
 # End of https://www.gitignore.io/api/visualstudio
 /yanve/include/graphics/geometry.h
+/yanve/include/asset/asset.h

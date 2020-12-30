@@ -210,6 +210,12 @@
     <ClInclude Include="include\external\imgui\imgui_impl_sdl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\asset\asset.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\graphics\gl\meshview.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\yanve.cpp">
@@ -339,6 +345,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\scene\scenemanager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\graphics\meshview.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

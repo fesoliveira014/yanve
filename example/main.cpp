@@ -177,7 +177,7 @@ public:
     deltaTimer{},
     clock{},
     mesh{yanve::gl::MeshPrimitive::Triangles},
-    cube2{ yanve::gl::MeshPrimitive::Triangles },
+    cube2{mesh},
     shaderProgram{},
     textureShaderProgram{},
     quadShaderProgram{},
@@ -341,11 +341,7 @@ public:
       .setCount(vertices.size())
       .setIndexBuffer(indexBuffer, 0, yanve::gl::Mesh::MeshIndexType::UnsignedInt);
 
-    cube2.addBuffer(vertexBuffer, 0, TestShader::Position{})
-      .addBuffer(colorBuffer, 0, TestShader::Color{})
-      .addBuffer(texBuffer, 0, TestTextureShader::UV{})
-      .setCount(vertices.size())
-      .setIndexBuffer(indexBuffer, 0, yanve::gl::Mesh::MeshIndexType::UnsignedInt);
+    cube2.setCount(vertices.size());
 
     screenTexture.setWrapping({ yanve::gl::SamplerWrapping::ClampToEdge, yanve::gl::SamplerWrapping::ClampToEdge })
       .setMinificationFilter(yanve::gl::SamplerFilter::Linear)
@@ -489,7 +485,6 @@ public:
       running = !input.quit();
     }
 
-    
     ((yanve::scene::Camera*)sm.resolveNodeID(cameraId))->translate(cameraPosition);
     ((yanve::scene::Camera*)sm.resolveNodeID(cameraId))->rotate(cameraRotation);
 
@@ -539,7 +534,7 @@ public:
     yanve::GuiManager::beginFrame();
   }
 
-  void sceneGui(yanve::scene::SceneNode& node)
+  void updateSceneGui(yanve::scene::SceneNode& node)
   {
     if (&node != nullptr) {
       std::string nodeName = yanve::scene::nodeTypeStr(node.type());
@@ -552,7 +547,7 @@ public:
         if (node.children().size() > 0) {
           ImGui::Text("children (%d):", node.children().size());
           for (auto child : node.children()) {
-            sceneGui(*child);
+            updateSceneGui(*child);
           }
         }
         ImGui::TreePop();
@@ -592,7 +587,7 @@ public:
       }
 
       if (ImGui::CollapsingHeader("Scene")) {
-        sceneGui(sm.getRootNode());
+        updateSceneGui(sm.getRootNode());
       }
       
       
@@ -686,7 +681,7 @@ protected:
   yanve::gl::Buffer quadTexBuffer;
 
   yanve::gl::Mesh mesh;
-  yanve::gl::Mesh cube2;
+  yanve::gl::MeshView cube2;
   yanve::gl::Mesh quadMesh;
   yanve::gl::Texture2D texture;
   yanve::gl::Texture2D screenTexture;

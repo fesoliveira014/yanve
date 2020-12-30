@@ -92,6 +92,8 @@ protected:
   
   GLuint _baseVertex;
   GLsizei _count;
+  GLsizei _instanceCount{ 1 };
+  GLuint _baseInstance{};
   ObjectFlags _flags;
 
 public:
@@ -107,6 +109,8 @@ public:
 
   Mesh& setPrimitive(MeshPrimitive primitive) { _primitive = primitive; return *this; }
   Mesh& setCount(GLsizei count) { _count = count; return *this; }
+  Mesh& setInstanceCount(GLsizei instanceCount) { _instanceCount = instanceCount; return *this; }
+  Mesh& setBaseInstance(GLuint baseInstance) { _baseInstance = baseInstance; return *this; }
   Mesh& setBaseVertex(GLuint baseVertex) { _baseVertex = baseVertex; return *this; }
   
   Mesh& setIndexBuffer(Buffer&& buffer, GLintptr offset, MeshIndexType type, GLuint start, GLuint end);
@@ -123,6 +127,8 @@ public:
 
   MeshPrimitive primitive() const { return _primitive; }
   GLsizei count() const { return _count; }
+  GLsizei instanceCount() const { return _instanceCount; }
+  GLuint baseInstance() const { return _baseInstance; }
   GLuint baseVertex() const { return _baseVertex; }
   bool isIndexed() const { return _indexBuffer.id() != 0; }
   MeshIndexType indexType() const { return _indexType; }
@@ -138,6 +144,8 @@ public:
   }
 
 protected:
+  friend class MeshView;
+  friend class ShaderPipeline;
   friend struct detail::MeshState;
   explicit Mesh(GLuint vao, MeshPrimitive primitive, ObjectFlags flags);
 
@@ -177,6 +185,8 @@ protected:
 
   void attributePointer(Buffer& buffer, const GLuint location, const GLint size, const GLenum type, GLint normalized, const GLintptr offset, const GLsizei stride/*, GLint divisor*/);
   void attributePointerInternal(AttributeLayout&& attribute);
+
+  void drawInternal(GLsizei count, GLuint baseVertex, GLsizei instanceCount, GLuint baseInstance, GLintptr indexOffset, GLuint indexStart, GLuint indexEnd);
 
   void vertexAttribPointer(AttributeLayout&& attribute);
   

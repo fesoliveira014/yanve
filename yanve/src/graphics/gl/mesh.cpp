@@ -85,29 +85,59 @@ Mesh& Mesh::setIndexBuffer(Buffer&& buffer, GLintptr offset, MeshIndexType type,
 
 Mesh& Mesh::draw(ShaderPipeline& shader)
 {
-  if (!_count) return *this;
-
-  bindVAO();
-  shader.use();
-
-  if (!_indexBuffer.id())
-    glDrawArrays(GLenum(_primitive), _baseVertex, _count);
-
-  else if (_baseVertex) {
-    if (_indexEnd)
-      glDrawRangeElementsBaseVertex(GLenum(_primitive), _indexStart, _indexEnd, _count, GLenum(_indexType), reinterpret_cast<void*>(_indexOffset), _baseVertex);
-    else
-      glDrawElementsBaseVertex(GLenum(_primitive), _count, GLenum(_indexType), reinterpret_cast<void*>(_indexOffset), _baseVertex);
-  }
-
-  else {
-    if (_indexEnd)
-      glDrawRangeElements(GLenum(_primitive), _indexStart, _indexEnd, _count, GLenum(_indexType), reinterpret_cast<void*>(_indexOffset));
-    else
-      glDrawElements(GLenum(_primitive), _count, GLenum(_indexType), reinterpret_cast<void*>(_indexOffset));
-  }
-
+  shader.draw(*this);
   return *this;
+}
+
+void Mesh::drawInternal(GLsizei count, GLuint baseVertex, GLsizei instanceCount, GLuint baseInstance, GLintptr indexOffset, GLuint indexStart, GLuint indexEnd)
+{
+  bindVAO();
+
+  if (instanceCount == 1) {
+    if (!_indexBuffer.id())
+      glDrawArrays(GLenum(_primitive), _baseVertex, _count);
+
+    else if (_baseVertex) {
+      if (_indexEnd)
+        glDrawRangeElementsBaseVertex(GLenum(_primitive), indexStart, indexEnd, count, GLenum(_indexType), reinterpret_cast<GLvoid*>(indexOffset), baseVertex);
+      else
+        glDrawElementsBaseVertex(GLenum(_primitive), count, GLenum(_indexType), reinterpret_cast<GLvoid*>(indexOffset), baseVertex);
+    }
+
+    else {
+      if (_indexEnd)
+        glDrawRangeElements(GLenum(_primitive), indexStart, indexEnd, count, GLenum(_indexType), reinterpret_cast<GLvoid*>(indexOffset));
+      else
+        glDrawElements(GLenum(_primitive), count, GLenum(_indexType), reinterpret_cast<GLvoid*>(indexOffset));
+    }
+  }
+  else {
+    if (!_indexBuffer.id()) {
+      if (baseInstance) {
+        glDrawArraysInstancedBaseInstance(GLenum(_primitive), baseVertex, count, instanceCount, baseInstance);
+      }
+      else {
+        glDrawArraysInstanced(GLenum(_primitive), baseVertex, count, instanceCount);
+      }
+    }
+    else if (baseVertex) {
+      if (baseInstance) {
+        glDrawElementsInstancedBaseVertexBaseInstance(GLenum(_primitive), count, GLenum(_indexType), reinterpret_cast<GLvoid*>(indexOffset), instanceCount, baseVertex, baseInstance);
+      }
+      else {
+        glDrawElementsInstancedBaseVertex(GLenum(_primitive), count, GLenum(_indexType), reinterpret_cast<GLvoid*>(indexOffset), instanceCount, baseVertex);
+      }
+    }
+    else {
+      if (baseInstance) {
+        glDrawElementsInstancedBaseInstance(GLenum(_primitive), count, GLenum(_indexType), reinterpret_cast<GLvoid*>(indexOffset), instanceCount, baseInstance);
+      }
+      else {
+        glDrawElementsInstanced(GLenum(_primitive), count, GLenum(_indexType), reinterpret_cast<GLvoid*>(indexOffset), instanceCount);
+      }
+    }
+  }
+  
 }
 
 GLsizei Mesh::meshIndexTypeSize(MeshIndexType type) const
