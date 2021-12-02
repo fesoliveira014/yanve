@@ -12,8 +12,8 @@ class YANVE_API MeshView
 public:
   MeshView(Mesh& mesh);
 
-  Mesh& mesh() { return _mesh; }
-  const Mesh& mesh() const { return _mesh; }
+  Mesh& mesh() { return *_mesh; }
+  const Mesh& mesh() const { return *_mesh; }
 
   GLsizei count() { return _count; }
   MeshView& setCount(GLsizei count)
@@ -52,7 +52,7 @@ private:
   friend class ShaderPipeline;
 
   // todo: maybe change to std::optional<std::reference_wrapper<Mesh>>
-  std::reference_wrapper<Mesh> _mesh;
+  optional_ref<Mesh> _mesh;
   GLsizei _count;
   GLuint _baseVertex;
   GLuint _instanceCount{ 1 };

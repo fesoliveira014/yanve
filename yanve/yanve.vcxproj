@@ -236,9 +236,17 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="C:\Users\fesol\source\repos\tinygltf\json.hpp" />
+    <ClInclude Include="C:\Users\fesol\source\repos\tinygltf\stb_image.h" />
+    <ClInclude Include="C:\Users\fesol\source\repos\tinygltf\stb_image_write.h" />
+    <ClInclude Include="C:\Users\fesol\source\repos\tinygltf\tiny_gltf.h" />
     <ClInclude Include="include\asset\asset.h" />
+    <ClInclude Include="include\asset\assetmanager.h" />
+    <ClInclude Include="include\asset\materialasset.h" />
+    <ClInclude Include="include\asset\meshasset.h" />
     <ClInclude Include="include\core\types.h" />
     <ClInclude Include="include\data\geometrydata.h" />
+    <ClInclude Include="include\data\vertexformat.h" />
     <ClInclude Include="include\external\imgui\imconfig.h" />
     <ClInclude Include="include\external\imgui\imgui.h" />
     <ClInclude Include="include\external\imgui\imgui_impl_opengl3.h" />
@@ -254,9 +262,14 @@
     <ClInclude Include="include\common.h" />
     <ClInclude Include="include\core\gui.h" />
     <ClInclude Include="include\core\window.h" />
+    <ClInclude Include="include\external\tinygltf\json.hpp" />
+    <ClInclude Include="include\external\tinygltf\stb_image.h" />
+    <ClInclude Include="include\external\tinygltf\stb_image_write.h" />
+    <ClInclude Include="include\external\tinygltf\tiny_gltf.h" />
     <ClInclude Include="include\graphics\gl\abstractframebuffer.h" />
     <ClInclude Include="include\graphics\gl\buffer.h" />
     <ClInclude Include="include\graphics\gl\context.h" />
+    <ClInclude Include="include\graphics\gl\cubemaptexture.h" />
     <ClInclude Include="include\graphics\gl\defaultframebuffer.h" />
     <ClInclude Include="include\graphics\gl\extensions.h" />
     <ClInclude Include="include\graphics\gl\framebuffer.h" />
@@ -299,6 +312,7 @@
     <ClInclude Include="include\utils\mesh\interleave.h" />
     <ClInclude Include="include\utils\misc.h" />
     <ClInclude Include="include\utils\nocreate.h" />
+    <ClInclude Include="include\utils\optionalref.h" />
     <ClInclude Include="include\utils\random.h" />
     <ClInclude Include="include\yanve.h" />
     <ClInclude Include="include\platform\targetver.h" />
@@ -315,15 +329,19 @@
     <ClCompile Include="include\external\imgui\imgui_widgets.cpp" />
     <ClCompile Include="include\graphics\gl\attribute.h" />
     <ClCompile Include="include\utils\logger.h" />
+    <ClCompile Include="src\asset\assetmanager.cpp" />
+    <ClCompile Include="src\asset\meshasset.cpp" />
     <ClCompile Include="src\core\application.cpp" />
     <ClCompile Include="src\core\gui.cpp" />
     <ClCompile Include="src\core\inputmanager.cpp" />
     <ClCompile Include="src\core\window.cpp" />
+    <ClCompile Include="src\data\vertexformat.cpp" />
     <ClCompile Include="src\graphics\gl\abstractframebuffer.cpp" />
     <ClCompile Include="src\graphics\gl\abstracttexture.cpp" />
     <ClCompile Include="src\graphics\gl\buffer.cpp" />
     <ClCompile Include="src\graphics\gl\attribute.cpp" />
     <ClCompile Include="src\graphics\gl\context.cpp" />
+    <ClCompile Include="src\graphics\gl\cubemaptexture.cpp" />
     <ClCompile Include="src\graphics\gl\defaultframebuffer.cpp" />
     <ClCompile Include="src\graphics\gl\framebuffer.cpp" />
     <ClCompile Include="src\graphics\gl\renderer.cpp" />

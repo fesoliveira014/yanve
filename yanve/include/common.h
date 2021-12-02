@@ -40,3 +40,4 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include <core/types.h>
+#include <utils/optionalref.h> // try to use this everywhere you need a reference that might be null (?)

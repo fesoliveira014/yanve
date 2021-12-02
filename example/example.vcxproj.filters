@@ -32,6 +32,8 @@
     <None Include="res\shaders\depthfrag.glsl" />
     <None Include="res\shaders\quadvert.glsl" />
     <None Include="res\shaders\quadfrag.glsl" />
+    <None Include="res\shaders\cubemapvert.glsl" />
+    <None Include="res\shaders\cubemapfrag.glsl" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stb\stb_image.h">

@@ -55,13 +55,13 @@ void ShaderPipeline::draw(Mesh& mesh)
   mesh.drawInternal(mesh._count, mesh._baseVertex, mesh._instanceCount, mesh._baseInstance, mesh._indexOffset, mesh._indexStart, mesh._indexEnd);
 }
 
-void ShaderPipeline::draw(MeshView& mesh)
+void ShaderPipeline::draw(MeshView& meshView)
 {
-  if (!mesh._count || !mesh._instanceCount) return;
+  if (!meshView._count || !meshView._instanceCount) return;
 
   use();
 
-  mesh._mesh.get().drawInternal(mesh._count, mesh._baseVertex, mesh._instanceCount, mesh._baseInstance, mesh._indexOffset, mesh._indexStart, mesh._indexEnd);
+  meshView.mesh().drawInternal(meshView._count, meshView._baseVertex, meshView._instanceCount, meshView._baseInstance, meshView._indexOffset, meshView._indexStart, meshView._indexEnd);
 }
 
 void ShaderPipeline::attachShader(Shader& shader)

@@ -285,11 +285,12 @@ void AbstractTexture::Helper<1>::setStorage(AbstractTexture& texture, GLsizei le
   texture.storage(levels, internalFormat, size);
 }
 
-void AbstractTexture::Helper<1>::setImage(AbstractTexture & texture, GLint level, TextureFormat internalFormat, PixelFormat format, PixelType type, byte * imageBuffer, size_t size)
+void AbstractTexture::Helper<1>::setImage(AbstractTexture & texture, GLenum target, GLint level, TextureFormat internalFormat, PixelFormat format, PixelType type, byte * imageBuffer, size_t size)
 {
   texture.bindInternal();
-  glTexImage1D(texture._target, level, GLint(internalFormat), size, 0, GLenum(format), GLenum(type), imageBuffer);
+  glTexImage1D(target, level, GLint(internalFormat), size, 0, GLenum(format), GLenum(type), imageBuffer);
 }
+
 
 void AbstractTexture::Helper<1>::setSubImage(AbstractTexture & texture, GLint level, const size_t& offset, const size_t& width, PixelFormat format, PixelType type, byte * imageBuffer, size_t size)
 {
@@ -317,10 +318,11 @@ void AbstractTexture::Helper<2>::setStorage(AbstractTexture & texture, GLsizei l
   texture.storage(levels, internalFormat, size);
 }
 
-void AbstractTexture::Helper<2>::setImage(AbstractTexture & texture, GLint level, TextureFormat internalFormat, PixelFormat format, PixelType type, byte * imageBuffer, const glm::uvec2 & size)
+
+void AbstractTexture::Helper<2>::setImage(AbstractTexture& texture, GLenum target, GLint level, TextureFormat internalFormat, PixelFormat format, PixelType type, byte* imageBuffer, const glm::uvec2& size)
 {
   texture.bindInternal();
-  glTexImage2D(texture._target, level, GLint(internalFormat), size.x, size.y, 0, GLenum(format), GLenum(type), imageBuffer);
+  glTexImage2D(target, level, GLint(internalFormat), size.x, size.y, 0, GLenum(format), GLenum(type), imageBuffer);
 }
 
 void AbstractTexture::Helper<2>::setSubImage(AbstractTexture & texture, GLint level, const glm::uvec2 & offset, const glm::uvec2 & dims, PixelFormat format, PixelType type, byte * imageBuffer, const glm::uvec2 & size)

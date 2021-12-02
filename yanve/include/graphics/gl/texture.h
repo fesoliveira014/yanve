@@ -45,7 +45,7 @@ public:
 
   template <size_t d = dimensions, class = typename std::enable_if<d == 3>::type>
   void bindImage(GLint imageUnit, GLint level, GLint layer, GLenum access, GLenum format) {
-    bindImageInternal(imageUnit, level, false, layer, access, format);
+    bindImageInternal(imageUnit, level, true, layer, access, format);
   }
 
   Texture<dimensions>& setBaseLevel(GLint level)

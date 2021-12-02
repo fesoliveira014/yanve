@@ -95,17 +95,17 @@ void Mesh::drawInternal(GLsizei count, GLuint baseVertex, GLsizei instanceCount,
 
   if (instanceCount == 1) {
     if (!_indexBuffer.id())
-      glDrawArrays(GLenum(_primitive), _baseVertex, _count);
+      glDrawArrays(GLenum(_primitive), baseVertex, count);
 
-    else if (_baseVertex) {
-      if (_indexEnd)
+    else if (baseVertex) {
+      if (indexEnd)
         glDrawRangeElementsBaseVertex(GLenum(_primitive), indexStart, indexEnd, count, GLenum(_indexType), reinterpret_cast<GLvoid*>(indexOffset), baseVertex);
       else
         glDrawElementsBaseVertex(GLenum(_primitive), count, GLenum(_indexType), reinterpret_cast<GLvoid*>(indexOffset), baseVertex);
     }
 
     else {
-      if (_indexEnd)
+      if (indexEnd)
         glDrawRangeElements(GLenum(_primitive), indexStart, indexEnd, count, GLenum(_indexType), reinterpret_cast<GLvoid*>(indexOffset));
       else
         glDrawElements(GLenum(_primitive), count, GLenum(_indexType), reinterpret_cast<GLvoid*>(indexOffset));

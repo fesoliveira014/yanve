@@ -22,9 +22,12 @@ struct AttributeCount
 {
   template<class T, class ...U> typename std::enable_if<!std::is_convertible<T, std::size_t>::value, std::size_t>::type operator()(const T& first, const U& ... next) const 
   {
-    if (sizeof...(next) == 0 || AttributeCount{}(next) == first.size() || AttributeCount{}(next) == ~std::size_t{ 0 }) {
+    if (!(sizeof...(next) == 0 || AttributeCount{}(next) == first.size() || AttributeCount{}(next) == ~std::size_t{ 0 })) {
       LogError("AttributeCount", "Attribute arrays don't have the same length, expected %d but got %d", first.size(), AttributeCount{}(next...));
+      exit(1); // todo: add graceful exit
     }
+
+    return first.size();
   }
 
   template<class T, class... U> std::size_t operator()(std::size_t, const T& first, const U& ... next) const {

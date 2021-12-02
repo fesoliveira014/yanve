@@ -10,8 +10,8 @@ MeshView::MeshView(Mesh& mesh) : _mesh{mesh}
 
 MeshView& MeshView::setIndexRange(GLuint first, GLuint start, GLuint end)
 {
-  if (_mesh.get()._indexBuffer.id()) {
-    _indexOffset = _mesh.get()._indexOffset + first * _mesh.get().indexTypeSize();
+  if (_mesh->_indexBuffer.id()) {
+    _indexOffset = _mesh->_indexOffset + first * _mesh->indexTypeSize();
     _indexStart = start;
     _indexEnd = end;
   }
@@ -20,8 +20,8 @@ MeshView& MeshView::setIndexRange(GLuint first, GLuint start, GLuint end)
 
 MeshView& MeshView::setIndexRange(GLuint first)
 {
-  if (_mesh.get()._indexBuffer.id()) {
-    _indexOffset = _mesh.get()._indexOffset + first * _mesh.get().indexTypeSize();
+  if (_mesh->_indexBuffer.id()) {
+    _indexOffset = _mesh->_indexOffset + first * _mesh->indexTypeSize();
   }
   return *this;
 }

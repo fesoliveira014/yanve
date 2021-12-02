@@ -65,6 +65,53 @@ private:
 
 };
 
+class CubeMapShader : public yanve::gl::ShaderPipeline
+{
+public:
+  typedef yanve::gl::Attribute<0, glm::vec3> Position;
+
+  CubeMapShader() : ShaderPipeline()
+  {
+    yanve::gl::Shader vertex(yanve::gl::Shader::Type::Vertex);
+    yanve::gl::Shader fragment(yanve::gl::Shader::Type::Fragment);
+
+    vertex.addFile("res/shaders/cubemapvert.glsl");
+    fragment.addFile("res/shaders/cubemapfrag.glsl");
+
+    vertex.compile();
+    fragment.compile();
+
+    attachShaders({ vertex, fragment });
+
+    link();
+
+    _uniforms["view"] = getUniformLocation("view");
+    _uniforms["projection"] = getUniformLocation("projection");
+    _uniforms["skybox"] = getUniformLocation("skybox");
+  }
+
+  CubeMapShader& setViewMatrix(const glm::mat4& view)
+  {
+    setUniform("view", view);
+    return *this;
+  }
+
+  CubeMapShader& setProjectionMatrix(const glm::mat4& projection)
+  {
+    setUniform("projection", projection);
+    return *this;
+  }
+
+  CubeMapShader& bindTexture(yanve::gl::CubeMapTexture& texture)
+  {
+    texture.bind(TextureUnit);
+    return *this;
+  }
+
+private:
+  enum : GLuint { TextureUnit = 0 };
+};
+
 class TestShader : public yanve::gl::ShaderPipeline
 {
 
@@ -176,12 +223,15 @@ public:
     running{ true }, 
     deltaTimer{},
     clock{},
-    mesh{yanve::gl::MeshPrimitive::Triangles},
+    mesh{},
+    skyboxMesh{},
     cube2{mesh},
     shaderProgram{},
     textureShaderProgram{},
     quadShaderProgram{},
+    cubeMapShader{},
     texture{},
+    cubeMapTexture{},
     screenTexture{},
     screenFramebuffer{yanve::NoCreate},
     framesPerSec{ 0 },
@@ -208,81 +258,119 @@ public:
 
     yanve::gl::Renderer::disable(yanve::gl::Renderer::Feature::Blending);
 
-    /*glEnable(GL_DEBUG_OUTPUT);
+    glEnable(GL_DEBUG_OUTPUT);
     glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
     glDebugMessageCallback(openglCallbackFunction, nullptr);
     glDebugMessageControl(
       GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, NULL, true
-    );*/
+    );
 
-    quadVertices.push_back(glm::vec3(-1.0,  1.0, 0.0)); quadUV.push_back(glm::vec2(0.0, 1.0));
-    quadVertices.push_back(glm::vec3(-1.0, -1.0, 0.0)); quadUV.push_back(glm::vec2(0.0, 0.0));
-    quadVertices.push_back(glm::vec3( 1.0,  1.0, 0.0)); quadUV.push_back(glm::vec2(1.0, 1.0));
+    // quad vertices
+    {
+      quadVertices.push_back(glm::vec3(-1.0, 1.0, 0.0)); quadUV.push_back(glm::vec2(0.0, 1.0));
+      quadVertices.push_back(glm::vec3(-1.0, -1.0, 0.0)); quadUV.push_back(glm::vec2(0.0, 0.0));
+      quadVertices.push_back(glm::vec3(1.0, 1.0, 0.0)); quadUV.push_back(glm::vec2(1.0, 1.0));
 
-    quadVertices.push_back(glm::vec3( 1.0,  1.0, 0.0)); quadUV.push_back(glm::vec2(1.0, 1.0));
-    quadVertices.push_back(glm::vec3(-1.0, -1.0, 0.0)); quadUV.push_back(glm::vec2(0.0, 0.0));
-    quadVertices.push_back(glm::vec3( 1.0, -1.0, 0.0)); quadUV.push_back(glm::vec2(1.0, 0.0));
+      quadVertices.push_back(glm::vec3(1.0, 1.0, 0.0)); quadUV.push_back(glm::vec2(1.0, 1.0));
+      quadVertices.push_back(glm::vec3(-1.0, -1.0, 0.0)); quadUV.push_back(glm::vec2(0.0, 0.0));
+      quadVertices.push_back(glm::vec3(1.0, -1.0, 0.0)); quadUV.push_back(glm::vec2(1.0, 0.0));
+    }
 
-    yanve::gl::Buffer qVB{};
-    qVB.setData(quadVertices.data(), quadVertices.size() * sizeof(glm::vec3), yanve::gl::BufferUsage::StaticDraw);
+    // mesh vertices
+    {
+      //front
+      vertices.push_back(glm::vec3(-0.5, -0.5, -0.5)); uvs.push_back(glm::vec2(0.0f, 0.0f));
+      vertices.push_back(glm::vec3(0.5, 0.5, -0.5)); uvs.push_back(glm::vec2(1.0f, 1.0f));
+      vertices.push_back(glm::vec3(-0.5, 0.5, -0.5)); uvs.push_back(glm::vec2(0.0f, 1.0f));
+      vertices.push_back(glm::vec3(-0.5, -0.5, -0.5)); uvs.push_back(glm::vec2(0.0f, 0.0f));
+      vertices.push_back(glm::vec3(0.5, -0.5, -0.5)); uvs.push_back(glm::vec2(1.0f, 0.0f));
+      vertices.push_back(glm::vec3(0.5, 0.5, -0.5)); uvs.push_back(glm::vec2(1.0f, 1.0f));
 
-    yanve::gl::Buffer qTB{};
-    qTB.setData(quadUV.data(), quadUV.size() * sizeof(glm::vec2), yanve::gl::BufferUsage::StaticDraw);
+      // back
+      vertices.push_back(glm::vec3(0.5, -0.5, 0.5)); uvs.push_back(glm::vec2(0.0f, 0.0f));
+      vertices.push_back(glm::vec3(-0.5, 0.5, 0.5)); uvs.push_back(glm::vec2(1.0f, 1.0f));
+      vertices.push_back(glm::vec3(0.5, 0.5, 0.5)); uvs.push_back(glm::vec2(0.0f, 1.0f));
+      vertices.push_back(glm::vec3(0.5, -0.5, 0.5)); uvs.push_back(glm::vec2(0.0f, 0.0f));
+      vertices.push_back(glm::vec3(-0.5, -0.5, 0.5)); uvs.push_back(glm::vec2(1.0f, 0.0f));
+      vertices.push_back(glm::vec3(-0.5, 0.5, 0.5)); uvs.push_back(glm::vec2(1.0f, 1.0f));
 
-    quadVertexBuffer = std::move(qVB);
-    quadTexBuffer = std::move(qTB);
+      // left
+      vertices.push_back(glm::vec3(-0.5, -0.5, 0.5)); uvs.push_back(glm::vec2(0.0f, 0.0f));
+      vertices.push_back(glm::vec3(-0.5, 0.5, -0.5)); uvs.push_back(glm::vec2(1.0f, 1.0f));
+      vertices.push_back(glm::vec3(-0.5, 0.5, 0.5)); uvs.push_back(glm::vec2(0.0f, 1.0f));
+      vertices.push_back(glm::vec3(-0.5, -0.5, 0.5)); uvs.push_back(glm::vec2(0.0f, 0.0f));
+      vertices.push_back(glm::vec3(-0.5, -0.5, -0.5)); uvs.push_back(glm::vec2(1.0f, 0.0f));
+      vertices.push_back(glm::vec3(-0.5, 0.5, -0.5)); uvs.push_back(glm::vec2(1.0f, 1.0f));
 
-    quadMesh.addBuffer(quadVertexBuffer, 0, QuadShader::Position{})
-      .addBuffer(quadTexBuffer, 0, QuadShader::UV{})
-      .setCount(quadVertices.size());
+      // right
+      vertices.push_back(glm::vec3(0.5, -0.5, -0.5)); uvs.push_back(glm::vec2(0.0f, 0.0f));
+      vertices.push_back(glm::vec3(0.5, 0.5, 0.5)); uvs.push_back(glm::vec2(1.0f, 1.0f));
+      vertices.push_back(glm::vec3(0.5, 0.5, -0.5)); uvs.push_back(glm::vec2(0.0f, 1.0f));
+      vertices.push_back(glm::vec3(0.5, -0.5, -0.5)); uvs.push_back(glm::vec2(0.0f, 0.0f));
+      vertices.push_back(glm::vec3(0.5, -0.5, 0.5)); uvs.push_back(glm::vec2(1.0f, 0.0f));
+      vertices.push_back(glm::vec3(0.5, 0.5, 0.5)); uvs.push_back(glm::vec2(1.0f, 1.0f));
 
-    //front
-    vertices.push_back(glm::vec3(-0.5, -0.5, -0.5)); uvs.push_back(glm::vec2(0.0f, 0.0f));
-    vertices.push_back(glm::vec3( 0.5,  0.5, -0.5)); uvs.push_back(glm::vec2(1.0f, 1.0f));
-    vertices.push_back(glm::vec3(-0.5,  0.5, -0.5)); uvs.push_back(glm::vec2(0.0f, 1.0f));
-    vertices.push_back(glm::vec3(-0.5, -0.5, -0.5)); uvs.push_back(glm::vec2(0.0f, 0.0f));
-    vertices.push_back(glm::vec3( 0.5, -0.5, -0.5)); uvs.push_back(glm::vec2(1.0f, 0.0f));
-    vertices.push_back(glm::vec3( 0.5,  0.5, -0.5)); uvs.push_back(glm::vec2(1.0f, 1.0f));
+      // bottom
+      vertices.push_back(glm::vec3(-0.5, -0.5, 0.5)); uvs.push_back(glm::vec2(0.0f, 0.0f));
+      vertices.push_back(glm::vec3(0.5, -0.5, -0.5)); uvs.push_back(glm::vec2(1.0f, 1.0f));
+      vertices.push_back(glm::vec3(-0.5, -0.5, -0.5)); uvs.push_back(glm::vec2(0.0f, 1.0f));
+      vertices.push_back(glm::vec3(-0.5, -0.5, 0.5)); uvs.push_back(glm::vec2(0.0f, 0.0f));
+      vertices.push_back(glm::vec3(0.5, -0.5, 0.5)); uvs.push_back(glm::vec2(1.0f, 0.0f));
+      vertices.push_back(glm::vec3(0.5, -0.5, -0.5)); uvs.push_back(glm::vec2(1.0f, 1.0f));
 
-    // back
-    vertices.push_back(glm::vec3( 0.5, -0.5,  0.5)); uvs.push_back(glm::vec2(0.0f, 0.0f));
-    vertices.push_back(glm::vec3(-0.5,  0.5,  0.5)); uvs.push_back(glm::vec2(1.0f, 1.0f));
-    vertices.push_back(glm::vec3( 0.5,  0.5,  0.5)); uvs.push_back(glm::vec2(0.0f, 1.0f));
-    vertices.push_back(glm::vec3( 0.5, -0.5,  0.5)); uvs.push_back(glm::vec2(0.0f, 0.0f));
-    vertices.push_back(glm::vec3(-0.5, -0.5,  0.5)); uvs.push_back(glm::vec2(1.0f, 0.0f));
-    vertices.push_back(glm::vec3(-0.5,  0.5,  0.5)); uvs.push_back(glm::vec2(1.0f, 1.0f));
+      //top
+      vertices.push_back(glm::vec3(-0.5, 0.5, -0.5)); uvs.push_back(glm::vec2(0.0f, 0.0f));
+      vertices.push_back(glm::vec3(0.5, 0.5, 0.5)); uvs.push_back(glm::vec2(1.0f, 1.0f));
+      vertices.push_back(glm::vec3(-0.5, 0.5, 0.5)); uvs.push_back(glm::vec2(0.0f, 1.0f));
+      vertices.push_back(glm::vec3(-0.5, 0.5, -0.5)); uvs.push_back(glm::vec2(0.0f, 0.0f));
+      vertices.push_back(glm::vec3(0.5, 0.5, -0.5)); uvs.push_back(glm::vec2(1.0f, 0.0f));
+      vertices.push_back(glm::vec3(0.5, 0.5, 0.5)); uvs.push_back(glm::vec2(1.0f, 1.0f));
+    }
 
-    // left
-    vertices.push_back(glm::vec3(-0.5, -0.5,  0.5)); uvs.push_back(glm::vec2(0.0f, 0.0f));
-    vertices.push_back(glm::vec3(-0.5,  0.5, -0.5)); uvs.push_back(glm::vec2(1.0f, 1.0f));
-    vertices.push_back(glm::vec3(-0.5,  0.5,  0.5)); uvs.push_back(glm::vec2(0.0f, 1.0f));
-    vertices.push_back(glm::vec3(-0.5, -0.5,  0.5)); uvs.push_back(glm::vec2(0.0f, 0.0f));
-    vertices.push_back(glm::vec3(-0.5, -0.5, -0.5)); uvs.push_back(glm::vec2(1.0f, 0.0f));
-    vertices.push_back(glm::vec3(-0.5,  0.5, -0.5)); uvs.push_back(glm::vec2(1.0f, 1.0f));
+    // cubemap mesh vertices
+    {
+      skyboxVertices.push_back({ -1.0f,  1.0f, -1.0f });
+      skyboxVertices.push_back({ -1.0f, -1.0f, -1.0f });
+      skyboxVertices.push_back({ 1.0f, -1.0f, -1.0f });
+      skyboxVertices.push_back({ 1.0f, -1.0f, -1.0f });
+      skyboxVertices.push_back({ 1.0f,  1.0f, -1.0f });
+      skyboxVertices.push_back({ -1.0f,  1.0f, -1.0f });
 
-    // right
-    vertices.push_back(glm::vec3( 0.5, -0.5, -0.5)); uvs.push_back(glm::vec2(0.0f, 0.0f));
-    vertices.push_back(glm::vec3( 0.5,  0.5,  0.5)); uvs.push_back(glm::vec2(1.0f, 1.0f));
-    vertices.push_back(glm::vec3( 0.5,  0.5, -0.5)); uvs.push_back(glm::vec2(0.0f, 1.0f));
-    vertices.push_back(glm::vec3( 0.5, -0.5, -0.5)); uvs.push_back(glm::vec2(0.0f, 0.0f));
-    vertices.push_back(glm::vec3( 0.5, -0.5,  0.5)); uvs.push_back(glm::vec2(1.0f, 0.0f));
-    vertices.push_back(glm::vec3( 0.5,  0.5,  0.5)); uvs.push_back(glm::vec2(1.0f, 1.0f));
-    
-    // bottom
-    vertices.push_back(glm::vec3(-0.5, -0.5,  0.5)); uvs.push_back(glm::vec2(0.0f, 0.0f));
-    vertices.push_back(glm::vec3( 0.5, -0.5, -0.5)); uvs.push_back(glm::vec2(1.0f, 1.0f));
-    vertices.push_back(glm::vec3(-0.5, -0.5, -0.5)); uvs.push_back(glm::vec2(0.0f, 1.0f));
-    vertices.push_back(glm::vec3(-0.5, -0.5,  0.5)); uvs.push_back(glm::vec2(0.0f, 0.0f));
-    vertices.push_back(glm::vec3( 0.5, -0.5,  0.5)); uvs.push_back(glm::vec2(1.0f, 0.0f));
-    vertices.push_back(glm::vec3( 0.5, -0.5, -0.5)); uvs.push_back(glm::vec2(1.0f, 1.0f));
+      skyboxVertices.push_back({ -1.0f, -1.0f,  1.0f });
+      skyboxVertices.push_back({ -1.0f, -1.0f, -1.0f });
+      skyboxVertices.push_back({ -1.0f,  1.0f, -1.0f });
+      skyboxVertices.push_back({ -1.0f,  1.0f, -1.0f });
+      skyboxVertices.push_back({ -1.0f,  1.0f,  1.0f });
+      skyboxVertices.push_back({ -1.0f, -1.0f,  1.0f });
 
-    //top
-    vertices.push_back(glm::vec3(-0.5,  0.5, -0.5)); uvs.push_back(glm::vec2(0.0f, 0.0f));
-    vertices.push_back(glm::vec3( 0.5,  0.5,  0.5)); uvs.push_back(glm::vec2(1.0f, 1.0f)); 
-    vertices.push_back(glm::vec3(-0.5,  0.5,  0.5)); uvs.push_back(glm::vec2(0.0f, 1.0f)); 
-    vertices.push_back(glm::vec3(-0.5,  0.5, -0.5)); uvs.push_back(glm::vec2(0.0f, 0.0f));
-    vertices.push_back(glm::vec3( 0.5,  0.5, -0.5)); uvs.push_back(glm::vec2(1.0f, 0.0f));
-    vertices.push_back(glm::vec3( 0.5,  0.5,  0.5)); uvs.push_back(glm::vec2(1.0f, 1.0f));
+      skyboxVertices.push_back({ 1.0f, -1.0f, -1.0f });
+      skyboxVertices.push_back({ 1.0f, -1.0f,  1.0f });
+      skyboxVertices.push_back({ 1.0f,  1.0f,  1.0f });
+      skyboxVertices.push_back({ 1.0f,  1.0f,  1.0f });
+      skyboxVertices.push_back({ 1.0f,  1.0f, -1.0f });
+      skyboxVertices.push_back({ 1.0f, -1.0f, -1.0f });
+
+      skyboxVertices.push_back({ -1.0f, -1.0f,  1.0f });
+      skyboxVertices.push_back({ -1.0f,  1.0f,  1.0f });
+      skyboxVertices.push_back({ 1.0f,  1.0f,  1.0f });
+      skyboxVertices.push_back({ 1.0f,  1.0f,  1.0f });
+      skyboxVertices.push_back({ 1.0f, -1.0f,  1.0f });
+      skyboxVertices.push_back({ -1.0f, -1.0f,  1.0f });
+
+      skyboxVertices.push_back({ -1.0f,  1.0f, -1.0f });
+      skyboxVertices.push_back({ 1.0f,  1.0f, -1.0f });
+      skyboxVertices.push_back({ 1.0f,  1.0f,  1.0f });
+      skyboxVertices.push_back({ 1.0f,  1.0f,  1.0f });
+      skyboxVertices.push_back({ -1.0f,  1.0f,  1.0f });
+      skyboxVertices.push_back({ -1.0f,  1.0f, -1.0f });
+
+      skyboxVertices.push_back({ -1.0f, -1.0f, -1.0f });
+      skyboxVertices.push_back({ -1.0f, -1.0f,  1.0f });
+      skyboxVertices.push_back({ 1.0f, -1.0f, -1.0f });
+      skyboxVertices.push_back({ 1.0f, -1.0f, -1.0f });
+      skyboxVertices.push_back({ -1.0f, -1.0f,  1.0f });
+      skyboxVertices.push_back({ 1.0f, -1.0f,  1.0f });
+    }
 
     for (int i = 0; i < vertices.size(); ++i) {
       colors.push_back(glm::vec4(vertices[i] + glm::vec3(0.5), 1.0));
@@ -303,103 +391,195 @@ public:
       if (v.z > bBox.max.z) bBox.min.z = v.z;
     }
 
-    yanve::gl::Buffer vBuf{};
-    vBuf.setData(vertices.data(), vertices.size() * sizeof(glm::vec3), yanve::gl::BufferUsage::StaticDraw);
+    // init buffers
+    {
+      //yanve::gl::Buffer vBuf{};
+      vertexBuffer.setData(vertices.data(), vertices.size() * sizeof(glm::vec3), yanve::gl::BufferUsage::StaticDraw);
 
-    yanve::gl::Buffer cBuf{};
-    cBuf.setData(colors.data(), colors.size() * sizeof(glm::vec4), yanve::gl::BufferUsage::StaticDraw);
+      //yanve::gl::Buffer cBuf{};
+      colorBuffer.setData(colors.data(), colors.size() * sizeof(glm::vec4), yanve::gl::BufferUsage::StaticDraw);
 
-    yanve::gl::Buffer tBuf{};
-    tBuf.setData(uvs.data(), uvs.size() * sizeof(glm::vec2), yanve::gl::BufferUsage::StaticDraw);
+      //yanve::gl::Buffer tBuf{};
+      texBuffer.setData(uvs.data(), uvs.size() * sizeof(glm::vec2), yanve::gl::BufferUsage::StaticDraw);
 
-    yanve::gl::Buffer iBuf{yanve::gl::Buffer::Target::ElementArray};
-    iBuf.setData(indices.data(), indices.size() * sizeof(size_t), yanve::gl::BufferUsage::StaticDraw);
+      yanve::gl::Buffer iBuf{ yanve::gl::Buffer::Target::ElementArray };
+      indexBuffer.setData(indices.data(), indices.size() * sizeof(size_t), yanve::gl::BufferUsage::StaticDraw);
 
-    vertexBuffer = std::move(vBuf);
-    colorBuffer = std::move(cBuf);
-    texBuffer = std::move(tBuf);
-    indexBuffer = std::move(iBuf);
+      //yanve::gl::Buffer skyboxVertBuf{};
+      skyboxVertBuffer.setData(skyboxVertices.data(), skyboxVertices.size() * sizeof(glm::vec3), yanve::gl::BufferUsage::StaticDraw);
 
-    int width, height, channels;
-    yanve::byte *data = stbi_load("res/textures/container.jpg", &width, &height, &channels, 0);
+      //yanve::gl::Buffer qVB{};
+      quadVertexBuffer.setData(quadVertices.data(), quadVertices.size() * sizeof(glm::vec3), yanve::gl::BufferUsage::StaticDraw);
 
-    if (data == nullptr) {
-      throw std::runtime_error("Could not load texture");
+      //yanve::gl::Buffer qTB{};
+      quadTexBuffer.setData(quadUV.data(), quadUV.size() * sizeof(glm::vec2), yanve::gl::BufferUsage::StaticDraw);
+
+      //quadVertexBuffer = std::move(qVB);
+      //quadTexBuffer = std::move(qTB);
+      //vertexBuffer = std::move(vBuf);
+      //colorBuffer = std::move(cBuf);
+      //texBuffer = std::move(tBuf);
+      indexBuffer = std::move(iBuf);
+      //skyboxVertBuffer = std::move(skyboxVertBuf);
     }
 
-    texture.setWrapping({ yanve::gl::SamplerWrapping::Repeat, yanve::gl::SamplerWrapping::Repeat })
-      .setMinificationFilter(yanve::gl::SamplerFilter::Linear)
-      .setMagnificationFilter(yanve::gl::SamplerFilter::Linear)
-      .setImage(0, yanve::gl::TextureFormat::RGB, yanve::gl::PixelFormat::RGB, yanve::gl::PixelType::UnsignedByte, data, { width, height })
-      .generateMipMap();
+    // container texture loading and init
+    { 
+      int width, height, channels;
+      yanve::byte* data = stbi_load("res/textures/container.jpg", &width, &height, &channels, 0);
 
-    stbi_image_free(data);
-    
-    mesh.addBuffer(vertexBuffer, 0, TestShader::Position{})
-      .addBuffer(colorBuffer, 0, TestShader::Color{})
-      .addBuffer(texBuffer, 0, TestTextureShader::UV{})
-      .setCount(vertices.size())
-      .setIndexBuffer(indexBuffer, 0, yanve::gl::Mesh::MeshIndexType::UnsignedInt);
+      if (data == nullptr) {
+        throw std::runtime_error("Could not load texture");
+      }
 
-    cube2.setCount(vertices.size());
+      texture.setWrapping({ yanve::gl::SamplerWrapping::Repeat, yanve::gl::SamplerWrapping::Repeat })
+        .setMinificationFilter(yanve::gl::SamplerFilter::Linear)
+        .setMagnificationFilter(yanve::gl::SamplerFilter::Linear)
+        .setImage(0, yanve::gl::TextureFormat::RGB, yanve::gl::PixelFormat::RGB, yanve::gl::PixelType::UnsignedByte, data, { width, height })
+        .generateMipMap();
 
-    screenTexture.setWrapping({ yanve::gl::SamplerWrapping::ClampToEdge, yanve::gl::SamplerWrapping::ClampToEdge })
-      .setMinificationFilter(yanve::gl::SamplerFilter::Linear)
-      .setMagnificationFilter(yanve::gl::SamplerFilter::Linear)
-      .setStorage(1, yanve::gl::TextureFormat::RGBA8, { 1024, 1024 });
-
-    yanve::gl::Renderbuffer rb{};
-    rb.setStorage(yanve::gl::RenderbufferFormat::Depth24Stencil8, { 1024, 1024 });
-
-    renderbuffer = std::move(rb);
-
-    yanve::gl::Framebuffer fb{ {{0, 0}, { 1024, 1024 }} };
-    fb.attachTexture(yanve::gl::Framebuffer::ColorAttachment{0}, screenTexture, 0)
-      .attachRenderbuffer(yanve::gl::Framebuffer::BufferAttachment::DepthStencil, renderbuffer)
-      .mapForDraw({ yanve::gl::Framebuffer::ColorAttachment{0} });
-
-    auto status = fb.checkStatus(yanve::gl::FramebufferTarget::Draw);
-    if (status != yanve::gl::Framebuffer::Status::Complete) {
-      LogError("TestApp::TestApp", "Framebuffer has bad status: %x", status);
-      std::abort();
+      stbi_image_free(data);
     }
 
-    screenFramebuffer = std::move(fb);
+    // cubemap texture loading and init
+    { 
+      int width, height, channels;
+      std::vector<std::string> faces
+      {
+        "res/textures/skybox/right.jpg",
+        "res/textures/skybox/left.jpg",
+        "res/textures/skybox/top.jpg",
+        "res/textures/skybox/bottom.jpg",
+        "res/textures/skybox/front.jpg",
+        "res/textures/skybox/back.jpg"
+      };
 
-    auto& input = yanve::InputManager::instance();
-    glm::vec2 windowSize = glm::vec2(input.windowState().width, input.windowState().height);
+      for (size_t i = 0; i < faces.size(); ++i) {
+        yanve::byte* data = stbi_load(faces[i].c_str(), &width, &height, &channels, 0);
+        if (data == nullptr) {
+          throw std::runtime_error("Could not load texture " + faces[i]);
+        }
+        switch (i) {
+        case 0:
+          cubeMapTexture.setImage(yanve::gl::CubeMapCoordinate::PositiveX, 0, yanve::gl::TextureFormat::RGB, yanve::gl::PixelFormat::RGB, yanve::gl::PixelType::UnsignedByte, data, { width, height });
+          break;
+        case 1:
+          cubeMapTexture.setImage(yanve::gl::CubeMapCoordinate::NegativeX, 0, yanve::gl::TextureFormat::RGB, yanve::gl::PixelFormat::RGB, yanve::gl::PixelType::UnsignedByte, data, { width, height });
+          break;
+        case 2:
+          cubeMapTexture.setImage(yanve::gl::CubeMapCoordinate::PositiveY, 0, yanve::gl::TextureFormat::RGB, yanve::gl::PixelFormat::RGB, yanve::gl::PixelType::UnsignedByte, data, { width, height });
+          break;
+        case 3:
+          cubeMapTexture.setImage(yanve::gl::CubeMapCoordinate::NegativeY, 0, yanve::gl::TextureFormat::RGB, yanve::gl::PixelFormat::RGB, yanve::gl::PixelType::UnsignedByte, data, { width, height });
+          break;
+        case 4:
+          cubeMapTexture.setImage(yanve::gl::CubeMapCoordinate::PositiveZ, 0, yanve::gl::TextureFormat::RGB, yanve::gl::PixelFormat::RGB, yanve::gl::PixelType::UnsignedByte, data, { width, height });
+          break;
+        case 5:
+          cubeMapTexture.setImage(yanve::gl::CubeMapCoordinate::NegativeZ, 0, yanve::gl::TextureFormat::RGB, yanve::gl::PixelFormat::RGB, yanve::gl::PixelType::UnsignedByte, data, { width, height });
+          break;
+        }
 
-    yanve::scene::CameraData cameraData{ "camera" };
-    cameraData.fov = 45.0f;
-    cameraData.aspect = windowSize.x / windowSize.y;
-    cameraData.nearPlane = 0.1f;
-    cameraData.farPlane = 1000.f;
-    cameraData.translation = glm::vec3{ 0, 0, 10 };
-    cameraData.rotation = yanve::math::eulerToQuat({ 0, 0, 0 });
-    yanve::scene::Camera* camera = new yanve::scene::Camera(cameraData);
+        stbi_image_free(data);
+      }
 
-    yanve::scene::MeshNodeData meshData{ "cube", &mesh,  bBox};
-    yanve::scene::MeshNode* meshNode1 = new yanve::scene::MeshNode(meshData);
-    meshData.name = "cube2";
-    meshData.translation = glm::vec3{ 0, 3, 0 };
-    yanve::scene::MeshNode*  meshNode2 = new yanve::scene::MeshNode(meshData);
-
-    auto& sm= yanve::scene::SceneManager::getInstance();
-    cameraId = sm.addNode(camera, sm.getRootNode());
-    mesh1Id = sm.addNode(meshNode1, sm.getRootNode());
-    mesh2Id = sm.addNode(meshNode2, sm.getRootNode());
-
-    // todo: improve this
-    cameraUp = ((yanve::scene::Camera*)sm.resolveNodeID(cameraId))->up();
-    cameraForward = ((yanve::scene::Camera*)sm.resolveNodeID(cameraId))->forward();
-    cameraRight = ((yanve::scene::Camera*)sm.resolveNodeID(cameraId))->right();
-    LogInfo("TestApp::TestApp", "after update: camera position: {%.2f, %.2f, %.2f}", camera->translation().x, camera->translation().y, camera->translation().z);
+      cubeMapTexture.setMinificationFilter(yanve::gl::SamplerFilter::Linear)
+        .setMagnificationFilter(yanve::gl::SamplerFilter::Linear)
+        .setWrapping({ yanve::gl::SamplerWrapping::ClampToEdge, yanve::gl::SamplerWrapping::ClampToEdge , yanve::gl::SamplerWrapping::ClampToEdge });
+    }
     
-    modelMatrix = glm::mat4(1.0f);
-    angle = 0.0f;
+    // init meshes
+    {
+      mesh.addBuffer(vertexBuffer, 0, TestShader::Position{})
+        .addBuffer(colorBuffer, 0, TestShader::Color{})
+        .addBuffer(texBuffer, 0, TestTextureShader::UV{})
+        .setCount(vertices.size())
+        .setIndexBuffer(indexBuffer, 0, yanve::gl::Mesh::MeshIndexType::UnsignedInt);
 
-    shaderProgram.setModelMatrix(modelMatrix);
-    textureShaderProgram.setModelMatrix(modelMatrix);
+      skyboxMesh.addBuffer(skyboxVertBuffer, 0, CubeMapShader::Position{})
+        .setCount(skyboxVertices.size());
+
+      cube2.setCount(vertices.size());
+
+      quadMesh.addBuffer(quadVertexBuffer, 0, QuadShader::Position{})
+        .addBuffer(quadTexBuffer, 0, QuadShader::UV{})
+        .setCount(quadVertices.size());
+    }
+
+    // init screen quad
+    {
+      screenTexture.setWrapping({ yanve::gl::SamplerWrapping::ClampToEdge, yanve::gl::SamplerWrapping::ClampToEdge })
+        .setMinificationFilter(yanve::gl::SamplerFilter::Linear)
+        .setMagnificationFilter(yanve::gl::SamplerFilter::Linear)
+        .setStorage(1, yanve::gl::TextureFormat::RGBA8, { 1024, 1024 });
+    }
+
+    // init framebuffer
+    {
+      yanve::gl::Renderbuffer rb{};
+      rb.setStorage(yanve::gl::RenderbufferFormat::Depth24Stencil8, { 1024, 1024 });
+
+      renderbuffer = std::move(rb);
+
+      yanve::gl::Framebuffer fb{ {{0, 0}, { 1024, 1024 }} };
+      fb.attachTexture(yanve::gl::Framebuffer::ColorAttachment{ 0 }, screenTexture, 0)
+        .attachRenderbuffer(yanve::gl::Framebuffer::BufferAttachment::DepthStencil, renderbuffer)
+        .mapForDraw({ yanve::gl::Framebuffer::ColorAttachment{0} });
+
+      auto status = fb.checkStatus(yanve::gl::FramebufferTarget::Draw);
+      if (status != yanve::gl::Framebuffer::Status::Complete) {
+        LogError("TestApp::TestApp", "Framebuffer has bad status: %x", status);
+        std::abort();
+      }
+
+      screenFramebuffer = std::move(fb);
+    }
+
+    // init scene
+    {
+      auto& input = yanve::InputManager::instance();
+      glm::vec2 windowSize = glm::vec2(input.windowState().width, input.windowState().height);
+
+      yanve::scene::CameraData cameraData{ "camera" };
+      cameraData.fov = 45.0f;
+      cameraData.aspect = windowSize.x / windowSize.y;
+      cameraData.nearPlane = 0.1f;
+      cameraData.farPlane = 1000.f;
+      cameraData.translation = glm::vec3{ 0, 0, 10 };
+      cameraData.rotation = yanve::math::eulerToQuat({ 0, 0, 0 });
+      yanve::scene::Camera* camera = new yanve::scene::Camera(cameraData);
+
+      yanve::scene::MeshNodeData meshData{ "cube", &mesh,  bBox };
+      yanve::scene::MeshNode* meshNode1 = new yanve::scene::MeshNode(meshData);
+
+      meshData.name = "cube2";
+      meshData.translation = glm::vec3{ 0, 3, 0 };
+      yanve::scene::MeshNode* meshNode2 = new yanve::scene::MeshNode(meshData);
+
+      //meshData.name = "skybox";
+      //meshData.mesh = &skyboxMesh;
+      //meshData.bBox = yanve::math::AABB{ {-1.0f, -1.0, -1.0f}, {1.0f, 1.0f, 1.0f} };
+      //meshData.translation = glm::vec3{ 0 };
+      //yanve::scene::MeshNode* skyboxNode = new yanve::scene::MeshNode(meshData);
+
+      auto& sm = yanve::scene::SceneManager::getInstance();
+      cameraId = sm.addNode(camera, sm.getRootNode());
+      mesh1Id = sm.addNode(meshNode1, sm.getRootNode());
+      mesh2Id = sm.addNode(meshNode2, sm.getRootNode());
+      //skyboxId = sm.addNode(skyboxNode, sm.getRootNode());
+
+      // todo: improve this
+      cameraUp = ((yanve::scene::Camera*)sm.resolveNodeID(cameraId))->up();
+      cameraForward = ((yanve::scene::Camera*)sm.resolveNodeID(cameraId))->forward();
+      cameraRight = ((yanve::scene::Camera*)sm.resolveNodeID(cameraId))->right();
+      LogInfo("TestApp::TestApp", "after update: camera position: {%.2f, %.2f, %.2f}", camera->translation().x, camera->translation().y, camera->translation().z);
+
+      modelMatrix = glm::mat4(1.0f);
+      angle = 0.0f;
+
+      shaderProgram.setModelMatrix(modelMatrix);
+      textureShaderProgram.setModelMatrix(modelMatrix);
+    }
 
     yanve::gl::defaultFramebuffer.setViewport({ {}, window.size() });
   }
@@ -488,8 +668,8 @@ public:
     ((yanve::scene::Camera*)sm.resolveNodeID(cameraId))->translate(cameraPosition);
     ((yanve::scene::Camera*)sm.resolveNodeID(cameraId))->rotate(cameraRotation);
 
-    ((yanve::scene::Camera*)sm.resolveNodeID(mesh1Id))->rotate(angle, { 1,1,0 });
-    ((yanve::scene::Camera*)sm.resolveNodeID(mesh2Id))->rotate(-angle, { 1,1,0 });
+    ((yanve::scene::MeshNode*)sm.resolveNodeID(mesh1Id))->rotate(angle, { 1,1,0 });
+    ((yanve::scene::MeshNode*)sm.resolveNodeID(mesh2Id))->rotate(-angle, { 1,1,0 });
 
     sm.updateNodes();
     sm.updateQueues();
@@ -522,6 +702,9 @@ public:
     textureShaderProgram.setViewMatrix(view);
     textureShaderProgram.setProjectionMatrix(projection);
 
+    cubeMapShader.setViewMatrix(glm::mat4(glm::mat3(view)));
+    cubeMapShader.setProjectionMatrix(projection);
+
     angle += 0.0001f;
     if (angle >= 360.0f) angle = 0.0f;
 
@@ -532,6 +715,7 @@ public:
     frames++;
 
     yanve::GuiManager::beginFrame();
+    updateGui();
   }
 
   void updateSceneGui(yanve::scene::SceneNode& node)
@@ -597,15 +781,24 @@ public:
 
   void render() override
   {
+    auto& sm = yanve::scene::SceneManager::getInstance();
+
+    // clear and bind screen framebuffer
     screenFramebuffer
       .clear(yanve::gl::FramebufferClear::Color | yanve::gl::FramebufferClear::Depth)
       .bind();
 
-    auto& sm = yanve::scene::SceneManager::getInstance();
+    // render cubemap
+    yanve::gl::Renderer::setDepthMask(false);
+    cubeMapShader.bindTexture(cubeMapTexture);
+    cubeMapShader.draw(skyboxMesh);
+    yanve::gl::Renderer::setDepthMask(true);
+    
+    // render scene
+    yanve::gl::Renderer::enable(yanve::gl::Renderer::Feature::DepthTest);
+
     for (auto item : sm.getRenderQueue()) {
       if (item.node->isRenderable()) {
-        yanve::gl::Renderer::enable(yanve::gl::Renderer::Feature::DepthTest);
-        
         if (useTexture) {
           textureShaderProgram.setModelMatrix(item.node->absTransform());
           textureShaderProgram.bindTexture(texture);
@@ -620,16 +813,20 @@ public:
 
     yanve::gl::Renderer::disable(yanve::gl::Renderer::Feature::DepthTest);
 
+    // clear and bind default framebuffer
     yanve::gl::defaultFramebuffer
       .clear(yanve::gl::FramebufferClear::Color)
       .bind();
+
+    // render scene texture to quad
     quadShaderProgram.bindTexture(screenTexture);
     quadMesh.draw(quadShaderProgram); // this is not part of the scene, as we rendered the scene to a texture, 
                                       // and now the texture on a quad
 
-    updateGui();
+    // render gui
     yanve::GuiManager::endFrame();
 
+    // swap buffers
     window.swapBuffers();
   }
 
@@ -668,6 +865,7 @@ protected:
   std::vector<glm::vec4> colors;
   std::vector<glm::vec2> uvs;
   std::vector<GLuint> indices;
+  std::vector<glm::vec3> skyboxVertices;
 
   std::vector<glm::vec3> quadVertices;
   std::vector<glm::vec2> quadUV;
@@ -676,6 +874,7 @@ protected:
   yanve::gl::Buffer colorBuffer;
   yanve::gl::Buffer texBuffer;
   yanve::gl::Buffer indexBuffer;
+  yanve::gl::Buffer skyboxVertBuffer;
 
   yanve::gl::Buffer quadVertexBuffer;
   yanve::gl::Buffer quadTexBuffer;
@@ -683,19 +882,22 @@ protected:
   yanve::gl::Mesh mesh;
   yanve::gl::MeshView cube2;
   yanve::gl::Mesh quadMesh;
+  yanve::gl::Mesh skyboxMesh;
   yanve::gl::Texture2D texture;
   yanve::gl::Texture2D screenTexture;
+  yanve::gl::CubeMapTexture cubeMapTexture;
   
   yanve::gl::Renderbuffer renderbuffer;
   yanve::gl::Framebuffer screenFramebuffer;
 
   /*yanve::scene::Camera* camera;
   yanve::scene::MeshNode *meshNode1, *meshNode2;*/
-  size_t cameraId, mesh1Id, mesh2Id;
+  size_t cameraId, mesh1Id, mesh2Id, skyboxId;
 
   TestShader shaderProgram;
   TestTextureShader textureShaderProgram;
   QuadShader quadShaderProgram;
+  CubeMapShader cubeMapShader;
 
   glm::mat4 modelMatrix;
   float angle = 0.0f;

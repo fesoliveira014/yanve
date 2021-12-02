@@ -107,7 +107,10 @@ template <> struct YANVE_API AbstractTexture::Helper<1>
   static void setWrapping(AbstractTexture& texture, const std::array<SamplerWrapping, 1>& wrapping);
   static void setStorage(AbstractTexture& texture, GLsizei levels, TextureFormat internalFormat, GLsizei size);
   
-  static void setImage(AbstractTexture& texture, GLint level, TextureFormat internalFormat, PixelFormat format, PixelType type, byte* imageBuffer, size_t size);
+  static void setImage(AbstractTexture& texture, GLint level, TextureFormat internalFormat, PixelFormat format, PixelType type, byte* imageBuffer, size_t size) {
+    setImage(texture, texture._target, level, internalFormat, format, type, imageBuffer, size);
+  }
+  static void setImage(AbstractTexture& texture, GLenum target, GLint level, TextureFormat internalFormat, PixelFormat format, PixelType type, byte* imageBuffer, size_t size);
   //static void setCompressedImage(AbstractTexture& texture, GLint level, byte* imageBuffer, size_t size);
   
   static void setSubImage(AbstractTexture& texture, GLint level, const size_t& offset, const size_t& width, PixelFormat format, PixelType type, byte* imageBuffer, size_t size);
@@ -126,7 +129,10 @@ template <> struct YANVE_API AbstractTexture::Helper<2>
   /*static void setImage(AbstractTexture& texture, GLint level, TextureFormat internalFormat, PixelFormat format, PixelType type, byte* imageBuffer, const glm::uvec2& size) {
     setImage(texture, texture._target, level, internalFormat, format, type, imageBuffer, size);
   }*/
-  static void setImage(AbstractTexture& texture, GLint level, TextureFormat internalFormat, PixelFormat format, PixelType type, byte* imageBuffer, const glm::uvec2& size);
+  static void setImage(AbstractTexture& texture, GLint level, TextureFormat internalFormat, PixelFormat format, PixelType type, byte* imageBuffer, const glm::uvec2& size) {
+    setImage(texture, texture._target, level, internalFormat, format, type, imageBuffer, size);
+  }
+  static void setImage(AbstractTexture& texture, GLenum target, GLint level, TextureFormat internalFormat, PixelFormat format, PixelType type, byte* imageBuffer, const glm::uvec2& size);
   //static void setCompressedImage(AbstractTexture& texture, GLint level, byte* imageBuffer, const glm::uvec2& size) {
   //  setCompressedImage(texture, texture._target, imageBuffer, size);
   //}

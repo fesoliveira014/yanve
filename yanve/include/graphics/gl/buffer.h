@@ -90,6 +90,7 @@ public:
 
   GLuint id() const { return _id; }
   Target target() const { return _target; }
+  ObjectFlags flags() const { return _flags; }
   
 protected:
   explicit Buffer(GLuint id, Target target, ObjectFlags flags = {});

@@ -29,6 +29,7 @@
 #include <graphics/gl/textureformat.h>
 #include <graphics/gl/abstracttexture.h>
 #include <graphics/gl/texture.h>
+#include <graphics/gl/cubemaptexture.h>
 #include <graphics/gl/abstractframebuffer.h>
 #include <graphics/gl/defaultframebuffer.h>
 #include <graphics/gl/framebuffer.h>

@@ -145,6 +145,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="res\shaders\cubemapfrag.glsl" />
+    <None Include="res\shaders\cubemapvert.glsl" />
     <None Include="res\shaders\depthfrag.glsl" />
     <None Include="res\shaders\depthvert.glsl" />
     <None Include="res\shaders\quadfrag.glsl" />
