@@ -231,18 +231,6 @@
     <ClInclude Include="include\asset\assetmanager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\fesol\source\repos\tinygltf\json.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="C:\Users\fesol\source\repos\tinygltf\stb_image.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="C:\Users\fesol\source\repos\tinygltf\stb_image_write.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="C:\Users\fesol\source\repos\tinygltf\tiny_gltf.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\external\tinygltf\json.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -404,8 +392,8 @@
     <ClCompile Include="src\data\vertexformat.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
+    <ClCompile Include="src\data\geometrydata.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

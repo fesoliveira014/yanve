@@ -49,7 +49,6 @@ public:
     UnsignedInt = GL_UNSIGNED_INT
   };
 
-protected:
   struct AttributeLayout
   {
     Buffer buffer;
@@ -62,14 +61,14 @@ protected:
     GLuint divisor;
 
     AttributeLayout(Buffer& buffer, GLuint location, GLint size, GLenum type, GLint normalized, GLintptr offset, GLsizei stride, GLuint divisor = 0) :
-      buffer{Buffer::wrap(buffer.id())},
-      location{location},
-      size{size},
-      type{type},
-      normalized{normalized},
-      offset{offset},
-      stride{stride},
-      divisor{divisor}
+      buffer{ Buffer::wrap(buffer.id()) },
+      location{ location },
+      size{ size },
+      type{ type },
+      normalized{ normalized },
+      offset{ offset },
+      stride{ stride },
+      divisor{ divisor }
     {
     }
 
@@ -79,19 +78,20 @@ protected:
     AttributeLayout& operator=(const AttributeLayout&) noexcept = delete;
   };
 
+protected:
   GLuint _vao;
   MeshPrimitive _primitive;
 
   std::vector<AttributeLayout> _attributes;
   
   Buffer _indexBuffer{NoCreate};
-  GLintptr _indexOffset;
-  MeshIndexType _indexType;
-  GLuint _indexStart;
-  GLuint _indexEnd;
+  GLintptr _indexOffset{ 0 };
+  MeshIndexType _indexType{ MeshIndexType::UnsignedInt };
+  GLuint _indexStart{ 0 };
+  GLuint _indexEnd{ 0 };
   
-  GLuint _baseVertex;
-  GLsizei _count;
+  GLuint _baseVertex{ 0 };
+  GLsizei _count{ 0 };
   GLsizei _instanceCount{ 1 };
   GLuint _baseInstance{};
   ObjectFlags _flags;
@@ -133,6 +133,11 @@ public:
   bool isIndexed() const { return _indexBuffer.id() != 0; }
   MeshIndexType indexType() const { return _indexType; }
   GLsizei indexTypeSize() const { return meshIndexTypeSize(_indexType); }
+
+  // only for debugging
+  const std::vector<AttributeLayout>& attributes() const { return _attributes; }
+  const Buffer& indexBuffer() const { return _indexBuffer; }
+  GLint vao() const { return _vao; }
 
   Mesh& draw(ShaderPipeline& shader);
   Mesh& draw(ShaderPipeline&& shader) { return draw(shader); }

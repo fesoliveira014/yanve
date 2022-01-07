@@ -36,8 +36,8 @@ class Asset
   template <class T> friend class AssetPtr;
   friend class yanve::AssetManager;
 public:
-  Asset(std::string name, AssetType type, AssetFlags flags);
-  virtual ~Asset();
+  Asset(std::string name, AssetType type, AssetFlags flags) {};
+  virtual ~Asset() {};
   
   virtual bool load(const std::string& path) = 0;
   virtual void unload() = 0;

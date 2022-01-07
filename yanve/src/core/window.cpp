@@ -37,6 +37,11 @@ Window::Window(std::string title, int width, int height) :
 
   SDL_GL_SetSwapInterval(0);
 
+  LogInfo(LOG_TAG + __func__, "GL Vendor: %s", glGetString(GL_VENDOR));
+  LogInfo(LOG_TAG + __func__, "GL Renderer: %s", glGetString(GL_RENDERER));
+  LogInfo(LOG_TAG + __func__, "GL Version: %s", glGetString(GL_VERSION));
+  LogInfo(LOG_TAG + __func__, "GL Shading Language Version: %s", glGetString(GL_SHADING_LANGUAGE_VERSION));
+
   //glewExperimental = GL_TRUE;
 
   //if (glewInit() != GLEW_OK) {

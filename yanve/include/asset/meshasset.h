@@ -10,20 +10,21 @@ namespace yanve::asset
 
 class MeshAsset : public Asset
 {
+public:
   MeshAsset(std::string name, AssetFlags flags);
   ~MeshAsset();
 
   bool load(const std::string& path) { return false; };
   //bool load(const byte *data, int size);
-  bool load(const data::GeometryData& data);
-  bool load(gl::Mesh&& mesh);
+  bool load(const data::GeometryData& data) { return false; };
+  bool load(gl::Mesh&& mesh) { return false; };
 
-  void unload();
+  void unload() {};
 
   gl::Mesh& mesh() { return _mesh; }
 
 protected:
-  Asset* clone();
+  Asset* clone() { return nullptr; };
 
 private:
   gl::Mesh _mesh;

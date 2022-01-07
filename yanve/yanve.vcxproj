@@ -1,6 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\packages\vcpkg.C.Users.fesol.source.repos.vcpkg.1.0.0\build\native\vcpkg.C.Users.fesol.source.repos.vcpkg.props" Condition="Exists('..\packages\vcpkg.C.Users.fesol.source.repos.vcpkg.1.0.0\build\native\vcpkg.C.Users.fesol.source.repos.vcpkg.props')" />
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -236,10 +235,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="C:\Users\fesol\source\repos\tinygltf\json.hpp" />
-    <ClInclude Include="C:\Users\fesol\source\repos\tinygltf\stb_image.h" />
-    <ClInclude Include="C:\Users\fesol\source\repos\tinygltf\stb_image_write.h" />
-    <ClInclude Include="C:\Users\fesol\source\repos\tinygltf\tiny_gltf.h" />
     <ClInclude Include="include\asset\asset.h" />
     <ClInclude Include="include\asset\assetmanager.h" />
     <ClInclude Include="include\asset\materialasset.h" />
@@ -335,6 +330,7 @@
     <ClCompile Include="src\core\gui.cpp" />
     <ClCompile Include="src\core\inputmanager.cpp" />
     <ClCompile Include="src\core\window.cpp" />
+    <ClCompile Include="src\data\geometrydata.cpp" />
     <ClCompile Include="src\data\vertexformat.cpp" />
     <ClCompile Include="src\graphics\gl\abstractframebuffer.cpp" />
     <ClCompile Include="src\graphics\gl\abstracttexture.cpp" />
@@ -368,18 +364,5 @@
     <ClCompile Include="src\utils\logger.cpp" />
     <ClCompile Include="src\yanve.cpp" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
-  <ImportGroup Label="ExtensionTargets">
-    <Import Project="..\packages\vcpkg.C.Users.fesol.source.repos.vcpkg.1.0.0\build\native\vcpkg.C.Users.fesol.source.repos.vcpkg.targets" Condition="Exists('..\packages\vcpkg.C.Users.fesol.source.repos.vcpkg.1.0.0\build\native\vcpkg.C.Users.fesol.source.repos.vcpkg.targets')" />
-  </ImportGroup>
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('..\packages\vcpkg.C.Users.fesol.source.repos.vcpkg.1.0.0\build\native\vcpkg.C.Users.fesol.source.repos.vcpkg.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\vcpkg.C.Users.fesol.source.repos.vcpkg.1.0.0\build\native\vcpkg.C.Users.fesol.source.repos.vcpkg.props'))" />
-    <Error Condition="!Exists('..\packages\vcpkg.C.Users.fesol.source.repos.vcpkg.1.0.0\build\native\vcpkg.C.Users.fesol.source.repos.vcpkg.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\vcpkg.C.Users.fesol.source.repos.vcpkg.1.0.0\build\native\vcpkg.C.Users.fesol.source.repos.vcpkg.targets'))" />
-  </Target>
 </Project>

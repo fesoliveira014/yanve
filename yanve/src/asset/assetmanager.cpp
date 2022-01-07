@@ -31,7 +31,7 @@ AssetId AssetManager::loadAsset(const std::string& path, AssetType type, const s
 {
   switch (type) {
   case AssetType::Mesh:
-    AssetId id = MeshAsset::load(path, name, flags);
+    //AssetId id = MeshAsset::load(path, name, flags);
     break;
   }
 }
@@ -73,7 +73,7 @@ AssetId AssetManager::addAsset(AssetType type, const std::string& name, AssetFla
     }
     else {
       id = _assets.size();
-      _assets.push_back(asset);
+      _assets.push_back(std::move(asset));
     }
 
     return id;

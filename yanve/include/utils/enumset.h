@@ -19,7 +19,7 @@ public:
     FullValue = fullValue
   };
 
-  constexpr EnumSet() : _value{} {}
+  constexpr EnumSet() : _value{ /*static_cast<underlying_type>(0)*/ } {}
   constexpr EnumSet(T value):
     _value{static_cast<underlying_type>(value)} {}
 

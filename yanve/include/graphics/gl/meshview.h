@@ -3,6 +3,8 @@
 #include <common.h>
 #include <graphics/gl/mesh.h>
 #include <graphics/gl/shaderpipeline.h>
+#include <utils/nocreate.h>
+
 
 namespace yanve::gl
 {
@@ -10,7 +12,9 @@ namespace yanve::gl
 class YANVE_API MeshView
 {
 public:
-  MeshView(Mesh& mesh);
+  explicit MeshView(NoCreateT);
+  explicit MeshView(Mesh& mesh);
+  explicit MeshView(const MeshView& other);
 
   Mesh& mesh() { return *_mesh; }
   const Mesh& mesh() const { return *_mesh; }
@@ -60,4 +64,7 @@ private:
   GLintptr _indexOffset;
   GLsizei _indexStart, _indexEnd;
 };
+
+inline MeshView::MeshView(NoCreateT) : _mesh{} {}
+
 }

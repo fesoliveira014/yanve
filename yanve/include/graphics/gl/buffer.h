@@ -69,7 +69,10 @@ public:
     _id = std::move(other._id);
     _size = std::move(other._size);
     _target = std::move(other._target);
+    _flags = std::move(other._flags);
+
     other._id = 0;
+
     return *this;
   }
 
@@ -90,6 +93,7 @@ public:
 
   GLuint id() const { return _id; }
   Target target() const { return _target; }
+  size_t size() const { return _size; }
   ObjectFlags flags() const { return _flags; }
   
 protected:

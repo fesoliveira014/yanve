@@ -40,6 +40,8 @@
 #include <graphics/gl/version.h>
 #include <graphics/gl/context.h>
 
+#include <data/geometrydata.h>
+
 #include <math/constants.h>
 #include <math/angle.h>
 #include <math/aabb.h>

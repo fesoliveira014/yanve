@@ -8,6 +8,11 @@ MeshView::MeshView(Mesh& mesh) : _mesh{mesh}
 
 }
 
+MeshView::MeshView(const MeshView& other) : _mesh{ other._mesh }
+{
+
+}
+
 MeshView& MeshView::setIndexRange(GLuint first, GLuint start, GLuint end)
 {
   if (_mesh->_indexBuffer.id()) {
