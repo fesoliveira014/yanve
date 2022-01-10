@@ -250,6 +250,17 @@ public:
 
   void initialize() override 
   {
+    init_renderer();
+    init_geometry();
+    init_textures();
+    init_meshes();
+    init_framebuffers();
+    init_scene();
+  }
+
+
+  void init_renderer()
+  {
     yanve::gl::Renderer::setFrontFace(yanve::gl::Renderer::FrontFace::CounterClockWise);
     yanve::gl::Renderer::setFaceCullingMode(yanve::gl::Renderer::PolygonFacing::Back);
     yanve::gl::Renderer::enable(yanve::gl::Renderer::Feature::FaceCulling);
@@ -265,7 +276,10 @@ public:
     glDebugMessageControl(
       GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, NULL, true
     );
+  }
 
+  void init_geometry()
+  {
     // quad vertices
     {
       quadGeometryData.vertices.push_back(glm::vec3(-1.0, 1.0, 0.0));  quadGeometryData.uvs.push_back(glm::vec2(0.0, 1.0));
@@ -381,26 +395,18 @@ public:
       cubeGeometryData.indices.push_back(i);
     }
 
-    yanve::math::AABB bBox{ glm::vec3{std::numeric_limits<float>::max()}, 
-                            glm::vec3{-std::numeric_limits<float>::max()} };
-    for (const glm::vec3& v : cubeGeometryData.vertices) {
-      if (v.x < bBox.min.x) bBox.min.x = v.x;
-      if (v.y < bBox.min.y) bBox.min.y = v.y;
-      if (v.z < bBox.min.z) bBox.min.z = v.z;
-      if (v.x > bBox.max.x) bBox.min.x = v.x;
-      if (v.y > bBox.max.y) bBox.min.y = v.y;
-      if (v.z > bBox.max.z) bBox.min.z = v.z;
-    }
-
     // init buffers
     {
       cubeGeometryData.updateBuffers();
       skyboxGeometryData.updateBuffers();
       quadGeometryData.updateBuffers();
     }
+  }
 
+  void init_textures()
+  {
     // container texture loading and init
-    { 
+    {
       int width, height, channels;
       yanve::byte* data = stbi_load("res/textures/container.jpg", &width, &height, &channels, 0);
 
@@ -418,7 +424,7 @@ public:
     }
 
     // cubemap texture loading and init
-    { 
+    {
       int width, height, channels;
       std::vector<std::string> faces
       {
@@ -463,31 +469,6 @@ public:
         .setMagnificationFilter(yanve::gl::SamplerFilter::Linear)
         .setWrapping({ yanve::gl::SamplerWrapping::ClampToEdge, yanve::gl::SamplerWrapping::ClampToEdge , yanve::gl::SamplerWrapping::ClampToEdge });
     }
-    
-    // init meshes
-    {
-      //mesh.addBuffer(vertexBuffer, 0, TestShader::Position{})
-      //  .addBuffer(colorBuffer, 0, TestShader::Color{})
-      //  .addBuffer(texBuffer, 0, TestTextureShader::UV{})
-      //  .setCount(cubeGeometryData.vertices.size())
-      //  .setIndexBuffer(indexBuffer, 0, yanve::gl::Mesh::MeshIndexType::UnsignedInt);
-
-      //skyboxMesh.addBuffer(skyboxVertBuffer, 0, CubeMapShader::Position{})
-      //  .setCount(skyboxGeometryData.vertices.size());
-
-      //cube2.setCount(cubeGeometryData.vertices.size());
-
-      //quadMesh.addBuffer(quadVertexBuffer, 0, QuadShader::Position{})
-      //  .addBuffer(quadTexBuffer, 0, QuadShader::UV{})
-      //  .setCount(quadGeometryData.vertices.size());
-
-      cubeGeometryData.toMesh(mesh);
-      skyboxGeometryData.toMesh(skyboxMesh);
-      quadGeometryData.toMesh(quadMesh);
-
-      cube2 = yanve::gl::MeshView(mesh);
-      cube2.setCount(cubeGeometryData.vertices.size());
-    }
 
     // init screen quad
     {
@@ -496,75 +477,98 @@ public:
         .setMagnificationFilter(yanve::gl::SamplerFilter::Linear)
         .setStorage(1, yanve::gl::TextureFormat::RGBA8, { 1024, 1024 });
     }
+  }
 
+  void init_meshes()
+  {
+    // init meshes
+    cubeGeometryData.toMesh(mesh);
+    skyboxGeometryData.toMesh(skyboxMesh);
+    quadGeometryData.toMesh(quadMesh);
+
+    cube2 = yanve::gl::MeshView(mesh);
+    cube2.setCount(cubeGeometryData.vertices.size());    
+  }
+
+  void init_framebuffers()
+  {
     // init framebuffer
-    {
-      yanve::gl::Renderbuffer rb{};
-      rb.setStorage(yanve::gl::RenderbufferFormat::Depth24Stencil8, { 1024, 1024 });
+    yanve::gl::Renderbuffer rb{};
+    rb.setStorage(yanve::gl::RenderbufferFormat::Depth24Stencil8, { 1024, 1024 });
 
-      renderbuffer = std::move(rb);
+    renderbuffer = std::move(rb);
 
-      yanve::gl::Framebuffer fb{ {{0, 0}, { 1024, 1024 }} };
-      fb.attachTexture(yanve::gl::Framebuffer::ColorAttachment{ 0 }, screenTexture, 0)
-        .attachRenderbuffer(yanve::gl::Framebuffer::BufferAttachment::DepthStencil, renderbuffer)
-        .mapForDraw({ yanve::gl::Framebuffer::ColorAttachment{0} });
+    yanve::gl::Framebuffer fb{ {{0, 0}, { 1024, 1024 }} };
+    fb.attachTexture(yanve::gl::Framebuffer::ColorAttachment{ 0 }, screenTexture, 0)
+      .attachRenderbuffer(yanve::gl::Framebuffer::BufferAttachment::DepthStencil, renderbuffer)
+      .mapForDraw({ yanve::gl::Framebuffer::ColorAttachment{0} });
 
-      auto status = fb.checkStatus(yanve::gl::FramebufferTarget::Draw);
-      if (status != yanve::gl::Framebuffer::Status::Complete) {
-        LogError("TestApp::TestApp", "Framebuffer has bad status: %x", status);
-        std::abort();
-      }
-
-      screenFramebuffer = std::move(fb);
+    auto status = fb.checkStatus(yanve::gl::FramebufferTarget::Draw);
+    if (status != yanve::gl::Framebuffer::Status::Complete) {
+      LogError("TestApp::TestApp", "Framebuffer has bad status: %x", status);
+      std::abort();
     }
 
-    // init scene
-    {
-      auto& input = yanve::InputManager::instance();
-      glm::vec2 windowSize = glm::vec2(input.windowState().width, input.windowState().height);
-
-      yanve::scene::CameraData cameraData{ "camera" };
-      cameraData.fov = 45.0f;
-      cameraData.aspect = windowSize.x / windowSize.y;
-      cameraData.nearPlane = 0.1f;
-      cameraData.farPlane = 1000.f;
-      cameraData.translation = glm::vec3{ 0, 0, 10 };
-      cameraData.rotation = yanve::math::eulerToQuat({ 0, 0, 0 });
-      yanve::scene::Camera* camera = new yanve::scene::Camera(cameraData);
-
-      yanve::scene::MeshNodeData meshData{ "cube", &mesh,  bBox };
-      yanve::scene::MeshNode* meshNode1 = new yanve::scene::MeshNode(meshData);
-
-      meshData.name = "cube2";
-      meshData.translation = glm::vec3{ 0, 3, 0 };
-      yanve::scene::MeshNode* meshNode2 = new yanve::scene::MeshNode(meshData);
-
-      //meshData.name = "skybox";
-      //meshData.mesh = &skyboxMesh;
-      //meshData.bBox = yanve::math::AABB{ {-1.0f, -1.0, -1.0f}, {1.0f, 1.0f, 1.0f} };
-      //meshData.translation = glm::vec3{ 0 };
-      //yanve::scene::MeshNode* skyboxNode = new yanve::scene::MeshNode(meshData);
-
-      auto& sm = yanve::scene::SceneManager::getInstance();
-      cameraId = sm.addNode(camera, sm.getRootNode());
-      mesh1Id = sm.addNode(meshNode1, sm.getRootNode());
-      mesh2Id = sm.addNode(meshNode2, sm.getRootNode());
-      //skyboxId = sm.addNode(skyboxNode, sm.getRootNode());
-
-      // todo: improve this
-      cameraUp = ((yanve::scene::Camera*)sm.resolveNodeID(cameraId))->up();
-      cameraForward = ((yanve::scene::Camera*)sm.resolveNodeID(cameraId))->forward();
-      cameraRight = ((yanve::scene::Camera*)sm.resolveNodeID(cameraId))->right();
-      LogInfo("TestApp::TestApp", "after update: camera position: {%.2f, %.2f, %.2f}", camera->translation().x, camera->translation().y, camera->translation().z);
-
-      modelMatrix = glm::mat4(1.0f);
-      angle = 0.0f;
-
-      shaderProgram.setModelMatrix(modelMatrix);
-      textureShaderProgram.setModelMatrix(modelMatrix);
-    }
-
+    screenFramebuffer = std::move(fb);
     yanve::gl::defaultFramebuffer.setViewport({ {}, window.size() });
+  }
+
+  void init_scene()
+  {
+    auto& input = yanve::InputManager::instance();
+    glm::vec2 windowSize = glm::vec2(input.windowState().width, input.windowState().height);
+
+    yanve::math::AABB bBox{ glm::vec3{std::numeric_limits<float>::max()},
+                          glm::vec3{-std::numeric_limits<float>::max()} };
+
+    for (const glm::vec3& v : cubeGeometryData.vertices) {
+      if (v.x < bBox.min.x) bBox.min.x = v.x;
+      if (v.y < bBox.min.y) bBox.min.y = v.y;
+      if (v.z < bBox.min.z) bBox.min.z = v.z;
+      if (v.x > bBox.max.x) bBox.min.x = v.x;
+      if (v.y > bBox.max.y) bBox.min.y = v.y;
+      if (v.z > bBox.max.z) bBox.min.z = v.z;
+    }
+
+    yanve::scene::CameraData cameraData{ "camera" };
+    cameraData.fov = 45.0f;
+    cameraData.aspect = windowSize.x / windowSize.y;
+    cameraData.nearPlane = 0.1f;
+    cameraData.farPlane = 1000.f;
+    cameraData.translation = glm::vec3{ 0, 0, 10 };
+    cameraData.rotation = yanve::math::eulerToQuat({ 0, 0, 0 });
+    yanve::scene::Camera* camera = new yanve::scene::Camera(cameraData);
+
+    yanve::scene::MeshNodeData meshData{ "cube", &mesh,  bBox };
+    yanve::scene::MeshNode* meshNode1 = new yanve::scene::MeshNode(meshData);
+
+    meshData.name = "cube2";
+    meshData.translation = glm::vec3{ 0, 3, 0 };
+    yanve::scene::MeshNode* meshNode2 = new yanve::scene::MeshNode(meshData);
+
+    //meshData.name = "skybox";
+    //meshData.mesh = &skyboxMesh;
+    //meshData.bBox = yanve::math::AABB{ {-1.0f, -1.0, -1.0f}, {1.0f, 1.0f, 1.0f} };
+    //meshData.translation = glm::vec3{ 0 };
+    //yanve::scene::MeshNode* skyboxNode = new yanve::scene::MeshNode(meshData);
+
+    auto& sm = yanve::scene::SceneManager::getInstance();
+    cameraId = sm.addNode(camera, sm.getRootNode());
+    mesh1Id = sm.addNode(meshNode1, sm.getRootNode());
+    mesh2Id = sm.addNode(meshNode2, sm.getRootNode());
+    //skyboxId = sm.addNode(skyboxNode, sm.getRootNode());
+
+    // todo: improve this
+    cameraUp = ((yanve::scene::Camera*)sm.resolveNodeID(cameraId))->up();
+    cameraForward = ((yanve::scene::Camera*)sm.resolveNodeID(cameraId))->forward();
+    cameraRight = ((yanve::scene::Camera*)sm.resolveNodeID(cameraId))->right();
+    LogInfo("TestApp::TestApp", "after update: camera position: {%.2f, %.2f, %.2f}", camera->translation().x, camera->translation().y, camera->translation().z);
+
+    modelMatrix = glm::mat4(1.0f);
+    angle = 0.0f;
+
+    shaderProgram.setModelMatrix(modelMatrix);
+    textureShaderProgram.setModelMatrix(modelMatrix);
   }
 
   void update() override
@@ -694,7 +698,6 @@ public:
     if (angle > 2.0f * glm::pi<float>())
       angle = 0.0f;
 
-    
     frames++;
 
     yanve::GuiManager::beginFrame();
@@ -786,45 +789,44 @@ public:
   
   void updateGui() override
   {
-    {
-      auto& sm = yanve::scene::SceneManager::getInstance();
+    auto& sm = yanve::scene::SceneManager::getInstance();
 
-      ImGui::Begin("Test Box");
+    ImGui::Begin("Test Box");
 
-      ImGui::Text("FPS: %d", framesPerSec);
-      ImGui::Checkbox("Use texture", &useTexture);
-      ImGui::Checkbox("Enable depth test", &enableDepthTest);
-      ImGui::Checkbox("Enable face culling", &enableFaceCulling);
-      ImGui::Checkbox("Quad polygon mode", &polygonMode);
+    ImGui::Text("FPS: %d", framesPerSec);
+    ImGui::Checkbox("Use texture", &useTexture);
+    ImGui::Checkbox("Enable depth test", &enableDepthTest);
+    ImGui::Checkbox("Enable face culling", &enableFaceCulling);
+    ImGui::Checkbox("Quad polygon mode", &polygonMode);
 
-      if (ImGui::CollapsingHeader("Camera")) {
-        ImGui::Text("Camera pos: (%.2f, %.2f, %.2f)", cameraPosition.x, cameraPosition.y, cameraPosition.z);
-        ImGui::Text("Camera angles: (%.2f, %.2f, %.2f)", cameraRotation.x, cameraRotation.y, cameraRotation.z);
-        ImGui::SliderFloat("Camera speed", &cameraSpeed, 5.0f, 20.0f, "%.2f", 0.5f);
-        ImGui::SliderFloat("Camera rotation speed", &cameraRotationSpeed, 0.001f, 0.1f, "%.4f", 0.005f);
-        if (ImGui::Button("Reset Camera")) {
-          ((yanve::scene::Camera*)sm.resolveNodeID(cameraId))->translate(glm::vec3{ 0, 0, 10 });
-          ((yanve::scene::Camera*)sm.resolveNodeID(cameraId))->rotate(glm::vec3{ 0 });
-          sm.updateNodes();
-          sm.updateQueues();
-          cameraUp = ((yanve::scene::Camera*)sm.resolveNodeID(cameraId))->up();
-          cameraForward = ((yanve::scene::Camera*)sm.resolveNodeID(cameraId))->forward();
-          cameraRight = ((yanve::scene::Camera*)sm.resolveNodeID(cameraId))->right();
-        }
+    if (ImGui::CollapsingHeader("Camera")) {
+      ImGui::Text("Camera pos: (%.2f, %.2f, %.2f)", cameraPosition.x, cameraPosition.y, cameraPosition.z);
+      ImGui::Text("Camera angles: (%.2f, %.2f, %.2f)", cameraRotation.x, cameraRotation.y, cameraRotation.z);
+      ImGui::SliderFloat("Camera speed", &cameraSpeed, 5.0f, 20.0f, "%.2f", 0.5f);
+      ImGui::SliderFloat("Camera rotation speed", &cameraRotationSpeed, 0.001f, 0.1f, "%.4f", 0.005f);
+      if (ImGui::Button("Reset Camera")) {
+        ((yanve::scene::Camera*)sm.resolveNodeID(cameraId))->translate(glm::vec3{ 0, 0, 10 });
+        ((yanve::scene::Camera*)sm.resolveNodeID(cameraId))->rotate(glm::vec3{ 0 });
+        sm.updateNodes();
+        sm.updateQueues();
+        cameraUp = ((yanve::scene::Camera*)sm.resolveNodeID(cameraId))->up();
+        cameraForward = ((yanve::scene::Camera*)sm.resolveNodeID(cameraId))->forward();
+        cameraRight = ((yanve::scene::Camera*)sm.resolveNodeID(cameraId))->right();
       }
-
-      if (ImGui::CollapsingHeader("Scene")) {
-        updateSceneGui(sm.getRootNode());
-      }
-
-      if (ImGui::CollapsingHeader("Mesh")) {
-        updateMeshDebugInfo(mesh, "cube");
-        updateMeshDebugInfo(skyboxMesh, "skybox");
-        updateMeshDebugInfo(quadMesh, "quad");
-      }
-      
-      ImGui::End();
     }
+
+    if (ImGui::CollapsingHeader("Scene")) {
+      updateSceneGui(sm.getRootNode());
+    }
+
+    if (ImGui::CollapsingHeader("Mesh")) {
+      updateMeshDebugInfo(mesh, "cube");
+      updateMeshDebugInfo(skyboxMesh, "skybox");
+      updateMeshDebugInfo(quadMesh, "quad");
+    }
+      
+    ImGui::End();
+    
   }
 
   void render() override
@@ -872,7 +874,7 @@ public:
                                       // and now the texture on a quad
 
     // render gui
-    yanve::GuiManager::endFrame();
+    yanve::GuiManager::render();
 
     // swap buffers
     window.swapBuffers();

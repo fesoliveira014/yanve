@@ -21,7 +21,7 @@ public:
 
   static void setup(SDL_Window* windowPtr, void* context);
   static void beginFrame();
-  static void endFrame();
+  static void render();
 
 private:
   GuiManager();

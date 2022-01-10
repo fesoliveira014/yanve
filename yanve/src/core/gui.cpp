@@ -53,7 +53,7 @@ void GuiManager::_beginFrame()
   }
 }
 
-void GuiManager::endFrame()
+void GuiManager::render()
 {
   ImGui::Render();
   ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
