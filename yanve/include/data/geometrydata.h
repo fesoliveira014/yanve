@@ -29,40 +29,28 @@ enum MeshAttribute : unsigned short {
   // add custom here
 };
 
-class YANVE_API GeometryData
+struct YANVE_API GeometryData
 {
-  typedef yanve::gl::Attribute<0, glm::vec3> Position;
-  typedef yanve::gl::Attribute<1, glm::vec4> Color;
-  typedef yanve::gl::Attribute<2, glm::vec3> Normals;
-  typedef yanve::gl::Attribute<3, glm::vec2> TextureCoordinates;
-
 public:
-  std::vector<glm::vec3> vertices;
-  std::vector<glm::vec4> colors;
-  std::vector<glm::vec3> normals;
-  std::vector<glm::vec2> uvs;
-  std::vector<uint> indices;
+  std::vector<glm::vec3> vertices{};
+  std::vector<glm::vec4> colors{};
+  std::vector<glm::vec3> normals{};
+  std::vector<glm::vec2> uvs{};
+  std::vector<uint> indices{};
 
   gl::MeshPrimitive primitive;
 
-  GeometryData();
-  GeometryData(gl::MeshPrimitive primitive);
+  explicit GeometryData();
+  explicit GeometryData(gl::MeshPrimitive primitive);
 
-  void updateBuffers();
+  explicit GeometryData(const GeometryData& other);
+  GeometryData(GeometryData&& other) noexcept;
 
-  void toMesh(gl::Mesh& mesh);
+  ~GeometryData() = default;
 
-private:
-  void createBuffers();
+  GeometryData& operator=(const GeometryData& rhs);
+  GeometryData& operator=(GeometryData&& other) noexcept;
 
-  inline bool created(MeshAttribute bufferId)
-  {
-    return (bool)(_defaultBuffers[bufferId].flags() & gl::ObjectFlag::Created);
-  }
-  
-private:
-  std::vector<gl::Buffer> _defaultBuffers;
-  gl::Buffer _indexBuffer{ NoCreate };
 };
 
 }

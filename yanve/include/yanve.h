@@ -41,12 +41,14 @@
 #include <graphics/gl/context.h>
 
 #include <data/geometrydata.h>
+#include <data/primitive/primitive.h>
 
 #include <math/constants.h>
 #include <math/angle.h>
 #include <math/aabb.h>
 #include <math/plane.h>
 #include <math/frustum.h>
+#include <math/geometry.h>
 
 #include <scene/scenemanager.h>
 #include <scene/scenenode.h>

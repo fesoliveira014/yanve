@@ -246,6 +246,12 @@
     <ClInclude Include="include\data\vertexformat.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\data\primitive\primitive.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\math\geometry.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\yanve.cpp">

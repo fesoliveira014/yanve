@@ -241,6 +241,7 @@
     <ClInclude Include="include\asset\meshasset.h" />
     <ClInclude Include="include\core\types.h" />
     <ClInclude Include="include\data\geometrydata.h" />
+    <ClInclude Include="include\data\primitive\primitive.h" />
     <ClInclude Include="include\data\vertexformat.h" />
     <ClInclude Include="include\external\imgui\imconfig.h" />
     <ClInclude Include="include\external\imgui\imgui.h" />
@@ -293,6 +294,7 @@
     <ClInclude Include="include\math\angle.h" />
     <ClInclude Include="include\math\constants.h" />
     <ClInclude Include="include\math\frustum.h" />
+    <ClInclude Include="include\math\geometry.h" />
     <ClInclude Include="include\math\plane.h" />
     <ClInclude Include="include\scene\abstracttransformation2d.h" />
     <ClInclude Include="include\scene\abstracttransformation.h" />

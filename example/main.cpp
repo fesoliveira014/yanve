@@ -223,9 +223,16 @@ public:
     running{ true }, 
     deltaTimer{},
     clock{},
-    mesh{ yanve::NoCreate },
-    skyboxMesh{ yanve::NoCreate },
-    quadMesh{ yanve::NoCreate },
+    cubePositionBuffer{},
+    cubeColorBuffer{},
+    cubeTextureBuffer{},
+    cubeIndexBuffer{yanve::gl::Buffer::Target::ElementArray},
+    skyboxPositionBuffer{},
+    quadPositionBuffer{},
+    quadTextureBuffer{},
+    mesh{ },
+    skyboxMesh{ },
+    quadMesh{ },
     cube2{ yanve::NoCreate },
     shaderProgram{},
     textureShaderProgram{},
@@ -280,127 +287,144 @@ public:
 
   void init_geometry()
   {
-    // quad vertices
-    {
-      quadGeometryData.vertices.push_back(glm::vec3(-1.0, 1.0, 0.0));  quadGeometryData.uvs.push_back(glm::vec2(0.0, 1.0));
-      quadGeometryData.vertices.push_back(glm::vec3(-1.0, -1.0, 0.0)); quadGeometryData.uvs.push_back(glm::vec2(0.0, 0.0));
-      quadGeometryData.vertices.push_back(glm::vec3(1.0, 1.0, 0.0));   quadGeometryData.uvs.push_back(glm::vec2(1.0, 1.0));
+    //// quad vertices
+    //{
+    //  quadGeometryData.vertices.push_back(glm::vec3(-1.0, 1.0, 0.0));  quadGeometryData.uvs.push_back(glm::vec2(0.0, 1.0));
+    //  quadGeometryData.vertices.push_back(glm::vec3(-1.0, -1.0, 0.0)); quadGeometryData.uvs.push_back(glm::vec2(0.0, 0.0));
+    //  quadGeometryData.vertices.push_back(glm::vec3(1.0, 1.0, 0.0));   quadGeometryData.uvs.push_back(glm::vec2(1.0, 1.0));
 
-      quadGeometryData.vertices.push_back(glm::vec3(1.0, 1.0, 0.0));   quadGeometryData.uvs.push_back(glm::vec2(1.0, 1.0));
-      quadGeometryData.vertices.push_back(glm::vec3(-1.0, -1.0, 0.0)); quadGeometryData.uvs.push_back(glm::vec2(0.0, 0.0));
-      quadGeometryData.vertices.push_back(glm::vec3(1.0, -1.0, 0.0));  quadGeometryData.uvs.push_back(glm::vec2(1.0, 0.0));
-    }
+    //  quadGeometryData.vertices.push_back(glm::vec3(1.0, 1.0, 0.0));   quadGeometryData.uvs.push_back(glm::vec2(1.0, 1.0));
+    //  quadGeometryData.vertices.push_back(glm::vec3(-1.0, -1.0, 0.0)); quadGeometryData.uvs.push_back(glm::vec2(0.0, 0.0));
+    //  quadGeometryData.vertices.push_back(glm::vec3(1.0, -1.0, 0.0));  quadGeometryData.uvs.push_back(glm::vec2(1.0, 0.0));
+    //}
 
-    // mesh vertices
-    {
-      //front
-      cubeGeometryData.vertices.push_back(glm::vec3(-0.5, -0.5, -0.5)); cubeGeometryData.uvs.push_back(glm::vec2(0.0f, 0.0f));
-      cubeGeometryData.vertices.push_back(glm::vec3(0.5, 0.5, -0.5));   cubeGeometryData.uvs.push_back(glm::vec2(1.0f, 1.0f));
-      cubeGeometryData.vertices.push_back(glm::vec3(-0.5, 0.5, -0.5));  cubeGeometryData.uvs.push_back(glm::vec2(0.0f, 1.0f));
-      cubeGeometryData.vertices.push_back(glm::vec3(-0.5, -0.5, -0.5)); cubeGeometryData.uvs.push_back(glm::vec2(0.0f, 0.0f));
-      cubeGeometryData.vertices.push_back(glm::vec3(0.5, -0.5, -0.5));  cubeGeometryData.uvs.push_back(glm::vec2(1.0f, 0.0f));
-      cubeGeometryData.vertices.push_back(glm::vec3(0.5, 0.5, -0.5));   cubeGeometryData.uvs.push_back(glm::vec2(1.0f, 1.0f));
+    //// mesh vertices
+    //{
+    //  //front
+    //  cubeGeometryData.vertices.push_back(glm::vec3(-0.5, -0.5, -0.5)); cubeGeometryData.uvs.push_back(glm::vec2(0.0f, 0.0f));
+    //  cubeGeometryData.vertices.push_back(glm::vec3(0.5, 0.5, -0.5));   cubeGeometryData.uvs.push_back(glm::vec2(1.0f, 1.0f));
+    //  cubeGeometryData.vertices.push_back(glm::vec3(-0.5, 0.5, -0.5));  cubeGeometryData.uvs.push_back(glm::vec2(0.0f, 1.0f));
+    //  cubeGeometryData.vertices.push_back(glm::vec3(-0.5, -0.5, -0.5)); cubeGeometryData.uvs.push_back(glm::vec2(0.0f, 0.0f));
+    //  cubeGeometryData.vertices.push_back(glm::vec3(0.5, -0.5, -0.5));  cubeGeometryData.uvs.push_back(glm::vec2(1.0f, 0.0f));
+    //  cubeGeometryData.vertices.push_back(glm::vec3(0.5, 0.5, -0.5));   cubeGeometryData.uvs.push_back(glm::vec2(1.0f, 1.0f));
 
-      // back
-      cubeGeometryData.vertices.push_back(glm::vec3(0.5, -0.5, 0.5));  cubeGeometryData.uvs.push_back(glm::vec2(0.0f, 0.0f));
-      cubeGeometryData.vertices.push_back(glm::vec3(-0.5, 0.5, 0.5));  cubeGeometryData.uvs.push_back(glm::vec2(1.0f, 1.0f));
-      cubeGeometryData.vertices.push_back(glm::vec3(0.5, 0.5, 0.5));   cubeGeometryData.uvs.push_back(glm::vec2(0.0f, 1.0f));
-      cubeGeometryData.vertices.push_back(glm::vec3(0.5, -0.5, 0.5));  cubeGeometryData.uvs.push_back(glm::vec2(0.0f, 0.0f));
-      cubeGeometryData.vertices.push_back(glm::vec3(-0.5, -0.5, 0.5)); cubeGeometryData.uvs.push_back(glm::vec2(1.0f, 0.0f));
-      cubeGeometryData.vertices.push_back(glm::vec3(-0.5, 0.5, 0.5));  cubeGeometryData.uvs.push_back(glm::vec2(1.0f, 1.0f));
+    //  // back
+    //  cubeGeometryData.vertices.push_back(glm::vec3(0.5, -0.5, 0.5));  cubeGeometryData.uvs.push_back(glm::vec2(0.0f, 0.0f));
+    //  cubeGeometryData.vertices.push_back(glm::vec3(-0.5, 0.5, 0.5));  cubeGeometryData.uvs.push_back(glm::vec2(1.0f, 1.0f));
+    //  cubeGeometryData.vertices.push_back(glm::vec3(0.5, 0.5, 0.5));   cubeGeometryData.uvs.push_back(glm::vec2(0.0f, 1.0f));
+    //  cubeGeometryData.vertices.push_back(glm::vec3(0.5, -0.5, 0.5));  cubeGeometryData.uvs.push_back(glm::vec2(0.0f, 0.0f));
+    //  cubeGeometryData.vertices.push_back(glm::vec3(-0.5, -0.5, 0.5)); cubeGeometryData.uvs.push_back(glm::vec2(1.0f, 0.0f));
+    //  cubeGeometryData.vertices.push_back(glm::vec3(-0.5, 0.5, 0.5));  cubeGeometryData.uvs.push_back(glm::vec2(1.0f, 1.0f));
 
-      // left
-      cubeGeometryData.vertices.push_back(glm::vec3(-0.5, -0.5, 0.5));  cubeGeometryData.uvs.push_back(glm::vec2(0.0f, 0.0f));
-      cubeGeometryData.vertices.push_back(glm::vec3(-0.5, 0.5, -0.5));  cubeGeometryData.uvs.push_back(glm::vec2(1.0f, 1.0f));
-      cubeGeometryData.vertices.push_back(glm::vec3(-0.5, 0.5, 0.5));   cubeGeometryData.uvs.push_back(glm::vec2(0.0f, 1.0f));
-      cubeGeometryData.vertices.push_back(glm::vec3(-0.5, -0.5, 0.5));  cubeGeometryData.uvs.push_back(glm::vec2(0.0f, 0.0f));
-      cubeGeometryData.vertices.push_back(glm::vec3(-0.5, -0.5, -0.5)); cubeGeometryData.uvs.push_back(glm::vec2(1.0f, 0.0f));
-      cubeGeometryData.vertices.push_back(glm::vec3(-0.5, 0.5, -0.5));  cubeGeometryData.uvs.push_back(glm::vec2(1.0f, 1.0f));
+    //  // left
+    //  cubeGeometryData.vertices.push_back(glm::vec3(-0.5, -0.5, 0.5));  cubeGeometryData.uvs.push_back(glm::vec2(0.0f, 0.0f));
+    //  cubeGeometryData.vertices.push_back(glm::vec3(-0.5, 0.5, -0.5));  cubeGeometryData.uvs.push_back(glm::vec2(1.0f, 1.0f));
+    //  cubeGeometryData.vertices.push_back(glm::vec3(-0.5, 0.5, 0.5));   cubeGeometryData.uvs.push_back(glm::vec2(0.0f, 1.0f));
+    //  cubeGeometryData.vertices.push_back(glm::vec3(-0.5, -0.5, 0.5));  cubeGeometryData.uvs.push_back(glm::vec2(0.0f, 0.0f));
+    //  cubeGeometryData.vertices.push_back(glm::vec3(-0.5, -0.5, -0.5)); cubeGeometryData.uvs.push_back(glm::vec2(1.0f, 0.0f));
+    //  cubeGeometryData.vertices.push_back(glm::vec3(-0.5, 0.5, -0.5));  cubeGeometryData.uvs.push_back(glm::vec2(1.0f, 1.0f));
 
-      // right
-      cubeGeometryData.vertices.push_back(glm::vec3(0.5, -0.5, -0.5)); cubeGeometryData.uvs.push_back(glm::vec2(0.0f, 0.0f));
-      cubeGeometryData.vertices.push_back(glm::vec3(0.5, 0.5, 0.5));   cubeGeometryData.uvs.push_back(glm::vec2(1.0f, 1.0f));
-      cubeGeometryData.vertices.push_back(glm::vec3(0.5, 0.5, -0.5));  cubeGeometryData.uvs.push_back(glm::vec2(0.0f, 1.0f));
-      cubeGeometryData.vertices.push_back(glm::vec3(0.5, -0.5, -0.5)); cubeGeometryData.uvs.push_back(glm::vec2(0.0f, 0.0f));
-      cubeGeometryData.vertices.push_back(glm::vec3(0.5, -0.5, 0.5));  cubeGeometryData.uvs.push_back(glm::vec2(1.0f, 0.0f));
-      cubeGeometryData.vertices.push_back(glm::vec3(0.5, 0.5, 0.5));   cubeGeometryData.uvs.push_back(glm::vec2(1.0f, 1.0f));
+    //  // right
+    //  cubeGeometryData.vertices.push_back(glm::vec3(0.5, -0.5, -0.5)); cubeGeometryData.uvs.push_back(glm::vec2(0.0f, 0.0f));
+    //  cubeGeometryData.vertices.push_back(glm::vec3(0.5, 0.5, 0.5));   cubeGeometryData.uvs.push_back(glm::vec2(1.0f, 1.0f));
+    //  cubeGeometryData.vertices.push_back(glm::vec3(0.5, 0.5, -0.5));  cubeGeometryData.uvs.push_back(glm::vec2(0.0f, 1.0f));
+    //  cubeGeometryData.vertices.push_back(glm::vec3(0.5, -0.5, -0.5)); cubeGeometryData.uvs.push_back(glm::vec2(0.0f, 0.0f));
+    //  cubeGeometryData.vertices.push_back(glm::vec3(0.5, -0.5, 0.5));  cubeGeometryData.uvs.push_back(glm::vec2(1.0f, 0.0f));
+    //  cubeGeometryData.vertices.push_back(glm::vec3(0.5, 0.5, 0.5));   cubeGeometryData.uvs.push_back(glm::vec2(1.0f, 1.0f));
 
-      // bottom
-      cubeGeometryData.vertices.push_back(glm::vec3(-0.5, -0.5, 0.5));  cubeGeometryData.uvs.push_back(glm::vec2(0.0f, 0.0f));
-      cubeGeometryData.vertices.push_back(glm::vec3(0.5, -0.5, -0.5));  cubeGeometryData.uvs.push_back(glm::vec2(1.0f, 1.0f));
-      cubeGeometryData.vertices.push_back(glm::vec3(-0.5, -0.5, -0.5)); cubeGeometryData.uvs.push_back(glm::vec2(0.0f, 1.0f));
-      cubeGeometryData.vertices.push_back(glm::vec3(-0.5, -0.5, 0.5));  cubeGeometryData.uvs.push_back(glm::vec2(0.0f, 0.0f));
-      cubeGeometryData.vertices.push_back(glm::vec3(0.5, -0.5, 0.5));   cubeGeometryData.uvs.push_back(glm::vec2(1.0f, 0.0f));
-      cubeGeometryData.vertices.push_back(glm::vec3(0.5, -0.5, -0.5));  cubeGeometryData.uvs.push_back(glm::vec2(1.0f, 1.0f));
+    //  // bottom
+    //  cubeGeometryData.vertices.push_back(glm::vec3(-0.5, -0.5, 0.5));  cubeGeometryData.uvs.push_back(glm::vec2(0.0f, 0.0f));
+    //  cubeGeometryData.vertices.push_back(glm::vec3(0.5, -0.5, -0.5));  cubeGeometryData.uvs.push_back(glm::vec2(1.0f, 1.0f));
+    //  cubeGeometryData.vertices.push_back(glm::vec3(-0.5, -0.5, -0.5)); cubeGeometryData.uvs.push_back(glm::vec2(0.0f, 1.0f));
+    //  cubeGeometryData.vertices.push_back(glm::vec3(-0.5, -0.5, 0.5));  cubeGeometryData.uvs.push_back(glm::vec2(0.0f, 0.0f));
+    //  cubeGeometryData.vertices.push_back(glm::vec3(0.5, -0.5, 0.5));   cubeGeometryData.uvs.push_back(glm::vec2(1.0f, 0.0f));
+    //  cubeGeometryData.vertices.push_back(glm::vec3(0.5, -0.5, -0.5));  cubeGeometryData.uvs.push_back(glm::vec2(1.0f, 1.0f));
 
-      //top
-      cubeGeometryData.vertices.push_back(glm::vec3(-0.5, 0.5, -0.5)); cubeGeometryData.uvs.push_back(glm::vec2(0.0f, 0.0f));
-      cubeGeometryData.vertices.push_back(glm::vec3(0.5, 0.5, 0.5));   cubeGeometryData.uvs.push_back(glm::vec2(1.0f, 1.0f));
-      cubeGeometryData.vertices.push_back(glm::vec3(-0.5, 0.5, 0.5));  cubeGeometryData.uvs.push_back(glm::vec2(0.0f, 1.0f));
-      cubeGeometryData.vertices.push_back(glm::vec3(-0.5, 0.5, -0.5)); cubeGeometryData.uvs.push_back(glm::vec2(0.0f, 0.0f));
-      cubeGeometryData.vertices.push_back(glm::vec3(0.5, 0.5, -0.5));  cubeGeometryData.uvs.push_back(glm::vec2(1.0f, 0.0f));
-      cubeGeometryData.vertices.push_back(glm::vec3(0.5, 0.5, 0.5));   cubeGeometryData.uvs.push_back(glm::vec2(1.0f, 1.0f));
-    }
+    //  //top
+    //  cubeGeometryData.vertices.push_back(glm::vec3(-0.5, 0.5, -0.5)); cubeGeometryData.uvs.push_back(glm::vec2(0.0f, 0.0f));
+    //  cubeGeometryData.vertices.push_back(glm::vec3(0.5, 0.5, 0.5));   cubeGeometryData.uvs.push_back(glm::vec2(1.0f, 1.0f));
+    //  cubeGeometryData.vertices.push_back(glm::vec3(-0.5, 0.5, 0.5));  cubeGeometryData.uvs.push_back(glm::vec2(0.0f, 1.0f));
+    //  cubeGeometryData.vertices.push_back(glm::vec3(-0.5, 0.5, -0.5)); cubeGeometryData.uvs.push_back(glm::vec2(0.0f, 0.0f));
+    //  cubeGeometryData.vertices.push_back(glm::vec3(0.5, 0.5, -0.5));  cubeGeometryData.uvs.push_back(glm::vec2(1.0f, 0.0f));
+    //  cubeGeometryData.vertices.push_back(glm::vec3(0.5, 0.5, 0.5));   cubeGeometryData.uvs.push_back(glm::vec2(1.0f, 1.0f));
+    //}
 
-    // cubemap mesh vertices
-    {
-      skyboxGeometryData.vertices.push_back({ -1.0f,  1.0f, -1.0f });
-      skyboxGeometryData.vertices.push_back({ -1.0f, -1.0f, -1.0f });
-      skyboxGeometryData.vertices.push_back({ 1.0f, -1.0f, -1.0f });
-      skyboxGeometryData.vertices.push_back({ 1.0f, -1.0f, -1.0f });
-      skyboxGeometryData.vertices.push_back({ 1.0f,  1.0f, -1.0f });
-      skyboxGeometryData.vertices.push_back({ -1.0f,  1.0f, -1.0f });
+    //// cubemap mesh vertices
+    //{
+    //  skyboxGeometryData.vertices.push_back({ -1.0f,  1.0f, -1.0f });
+    //  skyboxGeometryData.vertices.push_back({ -1.0f, -1.0f, -1.0f });
+    //  skyboxGeometryData.vertices.push_back({ 1.0f, -1.0f, -1.0f });
+    //  skyboxGeometryData.vertices.push_back({ 1.0f, -1.0f, -1.0f });
+    //  skyboxGeometryData.vertices.push_back({ 1.0f,  1.0f, -1.0f });
+    //  skyboxGeometryData.vertices.push_back({ -1.0f,  1.0f, -1.0f });
 
-      skyboxGeometryData.vertices.push_back({ -1.0f, -1.0f,  1.0f });
-      skyboxGeometryData.vertices.push_back({ -1.0f, -1.0f, -1.0f });
-      skyboxGeometryData.vertices.push_back({ -1.0f,  1.0f, -1.0f });
-      skyboxGeometryData.vertices.push_back({ -1.0f,  1.0f, -1.0f });
-      skyboxGeometryData.vertices.push_back({ -1.0f,  1.0f,  1.0f });
-      skyboxGeometryData.vertices.push_back({ -1.0f, -1.0f,  1.0f });
+    //  skyboxGeometryData.vertices.push_back({ -1.0f, -1.0f,  1.0f });
+    //  skyboxGeometryData.vertices.push_back({ -1.0f, -1.0f, -1.0f });
+    //  skyboxGeometryData.vertices.push_back({ -1.0f,  1.0f, -1.0f });
+    //  skyboxGeometryData.vertices.push_back({ -1.0f,  1.0f, -1.0f });
+    //  skyboxGeometryData.vertices.push_back({ -1.0f,  1.0f,  1.0f });
+    //  skyboxGeometryData.vertices.push_back({ -1.0f, -1.0f,  1.0f });
 
-      skyboxGeometryData.vertices.push_back({ 1.0f, -1.0f, -1.0f });
-      skyboxGeometryData.vertices.push_back({ 1.0f, -1.0f,  1.0f });
-      skyboxGeometryData.vertices.push_back({ 1.0f,  1.0f,  1.0f });
-      skyboxGeometryData.vertices.push_back({ 1.0f,  1.0f,  1.0f });
-      skyboxGeometryData.vertices.push_back({ 1.0f,  1.0f, -1.0f });
-      skyboxGeometryData.vertices.push_back({ 1.0f, -1.0f, -1.0f });
+    //  skyboxGeometryData.vertices.push_back({ 1.0f, -1.0f, -1.0f });
+    //  skyboxGeometryData.vertices.push_back({ 1.0f, -1.0f,  1.0f });
+    //  skyboxGeometryData.vertices.push_back({ 1.0f,  1.0f,  1.0f });
+    //  skyboxGeometryData.vertices.push_back({ 1.0f,  1.0f,  1.0f });
+    //  skyboxGeometryData.vertices.push_back({ 1.0f,  1.0f, -1.0f });
+    //  skyboxGeometryData.vertices.push_back({ 1.0f, -1.0f, -1.0f });
 
-      skyboxGeometryData.vertices.push_back({ -1.0f, -1.0f,  1.0f });
-      skyboxGeometryData.vertices.push_back({ -1.0f,  1.0f,  1.0f });
-      skyboxGeometryData.vertices.push_back({ 1.0f,  1.0f,  1.0f });
-      skyboxGeometryData.vertices.push_back({ 1.0f,  1.0f,  1.0f });
-      skyboxGeometryData.vertices.push_back({ 1.0f, -1.0f,  1.0f });
-      skyboxGeometryData.vertices.push_back({ -1.0f, -1.0f,  1.0f });
+    //  skyboxGeometryData.vertices.push_back({ -1.0f, -1.0f,  1.0f });
+    //  skyboxGeometryData.vertices.push_back({ -1.0f,  1.0f,  1.0f });
+    //  skyboxGeometryData.vertices.push_back({ 1.0f,  1.0f,  1.0f });
+    //  skyboxGeometryData.vertices.push_back({ 1.0f,  1.0f,  1.0f });
+    //  skyboxGeometryData.vertices.push_back({ 1.0f, -1.0f,  1.0f });
+    //  skyboxGeometryData.vertices.push_back({ -1.0f, -1.0f,  1.0f });
 
-      skyboxGeometryData.vertices.push_back({ -1.0f,  1.0f, -1.0f });
-      skyboxGeometryData.vertices.push_back({ 1.0f,  1.0f, -1.0f });
-      skyboxGeometryData.vertices.push_back({ 1.0f,  1.0f,  1.0f });
-      skyboxGeometryData.vertices.push_back({ 1.0f,  1.0f,  1.0f });
-      skyboxGeometryData.vertices.push_back({ -1.0f,  1.0f,  1.0f });
-      skyboxGeometryData.vertices.push_back({ -1.0f,  1.0f, -1.0f });
+    //  skyboxGeometryData.vertices.push_back({ -1.0f,  1.0f, -1.0f });
+    //  skyboxGeometryData.vertices.push_back({ 1.0f,  1.0f, -1.0f });
+    //  skyboxGeometryData.vertices.push_back({ 1.0f,  1.0f,  1.0f });
+    //  skyboxGeometryData.vertices.push_back({ 1.0f,  1.0f,  1.0f });
+    //  skyboxGeometryData.vertices.push_back({ -1.0f,  1.0f,  1.0f });
+    //  skyboxGeometryData.vertices.push_back({ -1.0f,  1.0f, -1.0f });
 
-      skyboxGeometryData.vertices.push_back({ -1.0f, -1.0f, -1.0f });
-      skyboxGeometryData.vertices.push_back({ -1.0f, -1.0f,  1.0f });
-      skyboxGeometryData.vertices.push_back({ 1.0f, -1.0f, -1.0f });
-      skyboxGeometryData.vertices.push_back({ 1.0f, -1.0f, -1.0f });
-      skyboxGeometryData.vertices.push_back({ -1.0f, -1.0f,  1.0f });
-      skyboxGeometryData.vertices.push_back({ 1.0f, -1.0f,  1.0f });
-    }
+    //  skyboxGeometryData.vertices.push_back({ -1.0f, -1.0f, -1.0f });
+    //  skyboxGeometryData.vertices.push_back({ -1.0f, -1.0f,  1.0f });
+    //  skyboxGeometryData.vertices.push_back({ 1.0f, -1.0f, -1.0f });
+    //  skyboxGeometryData.vertices.push_back({ 1.0f, -1.0f, -1.0f });
+    //  skyboxGeometryData.vertices.push_back({ -1.0f, -1.0f,  1.0f });
+    //  skyboxGeometryData.vertices.push_back({ 1.0f, -1.0f,  1.0f });
+    //}
 
-    for (int i = 0; i < cubeGeometryData.vertices.size(); ++i) {
-      cubeGeometryData.colors.push_back(glm::vec4(cubeGeometryData.vertices[i] + glm::vec3(0.5), 1.0));
-    }
+    //for (int i = 0; i < cubeGeometryData.vertices.size(); ++i) {
+    //  cubeGeometryData.colors.push_back(glm::vec4(cubeGeometryData.vertices[i] + glm::vec3(0.5), 1.0));
+    //}
 
-    for (int i = 0; i < cubeGeometryData.vertices.size(); ++i) {
-      cubeGeometryData.indices.push_back(i);
-    }
+    //for (int i = 0; i < cubeGeometryData.vertices.size(); ++i) {
+    //  cubeGeometryData.indices.push_back(i);
+    //}
 
     // init buffers
-    {
-      cubeGeometryData.updateBuffers();
-      skyboxGeometryData.updateBuffers();
-      quadGeometryData.updateBuffers();
-    }
+
+    cubeGD =  yanve::Primitive::cube(
+          yanve::PrimitiveFlag::Position |
+          yanve::PrimitiveFlag::Color |
+          yanve::PrimitiveFlag::Texture);
+
+    skyboxGD = yanve::Primitive::skybox();
+    
+    quadGD = yanve::Primitive::plane(
+      yanve::PrimitiveFlag::Position |
+      yanve::PrimitiveFlag::Texture |
+      yanve::PrimitiveFlag::NoIndex);
+    
+    
+    cubePositionBuffer.setData(cubeGD.vertices.data(), cubeGD.vertices.size() * sizeof(glm::vec3), yanve::gl::BufferUsage::StaticDraw);
+    cubeColorBuffer.setData(cubeGD.colors.data(), cubeGD.colors.size() * sizeof(glm::vec4), yanve::gl::BufferUsage::StaticDraw);
+    cubeTextureBuffer.setData(cubeGD.uvs.data(), cubeGD.uvs.size() * sizeof(glm::vec2), yanve::gl::BufferUsage::StaticDraw);
+    cubeIndexBuffer.setData(cubeGD.indices.data(), cubeGD.indices.size() * sizeof(size_t), yanve::gl::BufferUsage::StaticDraw);
+    skyboxPositionBuffer.setData(skyboxGD.vertices.data(), skyboxGD.vertices.size() * sizeof(glm::vec3), yanve::gl::BufferUsage::StaticDraw);
+    quadPositionBuffer.setData(quadGD.vertices.data(), quadGD.vertices.size() * sizeof(glm::vec3), yanve::gl::BufferUsage::StaticDraw);
+    quadTextureBuffer.setData(quadGD.uvs.data(), quadGD.uvs.size() * sizeof(glm::vec2), yanve::gl::BufferUsage::StaticDraw);
+
   }
 
   void init_textures()
@@ -482,12 +506,21 @@ public:
   void init_meshes()
   {
     // init meshes
-    cubeGeometryData.toMesh(mesh);
-    skyboxGeometryData.toMesh(skyboxMesh);
-    quadGeometryData.toMesh(quadMesh);
+    mesh.addBuffer(cubePositionBuffer, 0, TestShader::Position{})
+      .addBuffer(cubeColorBuffer, 0, TestShader::Color{})
+      .addBuffer(cubeTextureBuffer, 0, TestTextureShader::UV{})
+      .setCount(cubeGD.vertices.size())
+      .setIndexBuffer(cubeIndexBuffer, 0, yanve::gl::Mesh::MeshIndexType::UnsignedInt);
+
+    skyboxMesh.addBuffer(skyboxPositionBuffer, 0, CubeMapShader::Position{})
+      .setCount(skyboxGD.vertices.size());
+
+    quadMesh.addBuffer(quadPositionBuffer, 0, QuadShader::Position{})
+      .addBuffer(quadTextureBuffer, 0, QuadShader::UV{})
+      .setCount(quadGD.vertices.size());
 
     cube2 = yanve::gl::MeshView(mesh);
-    cube2.setCount(cubeGeometryData.vertices.size());    
+    cube2.setCount(cubeGD.vertices.size());    
   }
 
   void init_framebuffers()
@@ -521,7 +554,7 @@ public:
     yanve::math::AABB bBox{ glm::vec3{std::numeric_limits<float>::max()},
                           glm::vec3{-std::numeric_limits<float>::max()} };
 
-    for (const glm::vec3& v : cubeGeometryData.vertices) {
+    for (const glm::vec3& v : cubeGD.vertices) {
       if (v.x < bBox.min.x) bBox.min.x = v.x;
       if (v.y < bBox.min.y) bBox.min.y = v.y;
       if (v.z < bBox.min.z) bBox.min.z = v.z;
@@ -911,9 +944,17 @@ protected:
   long framesPerSec;
   long frames;
 
-  yanve::data::GeometryData cubeGeometryData;
-  yanve::data::GeometryData skyboxGeometryData;
-  yanve::data::GeometryData quadGeometryData;
+  yanve::data::GeometryData cubeGD;
+  yanve::data::GeometryData skyboxGD;
+  yanve::data::GeometryData quadGD;
+
+  yanve::gl::Buffer cubePositionBuffer;
+  yanve::gl::Buffer cubeColorBuffer;
+  yanve::gl::Buffer cubeTextureBuffer;
+  yanve::gl::Buffer cubeIndexBuffer;
+  yanve::gl::Buffer skyboxPositionBuffer;
+  yanve::gl::Buffer quadPositionBuffer;
+  yanve::gl::Buffer quadTextureBuffer;
 
   yanve::gl::Mesh mesh;
   yanve::gl::MeshView cube2;
@@ -926,8 +967,6 @@ protected:
   yanve::gl::Renderbuffer renderbuffer;
   yanve::gl::Framebuffer screenFramebuffer;
 
-  /*yanve::scene::Camera* camera;
-  yanve::scene::MeshNode *meshNode1, *meshNode2;*/
   size_t cameraId, mesh1Id, mesh2Id, skyboxId;
 
   TestShader shaderProgram;
