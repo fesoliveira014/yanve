@@ -14,7 +14,6 @@
 #define YANVE_THREAD_LOCAL _thread
 #endif
 
-
 #include <iostream>
 #include <string>
 #include <vector>

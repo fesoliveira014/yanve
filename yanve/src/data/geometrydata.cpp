@@ -4,11 +4,21 @@ namespace yanve::data
 {
 
 GeometryData::GeometryData() :
+  vertices{},
+  colors{},
+  normals{},
+  uvs{},
+  indices{},
   primitive{ gl::MeshPrimitive::Triangles }
 {
 }
 
 GeometryData::GeometryData(gl::MeshPrimitive primitive) :
+  vertices{},
+  colors{},
+  normals{},
+  uvs{},
+  indices{},
   primitive{ primitive }
 {
 }
@@ -26,7 +36,7 @@ GeometryData::GeometryData(const GeometryData& other) :
 GeometryData::GeometryData(GeometryData&& other) noexcept :
   vertices{std::move(other.vertices)},
   colors{std::move(other.colors)},
-  normals{std::move(normals)},
+  normals{std::move(other.normals)},
   uvs{std::move(other.uvs)},
   indices{std::move(other.indices)},
   primitive{other.primitive}

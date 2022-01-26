@@ -61,3 +61,11 @@
 #include <utils/nocreate.h>
 #include <utils/random.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+  __declspec(dllexport) extern DWORD NvOptimusEnablement;
+  __declspec(dllexport) extern int AmdPowerXpressRequestHighPerformance;
+#ifdef __cplusplus
+}
+#endif

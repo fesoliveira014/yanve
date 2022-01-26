@@ -6,6 +6,15 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb/stb_image.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+  __declspec(dllexport) DWORD NvOptimusEnablement = 0;
+  __declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
+#ifdef __cplusplus
+}
+#endif
+
 static void openglCallbackFunction(
   GLenum source,
   GLenum type,
@@ -20,7 +29,7 @@ static void openglCallbackFunction(
   (void)severity; (void)length; (void)userParam;
   if (!nomore) {
     if (severity == GL_DEBUG_SEVERITY_HIGH) LogError("OpenGL", "%s", message);
-    else LogInfo("OpenGL", "%s", message);
+    //else LogInfo("OpenGL", "%s", message);
 
     if (severity == GL_DEBUG_SEVERITY_HIGH) {
       LogError("OpenGL", "This probably is breaking something.");
@@ -163,7 +172,7 @@ class TestTextureShader : public yanve::gl::ShaderPipeline
 public:
   typedef yanve::gl::Attribute<0, glm::vec3> Position;
   typedef yanve::gl::Attribute<1, glm::vec4> Color;
-  typedef yanve::gl::Attribute<2, glm::vec2> UV;
+  typedef yanve::gl::Attribute<3, glm::vec2> UV;
 
   TestTextureShader() : ShaderPipeline()
   {
@@ -287,123 +296,7 @@ public:
 
   void init_geometry()
   {
-    //// quad vertices
-    //{
-    //  quadGeometryData.vertices.push_back(glm::vec3(-1.0, 1.0, 0.0));  quadGeometryData.uvs.push_back(glm::vec2(0.0, 1.0));
-    //  quadGeometryData.vertices.push_back(glm::vec3(-1.0, -1.0, 0.0)); quadGeometryData.uvs.push_back(glm::vec2(0.0, 0.0));
-    //  quadGeometryData.vertices.push_back(glm::vec3(1.0, 1.0, 0.0));   quadGeometryData.uvs.push_back(glm::vec2(1.0, 1.0));
-
-    //  quadGeometryData.vertices.push_back(glm::vec3(1.0, 1.0, 0.0));   quadGeometryData.uvs.push_back(glm::vec2(1.0, 1.0));
-    //  quadGeometryData.vertices.push_back(glm::vec3(-1.0, -1.0, 0.0)); quadGeometryData.uvs.push_back(glm::vec2(0.0, 0.0));
-    //  quadGeometryData.vertices.push_back(glm::vec3(1.0, -1.0, 0.0));  quadGeometryData.uvs.push_back(glm::vec2(1.0, 0.0));
-    //}
-
-    //// mesh vertices
-    //{
-    //  //front
-    //  cubeGeometryData.vertices.push_back(glm::vec3(-0.5, -0.5, -0.5)); cubeGeometryData.uvs.push_back(glm::vec2(0.0f, 0.0f));
-    //  cubeGeometryData.vertices.push_back(glm::vec3(0.5, 0.5, -0.5));   cubeGeometryData.uvs.push_back(glm::vec2(1.0f, 1.0f));
-    //  cubeGeometryData.vertices.push_back(glm::vec3(-0.5, 0.5, -0.5));  cubeGeometryData.uvs.push_back(glm::vec2(0.0f, 1.0f));
-    //  cubeGeometryData.vertices.push_back(glm::vec3(-0.5, -0.5, -0.5)); cubeGeometryData.uvs.push_back(glm::vec2(0.0f, 0.0f));
-    //  cubeGeometryData.vertices.push_back(glm::vec3(0.5, -0.5, -0.5));  cubeGeometryData.uvs.push_back(glm::vec2(1.0f, 0.0f));
-    //  cubeGeometryData.vertices.push_back(glm::vec3(0.5, 0.5, -0.5));   cubeGeometryData.uvs.push_back(glm::vec2(1.0f, 1.0f));
-
-    //  // back
-    //  cubeGeometryData.vertices.push_back(glm::vec3(0.5, -0.5, 0.5));  cubeGeometryData.uvs.push_back(glm::vec2(0.0f, 0.0f));
-    //  cubeGeometryData.vertices.push_back(glm::vec3(-0.5, 0.5, 0.5));  cubeGeometryData.uvs.push_back(glm::vec2(1.0f, 1.0f));
-    //  cubeGeometryData.vertices.push_back(glm::vec3(0.5, 0.5, 0.5));   cubeGeometryData.uvs.push_back(glm::vec2(0.0f, 1.0f));
-    //  cubeGeometryData.vertices.push_back(glm::vec3(0.5, -0.5, 0.5));  cubeGeometryData.uvs.push_back(glm::vec2(0.0f, 0.0f));
-    //  cubeGeometryData.vertices.push_back(glm::vec3(-0.5, -0.5, 0.5)); cubeGeometryData.uvs.push_back(glm::vec2(1.0f, 0.0f));
-    //  cubeGeometryData.vertices.push_back(glm::vec3(-0.5, 0.5, 0.5));  cubeGeometryData.uvs.push_back(glm::vec2(1.0f, 1.0f));
-
-    //  // left
-    //  cubeGeometryData.vertices.push_back(glm::vec3(-0.5, -0.5, 0.5));  cubeGeometryData.uvs.push_back(glm::vec2(0.0f, 0.0f));
-    //  cubeGeometryData.vertices.push_back(glm::vec3(-0.5, 0.5, -0.5));  cubeGeometryData.uvs.push_back(glm::vec2(1.0f, 1.0f));
-    //  cubeGeometryData.vertices.push_back(glm::vec3(-0.5, 0.5, 0.5));   cubeGeometryData.uvs.push_back(glm::vec2(0.0f, 1.0f));
-    //  cubeGeometryData.vertices.push_back(glm::vec3(-0.5, -0.5, 0.5));  cubeGeometryData.uvs.push_back(glm::vec2(0.0f, 0.0f));
-    //  cubeGeometryData.vertices.push_back(glm::vec3(-0.5, -0.5, -0.5)); cubeGeometryData.uvs.push_back(glm::vec2(1.0f, 0.0f));
-    //  cubeGeometryData.vertices.push_back(glm::vec3(-0.5, 0.5, -0.5));  cubeGeometryData.uvs.push_back(glm::vec2(1.0f, 1.0f));
-
-    //  // right
-    //  cubeGeometryData.vertices.push_back(glm::vec3(0.5, -0.5, -0.5)); cubeGeometryData.uvs.push_back(glm::vec2(0.0f, 0.0f));
-    //  cubeGeometryData.vertices.push_back(glm::vec3(0.5, 0.5, 0.5));   cubeGeometryData.uvs.push_back(glm::vec2(1.0f, 1.0f));
-    //  cubeGeometryData.vertices.push_back(glm::vec3(0.5, 0.5, -0.5));  cubeGeometryData.uvs.push_back(glm::vec2(0.0f, 1.0f));
-    //  cubeGeometryData.vertices.push_back(glm::vec3(0.5, -0.5, -0.5)); cubeGeometryData.uvs.push_back(glm::vec2(0.0f, 0.0f));
-    //  cubeGeometryData.vertices.push_back(glm::vec3(0.5, -0.5, 0.5));  cubeGeometryData.uvs.push_back(glm::vec2(1.0f, 0.0f));
-    //  cubeGeometryData.vertices.push_back(glm::vec3(0.5, 0.5, 0.5));   cubeGeometryData.uvs.push_back(glm::vec2(1.0f, 1.0f));
-
-    //  // bottom
-    //  cubeGeometryData.vertices.push_back(glm::vec3(-0.5, -0.5, 0.5));  cubeGeometryData.uvs.push_back(glm::vec2(0.0f, 0.0f));
-    //  cubeGeometryData.vertices.push_back(glm::vec3(0.5, -0.5, -0.5));  cubeGeometryData.uvs.push_back(glm::vec2(1.0f, 1.0f));
-    //  cubeGeometryData.vertices.push_back(glm::vec3(-0.5, -0.5, -0.5)); cubeGeometryData.uvs.push_back(glm::vec2(0.0f, 1.0f));
-    //  cubeGeometryData.vertices.push_back(glm::vec3(-0.5, -0.5, 0.5));  cubeGeometryData.uvs.push_back(glm::vec2(0.0f, 0.0f));
-    //  cubeGeometryData.vertices.push_back(glm::vec3(0.5, -0.5, 0.5));   cubeGeometryData.uvs.push_back(glm::vec2(1.0f, 0.0f));
-    //  cubeGeometryData.vertices.push_back(glm::vec3(0.5, -0.5, -0.5));  cubeGeometryData.uvs.push_back(glm::vec2(1.0f, 1.0f));
-
-    //  //top
-    //  cubeGeometryData.vertices.push_back(glm::vec3(-0.5, 0.5, -0.5)); cubeGeometryData.uvs.push_back(glm::vec2(0.0f, 0.0f));
-    //  cubeGeometryData.vertices.push_back(glm::vec3(0.5, 0.5, 0.5));   cubeGeometryData.uvs.push_back(glm::vec2(1.0f, 1.0f));
-    //  cubeGeometryData.vertices.push_back(glm::vec3(-0.5, 0.5, 0.5));  cubeGeometryData.uvs.push_back(glm::vec2(0.0f, 1.0f));
-    //  cubeGeometryData.vertices.push_back(glm::vec3(-0.5, 0.5, -0.5)); cubeGeometryData.uvs.push_back(glm::vec2(0.0f, 0.0f));
-    //  cubeGeometryData.vertices.push_back(glm::vec3(0.5, 0.5, -0.5));  cubeGeometryData.uvs.push_back(glm::vec2(1.0f, 0.0f));
-    //  cubeGeometryData.vertices.push_back(glm::vec3(0.5, 0.5, 0.5));   cubeGeometryData.uvs.push_back(glm::vec2(1.0f, 1.0f));
-    //}
-
-    //// cubemap mesh vertices
-    //{
-    //  skyboxGeometryData.vertices.push_back({ -1.0f,  1.0f, -1.0f });
-    //  skyboxGeometryData.vertices.push_back({ -1.0f, -1.0f, -1.0f });
-    //  skyboxGeometryData.vertices.push_back({ 1.0f, -1.0f, -1.0f });
-    //  skyboxGeometryData.vertices.push_back({ 1.0f, -1.0f, -1.0f });
-    //  skyboxGeometryData.vertices.push_back({ 1.0f,  1.0f, -1.0f });
-    //  skyboxGeometryData.vertices.push_back({ -1.0f,  1.0f, -1.0f });
-
-    //  skyboxGeometryData.vertices.push_back({ -1.0f, -1.0f,  1.0f });
-    //  skyboxGeometryData.vertices.push_back({ -1.0f, -1.0f, -1.0f });
-    //  skyboxGeometryData.vertices.push_back({ -1.0f,  1.0f, -1.0f });
-    //  skyboxGeometryData.vertices.push_back({ -1.0f,  1.0f, -1.0f });
-    //  skyboxGeometryData.vertices.push_back({ -1.0f,  1.0f,  1.0f });
-    //  skyboxGeometryData.vertices.push_back({ -1.0f, -1.0f,  1.0f });
-
-    //  skyboxGeometryData.vertices.push_back({ 1.0f, -1.0f, -1.0f });
-    //  skyboxGeometryData.vertices.push_back({ 1.0f, -1.0f,  1.0f });
-    //  skyboxGeometryData.vertices.push_back({ 1.0f,  1.0f,  1.0f });
-    //  skyboxGeometryData.vertices.push_back({ 1.0f,  1.0f,  1.0f });
-    //  skyboxGeometryData.vertices.push_back({ 1.0f,  1.0f, -1.0f });
-    //  skyboxGeometryData.vertices.push_back({ 1.0f, -1.0f, -1.0f });
-
-    //  skyboxGeometryData.vertices.push_back({ -1.0f, -1.0f,  1.0f });
-    //  skyboxGeometryData.vertices.push_back({ -1.0f,  1.0f,  1.0f });
-    //  skyboxGeometryData.vertices.push_back({ 1.0f,  1.0f,  1.0f });
-    //  skyboxGeometryData.vertices.push_back({ 1.0f,  1.0f,  1.0f });
-    //  skyboxGeometryData.vertices.push_back({ 1.0f, -1.0f,  1.0f });
-    //  skyboxGeometryData.vertices.push_back({ -1.0f, -1.0f,  1.0f });
-
-    //  skyboxGeometryData.vertices.push_back({ -1.0f,  1.0f, -1.0f });
-    //  skyboxGeometryData.vertices.push_back({ 1.0f,  1.0f, -1.0f });
-    //  skyboxGeometryData.vertices.push_back({ 1.0f,  1.0f,  1.0f });
-    //  skyboxGeometryData.vertices.push_back({ 1.0f,  1.0f,  1.0f });
-    //  skyboxGeometryData.vertices.push_back({ -1.0f,  1.0f,  1.0f });
-    //  skyboxGeometryData.vertices.push_back({ -1.0f,  1.0f, -1.0f });
-
-    //  skyboxGeometryData.vertices.push_back({ -1.0f, -1.0f, -1.0f });
-    //  skyboxGeometryData.vertices.push_back({ -1.0f, -1.0f,  1.0f });
-    //  skyboxGeometryData.vertices.push_back({ 1.0f, -1.0f, -1.0f });
-    //  skyboxGeometryData.vertices.push_back({ 1.0f, -1.0f, -1.0f });
-    //  skyboxGeometryData.vertices.push_back({ -1.0f, -1.0f,  1.0f });
-    //  skyboxGeometryData.vertices.push_back({ 1.0f, -1.0f,  1.0f });
-    //}
-
-    //for (int i = 0; i < cubeGeometryData.vertices.size(); ++i) {
-    //  cubeGeometryData.colors.push_back(glm::vec4(cubeGeometryData.vertices[i] + glm::vec3(0.5), 1.0));
-    //}
-
-    //for (int i = 0; i < cubeGeometryData.vertices.size(); ++i) {
-    //  cubeGeometryData.indices.push_back(i);
-    //}
-
-    // init buffers
-
+    // init geometry
     cubeGD =  yanve::Primitive::cube(
           yanve::PrimitiveFlag::Position |
           yanve::PrimitiveFlag::Color |
@@ -416,7 +309,7 @@ public:
       yanve::PrimitiveFlag::Texture |
       yanve::PrimitiveFlag::NoIndex);
     
-    
+    // init buffers
     cubePositionBuffer.setData(cubeGD.vertices.data(), cubeGD.vertices.size() * sizeof(glm::vec3), yanve::gl::BufferUsage::StaticDraw);
     cubeColorBuffer.setData(cubeGD.colors.data(), cubeGD.colors.size() * sizeof(glm::vec4), yanve::gl::BufferUsage::StaticDraw);
     cubeTextureBuffer.setData(cubeGD.uvs.data(), cubeGD.uvs.size() * sizeof(glm::vec2), yanve::gl::BufferUsage::StaticDraw);
